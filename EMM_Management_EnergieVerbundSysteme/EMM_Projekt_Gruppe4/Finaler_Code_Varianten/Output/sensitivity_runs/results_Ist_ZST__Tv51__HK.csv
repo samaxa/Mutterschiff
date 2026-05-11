@@ -1,0 +1,2 @@
+scenario_id,lastgang_version,lastgang_file,use_radiators,T_vorlauf_C,JAZ_wp,WP_Nennleistung,WP_Deckungsanteil,HE_Nennleistung,HE_Deckungsanteil,waermegestehungskosten_EUR_per_kWh_th,Total_costs_€/a,CAPEX_€/a,OPEX_€/a,grid_import_kWh,Q_hp_kWh_th,E_hp_kWh_el
+Ist_ZST__Tv51__HK,Ist_ZST,../Input_Data/2026-01-19-Mehrfamilienhaus-Lastprofile_Ist_ZST.csv,True,51.0,2.5284452846983974,30.0,99.78403234271751,9.0,0.21596765728249612,0.221458583526806,7992.800616065574,581.17229,7992.80062,23312.62843270917,75251.53519739817,29761.978893830194

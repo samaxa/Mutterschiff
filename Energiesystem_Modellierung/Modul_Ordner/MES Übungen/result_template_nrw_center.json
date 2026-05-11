@@ -1,0 +1,7 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "NRW": "Nordrhein-Westfalen" }, "geometry": { "type": "Point", "coordinates": [ 7.562172019016501, 51.479790275132181 ] } }
+]
+}

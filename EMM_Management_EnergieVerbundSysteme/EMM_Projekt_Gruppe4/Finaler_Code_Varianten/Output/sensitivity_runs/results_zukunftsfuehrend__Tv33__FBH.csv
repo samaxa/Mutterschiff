@@ -1,0 +1,2 @@
+scenario_id,lastgang_version,lastgang_file,use_radiators,T_vorlauf_C,JAZ_wp,WP_Nennleistung,WP_Deckungsanteil,HE_Nennleistung,HE_Deckungsanteil,waermegestehungskosten_EUR_per_kWh_th,Total_costs_€/a,CAPEX_€/a,OPEX_€/a,grid_import_kWh,Q_hp_kWh_th,E_hp_kWh_el
+zukunftsfuehrend__Tv33__FBH,zukunftsfuehrend,../Input_Data/2026-01-19-Mehrfamilienhaus-Lastprofile_zukunftsfuehrend.csv,False,33.0,2.705774029637513,10.0,98.5820663198746,9.0,1.4179336801253999,0.04102441901379063,-66.63780223147523,581.17229,-66.6378,2080.190517043086,17238.344554515817,6370.947597876532

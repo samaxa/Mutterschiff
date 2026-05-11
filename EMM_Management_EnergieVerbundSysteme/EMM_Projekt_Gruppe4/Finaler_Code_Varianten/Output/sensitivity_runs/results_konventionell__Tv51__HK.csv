@@ -1,0 +1,2 @@
+scenario_id,lastgang_version,lastgang_file,use_radiators,T_vorlauf_C,JAZ_wp,WP_Nennleistung,WP_Deckungsanteil,HE_Nennleistung,HE_Deckungsanteil,waermegestehungskosten_EUR_per_kWh_th,Total_costs_€/a,CAPEX_€/a,OPEX_€/a,grid_import_kWh,Q_hp_kWh_th,E_hp_kWh_el
+konventionell__Tv51__HK,konventionell,../Input_Data/2026-01-19-Mehrfamilienhaus-Lastprofile_konventionell.csv,True,51.0,2.633692961455485,15.0,99.6392655854733,9.0,0.36073441452670585,0.15956009792766745,2867.569042455384,581.17229,2867.56904,9693.010135148343,40570.098018272125,15404.262612241426

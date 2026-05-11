@@ -1,0 +1,27 @@
+{
+  "features": [
+{
+      "geometry": {
+        "coordinates": [
+          [
+            6.488591461177366,
+            51.07379249022424
+          ],
+          [
+            6.489544925162946,
+            51.07381298223884
+          ]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "length_m": 66.862,
+        "orientation": "EW",
+        "row": 34,
+        "segment": 1
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

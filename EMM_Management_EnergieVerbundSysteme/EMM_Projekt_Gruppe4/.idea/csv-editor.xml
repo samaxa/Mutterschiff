@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CsvFileAttributes">
+    <option name="attributeMap">
+      <map>
+        <entry key="\Durchlauferhitzer_WW\Input_Data_clean\2026-01-19-Mehrfamilienhaus-Lastprofile_Ist_ZST_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Durchlauferhitzer_WW\Input_Data_clean\2026-01-19-Mehrfamilienhaus-Lastprofile_konventionell_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Durchlauferhitzer_WW\Input_Data_clean\2026-01-19-Mehrfamilienhaus-Lastprofile_zukunftsfuehrend_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Durchlauferhitzer_WW\Input_Data_clean\2026-01-24-Mehrfamilienhaus-Strom_Lastprofile.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Durchlauferhitzer_WW\Input_Data_clean\pv_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Durchlauferhitzer_WW\Output\sensitivity_runs\results_Ist_ZST__Tv33__FBH_DLE.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Finaler_Code_Varianten\Output\sensitivity_runs\results_Ist_ZST__Tv33__FBH.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Finaler_Code_Varianten\Output\sensitivity_runs\results_Ist_ZST__Tv51__HK.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Finaler_Code_Varianten\Output\sensitivity_runs\results_konventionell__Tv33__FBH.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Finaler_Code_Varianten\Output\sensitivity_runs\results_konventionell__Tv51__HK.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Finaler_Code_Varianten\Output\sensitivity_runs\results_zukunftsfuehrend__Tv33__FBH.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Finaler_Code_Varianten\Output\sensitivity_runs\results_zukunftsfuehrend__Tv51__HK.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Kombispeicher\Input_Data\2026-01-19-Mehrfamilienhaus-Lastprofile_Ist_ZST.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Kombispeicher\Input_Data\2026-01-19-Mehrfamilienhaus-Lastprofile_konventionell.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input\2026-01-19-Mehrfamilienhaus-Lastprofile_Ist_ZST.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input\2026-01-19-Mehrfamilienhaus-Lastprofile_konventionell.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input\2026-01-19-Mehrfamilienhaus-Lastprofile_zukunftsfuehrend.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input\ninja_pv_50.9384_6.9600_corrected.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input\ninja_weather_50.9384_6.9600_2019_uncorrected.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input_Data_clean\2026-01-19-Mehrfamilienhaus-Lastprofile_Ist_ZST_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input_Data_clean\2026-01-19-Mehrfamilienhaus-Lastprofile_konventionell_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input_Data_clean\2026-01-19-Mehrfamilienhaus-Lastprofile_zukunftsfuehrend_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input_Data_clean\pv_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Test_Ordner\Input_Data_clean\weather_clean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": { "Bus": "Arnsberg" }, "geometry": { "type": "Point", "coordinates": [ 8.005529492164035, 51.31610263380535 ] } },
+{ "type": "Feature", "properties": { "Bus": "Detmold" }, "geometry": { "type": "Point", "coordinates": [ 8.784302609674924, 51.939703848104607 ] } },
+{ "type": "Feature", "properties": { "Bus": "Duesseldorf" }, "geometry": { "type": "Point", "coordinates": [ 6.595913217320064, 51.430478995223197 ] } },
+{ "type": "Feature", "properties": { "Bus": "Koeln" }, "geometry": { "type": "Point", "coordinates": [ 6.80911443250468, 50.825083217317172 ] } },
+{ "type": "Feature", "properties": { "Bus": "Muenster" }, "geometry": { "type": "Point", "coordinates": [ 7.416431607824189, 51.950493055206856 ] } }
+]
+}

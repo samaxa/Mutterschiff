@@ -1,0 +1,19 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          6.484253948773133,
+          51.07859160957431
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "name": "Flaeche_Centroid",
+        "source": "original_area"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

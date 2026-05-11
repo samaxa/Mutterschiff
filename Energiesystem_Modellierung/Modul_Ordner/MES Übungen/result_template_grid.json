@@ -1,0 +1,15 @@
+{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": { "Line": "Arn_Det", "bus0": "Arnsberg", "bus1": "Detmold" }, "geometry": { "type": "LineString", "coordinates": [ [ 8.005529492164035, 51.31610263380535 ], [ 8.784302609674924, 51.939703848104607 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Arn_Due", "bus0": "Arnsberg", "bus1": "Duesseldorf" }, "geometry": { "type": "LineString", "coordinates": [ [ 8.005529492164035, 51.31610263380535 ], [ 6.595913217320064, 51.430478995223197 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Arn_Koe", "bus0": "Arnsberg", "bus1": "Koeln" }, "geometry": { "type": "LineString", "coordinates": [ [ 8.005529492164035, 51.31610263380535 ], [ 6.80911443250468, 50.825083217317172 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Arn_Mue", "bus0": "Arnsberg", "bus1": "Muenster" }, "geometry": { "type": "LineString", "coordinates": [ [ 8.005529492164035, 51.31610263380535 ], [ 7.416431607824189, 51.950493055206856 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Det_Due", "bus0": "Detmold", "bus1": "Duesseldorf" }, "geometry": { "type": "LineString", "coordinates": [ [ 8.784302609674924, 51.939703848104607 ], [ 6.595913217320064, 51.430478995223197 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Det_Koe", "bus0": "Detmold", "bus1": "Koeln" }, "geometry": { "type": "LineString", "coordinates": [ [ 8.784302609674924, 51.939703848104607 ], [ 6.80911443250468, 50.825083217317172 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Det_Mue", "bus0": "Detmold", "bus1": "Muenster" }, "geometry": { "type": "LineString", "coordinates": [ [ 8.784302609674924, 51.939703848104607 ], [ 7.416431607824189, 51.950493055206856 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Due_Koe", "bus0": "Duesseldorf", "bus1": "Koeln" }, "geometry": { "type": "LineString", "coordinates": [ [ 6.595913217320064, 51.430478995223197 ], [ 6.80911443250468, 50.825083217317172 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Due_Mue", "bus0": "Duesseldorf", "bus1": "Muenster" }, "geometry": { "type": "LineString", "coordinates": [ [ 6.595913217320064, 51.430478995223197 ], [ 7.416431607824189, 51.950493055206856 ] ] } },
+{ "type": "Feature", "properties": { "Line": "Koe_Mue", "bus0": "Koeln", "bus1": "Muenster" }, "geometry": { "type": "LineString", "coordinates": [ [ 6.80911443250468, 50.825083217317172 ], [ 7.416431607824189, 51.950493055206856 ] ] } }
+]
+}
