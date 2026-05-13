@@ -77,19 +77,40 @@ file_path_input = st.sidebar.text_input(
     value=str(MESSDATEI)
 )
 
-
-refresh_seconds = st.sidebar.number_input(
-    "Aktualisierung alle X Sekunden",
-    min_value=10,
-    max_value=600,
-    value=60,
-    step=10
+auto_refresh = st.sidebar.checkbox(
+    "Automatisch aktualisieren",
+    value=False
 )
 
-# einfache automatische Aktualisierung
-st.markdown(
-    f"<meta http-equiv='refresh' content='{refresh_seconds}'>",
-    unsafe_allow_html=True
+if auto_refresh:
+    refresh_seconds = st.sidebar.number_input(
+        "Aktualisierung alle X Sekunden",
+        min_value=10,
+        max_value=600,
+        value=60,
+        step=10
+    )
+
+    st.markdown(
+        f"<meta http-equiv='refresh' content='{refresh_seconds}'>",
+        unsafe_allow_html=True
+    )
+
+if st.sidebar.button("Jetzt aktualisieren"):
+    st.rerun()
+
+time_range = st.sidebar.selectbox(
+    "Zeitspanne für Diagramme",
+    [
+        "Alle Daten",
+        "Letzte 24 Stunden",
+        "Letzte 7 Tage",
+        "Letzte 30 Tage",
+        "Letzte 3 Monate",
+        "Letzte 6 Monate",
+        "Letztes Jahr",
+        "Manuell auswählen"
+    ]
 )
 
 
@@ -115,6 +136,90 @@ if df.empty:
     st.warning("Die Datei wurde gefunden, aber es konnten keine Messdaten erkannt werden.")
     st.stop()
 
+# ------------------------------------------------------------
+# Daten für Diagramme nach Zeitspanne filtern
+# ------------------------------------------------------------
+
+df_plot = df.copy()
+
+if time_range != "Alle Daten":
+    latest_datetime = df["datetime"].max()
+
+    if time_range == "Letzte 24 Stunden":
+        start_datetime = latest_datetime - pd.Timedelta(hours=24)
+        df_plot = df[df["datetime"] >= start_datetime]
+
+    elif time_range == "Letzte 7 Tage":
+        start_datetime = latest_datetime - pd.Timedelta(days=7)
+        df_plot = df[df["datetime"] >= start_datetime]
+
+    elif time_range == "Letzte 30 Tage":
+        start_datetime = latest_datetime - pd.Timedelta(days=30)
+        df_plot = df[df["datetime"] >= start_datetime]
+
+    elif time_range == "Letzte 3 Monate":
+        start_datetime = latest_datetime - pd.DateOffset(months=3)
+        df_plot = df[df["datetime"] >= start_datetime]
+
+    elif time_range == "Letzte 6 Monate":
+        start_datetime = latest_datetime - pd.DateOffset(months=6)
+        df_plot = df[df["datetime"] >= start_datetime]
+
+    elif time_range == "Letztes Jahr":
+        start_datetime = latest_datetime - pd.DateOffset(years=1)
+        df_plot = df[df["datetime"] >= start_datetime]
+
+    elif time_range == "Manuell auswählen":
+        min_datetime = df["datetime"].min()
+        max_datetime = df["datetime"].max()
+        start_date = st.sidebar.date_input(
+
+            "Startdatum",
+            value=min_datetime.date(),
+            min_value=min_datetime.date(),
+            max_value=max_datetime.date()
+
+        )
+
+        start_time_text = st.sidebar.text_input(
+            "Startzeit",
+            value=min_datetime.strftime("%H:%M:%S"),
+            help="Format: HH:MM oder HH:MM:SS"
+        )
+
+        end_date = st.sidebar.date_input(
+            "Enddatum",
+            value=max_datetime.date(),
+            min_value=min_datetime.date(),
+            max_value=max_datetime.date()
+        )
+
+        end_time_text = st.sidebar.text_input(
+            "Endzeit",
+            value=max_datetime.strftime("%H:%M:%S"),
+            help="Format: HH:MM oder HH:MM:SS"
+        )
+
+        try:
+            start_datetime = pd.to_datetime(f"{start_date} {start_time_text}")
+            end_datetime = pd.to_datetime(f"{end_date} {end_time_text}")
+        except ValueError:
+            st.sidebar.error("Bitte gib die Uhrzeit im Format HH:MM oder HH:MM:SS ein.")
+            st.stop()
+
+        if start_datetime > end_datetime:
+            st.sidebar.error("Der Startzeitpunkt darf nicht nach dem Endzeitpunkt liegen.")
+            st.stop()
+
+        df_plot = df[
+            (df["datetime"] >= start_datetime) &
+            (df["datetime"] <= end_datetime)
+            ]
+
+if df_plot.empty:
+    st.warning("Für die gewählte Zeitspanne sind keine Messdaten vorhanden.")
+
+    st.stop()
 
 # ------------------------------------------------------------
 # Kennzahlen
@@ -140,7 +245,7 @@ col4.metric(
 st.subheader("MPP-Leistung über die Zeit")
 
 fig_power = px.line(
-    df,
+    df_plot,
     x="datetime",
     y="mpp_power_w",
     color="mode",
@@ -164,7 +269,7 @@ col_left, col_right = st.columns(2)
 with col_left:
     st.subheader("MPP-Spannung")
     fig_voltage = px.line(
-        df,
+        df_plot,
         x="datetime",
         y="mpp_voltage_v",
         color="mode",
@@ -179,7 +284,7 @@ with col_left:
 with col_right:
     st.subheader("MPP-Strom")
     fig_current = px.line(
-        df,
+        df_plot,
         x="datetime",
         y="mpp_current_a",
         color="mode",
