@@ -8,11 +8,11 @@ import plotly.express as px
 
 
 # ------------------------------------------------------------
-# Pfad zur synchronisierten Messdatei
+# Pfad zum synchronisierten Sciebo-Referenzdatensatz - ggf. anpassen!
 # ------------------------------------------------------------
 
-MESSDATEI = Path(
-    r"C:\PythonProjekte\PV_Projekt\PV_test\PV - Kopie\pv_dummy_messdaten.txt"
+MESS_ROOT = Path(
+    r"C:\Users\sarah\OneDrive - TH Köln\Desktop\4.Semester\PV\Messdaten_PV_Sciebo\Referenzdatensatz"
 )
 
 # ------------------------------------------------------------
@@ -57,6 +57,32 @@ def read_pv_file(file_path: Path) -> pd.DataFrame:
 
     return df
 
+def read_multiple_pv_files(file_paths: list[Path]) -> pd.DataFrame:
+    all_dfs = []
+
+    for file_path in file_paths:
+        df = read_pv_file(file_path)
+
+        if df.empty:
+            continue
+
+        df["source_file"] = file_path.name
+        df["source_path"] = str(file_path)
+        df["last_modified"] = pd.to_datetime(file_path.stat().st_mtime, unit="s")
+
+        all_dfs.append(df)
+
+    if not all_dfs:
+        return pd.DataFrame()
+
+    df_all = pd.concat(all_dfs, ignore_index=True)
+    df_all = df_all.sort_values("datetime")
+
+    return df_all
+
+
+
+
 
 # ------------------------------------------------------------
 # Streamlit Layout
@@ -73,8 +99,8 @@ st.caption("Anzeige der automatisch synchronisierten PV-Messdaten")
 st.sidebar.header("Einstellungen")
 
 file_path_input = st.sidebar.text_input(
-    "Pfad zur Messdatei",
-    value=str(MESSDATEI)
+    "Pfad zum Referenzdatensatz",
+    value=str(MESS_ROOT)
 )
 
 
@@ -97,25 +123,63 @@ st.markdown(
 # Daten laden
 # ------------------------------------------------------------
 
-file_path = Path(file_path_input)
+root_path = Path(file_path_input)
 
-if not file_path.exists():
-    st.error(f"Messdatei nicht gefunden: {file_path}")
+if not root_path.exists():
+    st.error(f"Ordner nicht gefunden: {root_path}")
     st.stop()
 
-try:
-    df = read_pv_file(file_path)
+# Direkte Unterordner = Modultypen
+module_type_folders = sorted([p for p in root_path.iterdir() if p.is_dir()])
 
-except Exception as e:
-    st.warning(f"Datei konnte gerade nicht gelesen werden: {e}")
+if not module_type_folders:
+    st.error("Keine Modultyp-Ordner gefunden.")
     st.stop()
 
+module_type_names = [folder.name for folder in module_type_folders]
+
+selected_module_type_name = st.sidebar.selectbox(
+    "Modultyp auswählen",
+    module_type_names
+)
+
+selected_module_type_folder = root_path / selected_module_type_name
+
+# Messläufe innerhalb des ausgewählten Modultyps
+measurement_run_folders = sorted([
+    p for p in selected_module_type_folder.iterdir()
+    if p.is_dir()
+])
+
+measurement_run_names = ["Alle Messläufe"] + [folder.name for folder in measurement_run_folders]
+
+selected_measurement_run_name = st.sidebar.selectbox(
+    "Messlauf auswählen",
+    measurement_run_names
+)
+
+if selected_measurement_run_name == "Alle Messläufe":
+    search_folder = selected_module_type_folder
+else:
+    search_folder = selected_module_type_folder / selected_measurement_run_name
+
+# Cont-Dateien suchen
+cont_files = sorted(search_folder.rglob("*Cont*.txt"))
+
+st.write(f"Ausgewählter Modultyp: {selected_module_type_name}")
+st.write(f"Ausgewählter Messlauf: {selected_measurement_run_name}")
+st.write(f"Gefundene Cont-Dateien: {len(cont_files)}")
+
+if not cont_files:
+    st.warning("Für diese Auswahl wurden keine Cont-Dateien gefunden.")
+    st.stop()
+
+# Alle gefundenen Cont-Dateien einlesen
+df = read_multiple_pv_files(cont_files)
 
 if df.empty:
-    st.warning("Die Datei wurde gefunden, aber es konnten keine Messdaten erkannt werden.")
+    st.warning("Die Dateien wurden gefunden, aber es konnten keine Messdaten erkannt werden.")
     st.stop()
-
-
 # ------------------------------------------------------------
 # Kennzahlen
 # ------------------------------------------------------------
