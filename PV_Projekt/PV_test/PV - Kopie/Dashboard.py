@@ -158,6 +158,8 @@ if auto_refresh:
         f"<meta http-equiv='refresh' content='{refresh_seconds}'>",
         unsafe_allow_html=True
     )
+
+
 # ------------------------------------------------------------
 # Daten laden
 # ------------------------------------------------------------
@@ -263,6 +265,8 @@ if df.empty:
     st.warning("Für die ausgewählten Modulpaare sind keine Daten vorhanden.")
     st.stop()
 
+
+
 # ------------------------------------------------------------
 # Zeitbereich filtern
 # ------------------------------------------------------------
@@ -343,24 +347,57 @@ else:
         max_value=max_datetime.date()
     )
 
-    start_time = st.sidebar.time_input(
-        "Startzeit",
-        value=min_datetime.time()
+    st.sidebar.caption(
+        f"Verfügbare Zeitspanne: "
+        f"{min_datetime.strftime('%d.%m.%Y %H:%M:%S')} bis "
+        f"{max_datetime.strftime('%d.%m.%Y %H:%M:%S')}"
     )
 
-    end_time = st.sidebar.time_input(
-        "Endzeit",
-        value=max_datetime.time()
+    start_time_text = st.sidebar.text_input(
+        "Startzeit (HH:MM oder HH:MM:SS)",
+        value=min_datetime.strftime("%H:%M:%S")
     )
 
-    start_datetime = pd.Timestamp.combine(start_date, start_time)
-    end_datetime = pd.Timestamp.combine(end_date, end_time)
+    end_time_text = st.sidebar.text_input(
+        "Endzeit (HH:MM oder HH:MM:SS)",
+        value=max_datetime.strftime("%H:%M:%S")
+    )
+
+    try:
+        start_datetime = pd.to_datetime(
+            f"{start_date} {start_time_text}"
+        )
+
+        end_datetime = pd.to_datetime(
+            f"{end_date} {end_time_text}"
+        )
+
+    except ValueError:
+        st.sidebar.error("Bitte die Zeit im Format HH:MM oder HH:MM:SS eingeben.")
+        st.stop()
+
+    if start_datetime < min_datetime:
+        st.sidebar.error(
+            f"Die Startzeit liegt vor dem ersten Messpunkt: "
+            f"{min_datetime.strftime('%d.%m.%Y %H:%M:%S')}"
+        )
+        st.stop()
+
+    if end_datetime > max_datetime:
+        st.sidebar.error(
+            f"Die Endzeit liegt nach dem letzten Messpunkt: "
+            f"{max_datetime.strftime('%d.%m.%Y %H:%M:%S')}"
+        )
+        st.stop()
+
+    if start_datetime > end_datetime:
+        st.sidebar.error("Der Startzeitpunkt darf nicht nach dem Endzeitpunkt liegen.")
+        st.stop()
 
     df_filtered = df[
         (df["datetime"] >= start_datetime) &
         (df["datetime"] <= end_datetime)
     ]
-
 
 # ------------------------------------------------------------
 # Kennzahlen
@@ -392,6 +429,9 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Aktuelle Leistung", f"{latest['mpp_power_w']:.1f} W")
 col2.metric("Aktuelle Spannung", f"{latest['mpp_voltage_v']:.2f} V")
 col3.metric("Aktueller Strom", f"{latest['mpp_current_a']:.2f} A")
+
+
+
 # ------------------------------------------------------------
 # Diagramm: Leistung über Zeit
 # ------------------------------------------------------------
