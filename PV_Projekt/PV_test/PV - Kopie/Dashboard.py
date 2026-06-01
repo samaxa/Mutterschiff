@@ -15,6 +15,35 @@ MESS_ROOT = Path(
     r"C:\Users\sarah\OneDrive - TH Köln\Desktop\4.Semester\PV\Messdaten_PV_Sciebo\Referenzdatensatz"
 )
 
+
+def read_file_metadata(file_path: Path) -> dict:
+    metadata = {
+        "module_type_from_file": "unbekannt",
+        "module_pair": "unbekannt",
+    }
+
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
+        for line in file:
+            line = line.strip()
+
+            if line.startswith("Name"):
+                parts = re.split(r"\t+", line)
+                if len(parts) >= 2:
+                    metadata["module_type_from_file"] = parts[1].strip()
+
+            elif line.startswith("Modul Kennung"):
+                parts = re.split(r"\t+", line)
+                if len(parts) >= 2:
+                    metadata["module_pair"] = parts[1].strip()
+
+            elif line.startswith("Time"):
+                break
+
+    return metadata
+
+
+
+
 # ------------------------------------------------------------
 # Messdatei einlesen
 # ------------------------------------------------------------
@@ -66,6 +95,10 @@ def read_multiple_pv_files(file_paths: list[Path]) -> pd.DataFrame:
         if df.empty:
             continue
 
+        metadata = read_file_metadata(file_path)
+
+        df["module_type_from_file"] = metadata["module_type_from_file"]
+        df["module_pair"] = metadata["module_pair"]
         df["source_file"] = file_path.name
         df["source_path"] = str(file_path)
         df["last_modified"] = pd.to_datetime(file_path.stat().st_mtime, unit="s")
@@ -104,6 +137,11 @@ file_path_input = st.sidebar.text_input(
 )
 
 
+auto_refresh = st.sidebar.checkbox(
+    "Automatische Aktualisierung aktivieren",
+    value=False
+)
+
 refresh_seconds = st.sidebar.number_input(
     "Aktualisierung alle X Sekunden",
     min_value=10,
@@ -112,13 +150,14 @@ refresh_seconds = st.sidebar.number_input(
     step=10
 )
 
-# einfache automatische Aktualisierung
-st.markdown(
-    f"<meta http-equiv='refresh' content='{refresh_seconds}'>",
-    unsafe_allow_html=True
-)
+if st.sidebar.button("Jetzt manuell aktualisieren"):
+    st.rerun()
 
-
+if auto_refresh:
+    st.markdown(
+        f"<meta http-equiv='refresh' content='{refresh_seconds}'>",
+        unsafe_allow_html=True
+    )
 # ------------------------------------------------------------
 # Daten laden
 # ------------------------------------------------------------
@@ -140,29 +179,34 @@ module_type_names = [folder.name for folder in module_type_folders]
 
 selected_module_type_name = st.sidebar.selectbox(
     "Modultyp auswählen",
-    module_type_names
+    ["Bitte Modultyp auswählen"] + module_type_names
 )
 
+if selected_module_type_name == "Bitte Modultyp auswählen":
+    st.info("Bitte zuerst einen Modultyp auswählen, um Messdaten anzuzeigen.")
+    st.stop()
+
 selected_module_type_folder = root_path / selected_module_type_name
-
 # Messläufe innerhalb des ausgewählten Modultyps
-measurement_run_folders = sorted([
-    p for p in selected_module_type_folder.iterdir()
-    if p.is_dir()
-])
+# Messläufe nach Änderungsdatum sortieren: neuester zuerst
+measurement_run_folders = sorted(
+    [p for p in selected_module_type_folder.iterdir() if p.is_dir()],
+    key=lambda p: p.stat().st_mtime,
+    reverse=True
+)
 
-measurement_run_names = ["Alle Messläufe"] + [folder.name for folder in measurement_run_folders]
+measurement_run_names = [folder.name for folder in measurement_run_folders]
 
 selected_measurement_run_name = st.sidebar.selectbox(
     "Messlauf auswählen",
-    measurement_run_names
+    ["Bitte Messlauf auswählen"] + measurement_run_names
 )
 
-if selected_measurement_run_name == "Alle Messläufe":
-    search_folder = selected_module_type_folder
-else:
-    search_folder = selected_module_type_folder / selected_measurement_run_name
+if selected_measurement_run_name == "Bitte Messlauf auswählen":
+    st.info("Bitte zuerst einen Messlauf auswählen, um Messdaten anzuzeigen.")
+    st.stop()
 
+search_folder = selected_module_type_folder / selected_measurement_run_name
 # Cont-Dateien suchen
 cont_files = sorted(search_folder.rglob("*Cont*.txt"))
 
@@ -180,23 +224,174 @@ df = read_multiple_pv_files(cont_files)
 if df.empty:
     st.warning("Die Dateien wurden gefunden, aber es konnten keine Messdaten erkannt werden.")
     st.stop()
+
+ORIENTATION_MAPPING = {
+    "Modul-1_6": "Modul 1: Süd, Modul 6: Ost/West",
+    "Modul-3_4": "Modul 3: Süd, Modul 4: Ost/West",
+    "Modul-2_5": "Modul 2: Süd, Modul 5: Ost/West",
+}
+
+df["orientation_info"] = df["module_pair"].map(ORIENTATION_MAPPING).fillna("unbekannt")
+# ------------------------------------------------------------
+# Modulpaar filtern
+# ------------------------------------------------------------
+
+module_pair_options = sorted(df["module_pair"].dropna().unique())
+
+selected_module_pairs = st.sidebar.multiselect(
+    "Modulpaar auswählen",
+    module_pair_options,
+    default=[]
+)
+
+st.info(
+    "Hinweis: Mehrere Modulpaare können gemeinsam angezeigt werden. "
+    "Die Messzeitpunkte können sich jedoch je nach Messlauf unterscheiden."
+)
+
+if not selected_module_pairs:
+    st.info("Bitte ein Modulpaar auswählen, um Messdaten anzuzeigen.")
+    st.stop()
+
+st.info(
+    f"Ausgewählte Modulpaare: {', '.join(selected_module_pairs)}"
+)
+
+df = df[df["module_pair"].isin(selected_module_pairs)]
+
+if df.empty:
+    st.warning("Für die ausgewählten Modulpaare sind keine Daten vorhanden.")
+    st.stop()
+
+# ------------------------------------------------------------
+# Zeitbereich filtern
+# ------------------------------------------------------------
+
+st.sidebar.subheader("Zeitbereich")
+
+min_datetime = df["datetime"].min()
+max_datetime = df["datetime"].max()
+
+time_range_option = st.sidebar.selectbox(
+    "Anzuzeigender Zeitraum",
+    [
+        "Gesamter Zeitraum",
+        "Letzte 5 Minuten",
+        "Letzte 15 Minuten",
+        "Letzte 30 Minuten",
+        "Letzte 60 Minuten",
+        "Letzte 24 Stunden",
+        "Letzte 7 Tage",
+        "Letzte 30 Tage",
+        "Monat der letzten Messung",
+        "Jahr der letzten Messung",
+        "Manuell auswählen"
+    ]
+)
+
+if time_range_option == "Gesamter Zeitraum":
+    df_filtered = df.copy()
+
+elif time_range_option == "Letzte 5 Minuten":
+    start_datetime = max_datetime - pd.Timedelta(minutes=5)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Letzte 15 Minuten":
+    start_datetime = max_datetime - pd.Timedelta(minutes=15)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Letzte 30 Minuten":
+    start_datetime = max_datetime - pd.Timedelta(minutes=30)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Letzte 60 Minuten":
+    start_datetime = max_datetime - pd.Timedelta(hours=1)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Letzte 24 Stunden":
+    start_datetime = max_datetime - pd.Timedelta(hours=24)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Letzte 7 Tage":
+    start_datetime = max_datetime - pd.Timedelta(days=7)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Letzte 30 Tage":
+    start_datetime = max_datetime - pd.Timedelta(days=30)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Monat der letzten Messung":
+    start_datetime = max_datetime.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+elif time_range_option == "Jahr der letzten Messung":
+    start_datetime = max_datetime.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+    df_filtered = df[df["datetime"] >= start_datetime]
+
+else:
+    start_date = st.sidebar.date_input(
+        "Startdatum",
+        value=min_datetime.date(),
+        min_value=min_datetime.date(),
+        max_value=max_datetime.date()
+    )
+
+    end_date = st.sidebar.date_input(
+        "Enddatum",
+        value=max_datetime.date(),
+        min_value=min_datetime.date(),
+        max_value=max_datetime.date()
+    )
+
+    start_time = st.sidebar.time_input(
+        "Startzeit",
+        value=min_datetime.time()
+    )
+
+    end_time = st.sidebar.time_input(
+        "Endzeit",
+        value=max_datetime.time()
+    )
+
+    start_datetime = pd.Timestamp.combine(start_date, start_time)
+    end_datetime = pd.Timestamp.combine(end_date, end_time)
+
+    df_filtered = df[
+        (df["datetime"] >= start_datetime) &
+        (df["datetime"] <= end_datetime)
+    ]
+
+
 # ------------------------------------------------------------
 # Kennzahlen
 # ------------------------------------------------------------
 
-latest = df.iloc[-1]
+if df_filtered.empty:
+    st.warning("Für den ausgewählten Zeitraum sind keine Daten vorhanden.")
+    st.stop()
 
-col1, col2, col3, col4 = st.columns(4)
+first = df_filtered.iloc[0]
+latest = df_filtered.iloc[-1]
 
-col1.metric("Aktuelle Leistung", f"{latest['mpp_power_w']:.1f} W")
-col2.metric("Aktuelle Spannung", f"{latest['mpp_voltage_v']:.2f} V")
-col3.metric("Aktueller Strom", f"{latest['mpp_current_a']:.2f} A")
-col4.metric(
+# Erste Zeile: Messzeitraum
+time_col1, time_col2 = st.columns(2)
+
+time_col1.metric(
+    "Erster Messzeitpunkt",
+    first["datetime"].strftime("%d.%m.%Y %H:%M:%S")
+)
+
+time_col2.metric(
     "Letzter Messzeitpunkt",
     latest["datetime"].strftime("%d.%m.%Y %H:%M:%S")
 )
 
+# Zweite Zeile: aktuelle Messwerte
+col1, col2, col3 = st.columns(3)
 
+col1.metric("Aktuelle Leistung", f"{latest['mpp_power_w']:.1f} W")
+col2.metric("Aktuelle Spannung", f"{latest['mpp_voltage_v']:.2f} V")
+col3.metric("Aktueller Strom", f"{latest['mpp_current_a']:.2f} A")
 # ------------------------------------------------------------
 # Diagramm: Leistung über Zeit
 # ------------------------------------------------------------
@@ -204,14 +399,16 @@ col4.metric(
 st.subheader("MPP-Leistung über die Zeit")
 
 fig_power = px.line(
-    df,
+    df_filtered,
     x="datetime",
     y="mpp_power_w",
-    color="mode",
-    title="PV-Leistung über die Zeit",
+    color="module_pair",
+    line_dash="mode",
+    title="PV-Leistung über die Zeit nach Modulpaar",
     labels={
         "datetime": "Zeit",
         "mpp_power_w": "MPP-Leistung [W]",
+        "module_pair": "Modulpaar",
         "mode": "Messmodus"
     }
 )
@@ -228,13 +425,15 @@ col_left, col_right = st.columns(2)
 with col_left:
     st.subheader("MPP-Spannung")
     fig_voltage = px.line(
-        df,
+        df_filtered,
         x="datetime",
         y="mpp_voltage_v",
-        color="mode",
+        color="module_pair",
+        line_dash="mode",
         labels={
             "datetime": "Zeit",
             "mpp_voltage_v": "MPP-Spannung [V]",
+            "module_pair": "Modulpaar",
             "mode": "Messmodus"
         }
     )
@@ -243,13 +442,15 @@ with col_left:
 with col_right:
     st.subheader("MPP-Strom")
     fig_current = px.line(
-        df,
+        df_filtered,
         x="datetime",
         y="mpp_current_a",
-        color="mode",
+        color="module_pair",
+        line_dash="mode",
         labels={
             "datetime": "Zeit",
             "mpp_current_a": "MPP-Strom [A]",
+            "module_pair": "Modulpaar",
             "mode": "Messmodus"
         }
     )
@@ -262,9 +463,9 @@ with col_right:
 
 st.subheader("Messdatentabelle")
 
-st.dataframe(df, use_container_width=True)
+st.dataframe(df_filtered, use_container_width=True)
 
-csv = df.to_csv(index=False).encode("utf-8")
+csv = df_filtered.to_csv(index=False).encode("utf-8")
 
 st.download_button(
     label="Messdaten als CSV herunterladen",
