@@ -1188,6 +1188,188 @@ def render_electrical_charts(df_filtered: pd.DataFrame) -> None:
             )
 
 
+def add_energy_from_power(
+    df_filtered: pd.DataFrame,
+    max_gap_minutes: float = 10,
+) -> pd.DataFrame:
+    """
+    Berechnet die Energie aus der MPP-Leistung und den realen Zeitabständen.
+
+    Wichtig:
+    Scan und Track werden NICHT zusammengemischt, sondern getrennt berechnet.
+    Dadurch bekommt jeder Messmodus seine eigene Zeitachse:
+    - Track -> nächster Track
+    - Scan  -> nächster Scan
+
+    Energie [Wh] = Leistung [W] * Zeitdifferenz [h]
+    """
+
+    if df_filtered.empty:
+        return pd.DataFrame()
+
+    df_energy = df_filtered.copy()
+    df_energy = df_energy.sort_values(["module_number", "source_file", "mode", "datetime"])
+
+    # Scan und Track werden absichtlich getrennt gruppiert.
+    # Dadurch wird nicht Track -> Scan -> Track gerechnet, sondern:
+    # Track -> nächster Track und Scan -> nächster Scan.
+    group_columns = ["module_number", "source_file", "mode"]
+
+    # Zeit bis zum nächsten Messpunkt desselben Moduls UND desselben Messmodus.
+    next_datetime = df_energy.groupby(group_columns)["datetime"].shift(-1)
+
+    df_energy["delta_time_s"] = (
+        next_datetime - df_energy["datetime"]
+    ).dt.total_seconds()
+
+    # Der letzte Messpunkt je Modul/Modus hat keinen nächsten Messpunkt mehr.
+    # Negative oder fehlende Zeitabstände sind nicht sinnvoll und werden auf 0 gesetzt.
+    df_energy["delta_time_s"] = df_energy["delta_time_s"].fillna(0)
+    df_energy.loc[df_energy["delta_time_s"] < 0, "delta_time_s"] = 0
+
+    # Sehr große Lücken werden nicht integriert, weil sonst Messabbrüche oder
+    # fehlende Daten die berechnete Energie künstlich erhöhen könnten.
+    max_gap_seconds = max_gap_minutes * 60
+    df_energy.loc[df_energy["delta_time_s"] > max_gap_seconds, "delta_time_s"] = 0
+
+    df_energy["delta_time_h"] = df_energy["delta_time_s"] / 3600
+
+    df_energy["energy_interval_wh"] = (
+        df_energy["mpp_power_w"] * df_energy["delta_time_h"]
+    )
+
+    df_energy["energy_cumulative_kwh"] = (
+        df_energy
+        .groupby(group_columns)["energy_interval_wh"]
+        .cumsum()
+        / 1000
+    )
+
+    return df_energy
+
+
+def render_energy_chart(df_filtered: pd.DataFrame) -> None:
+    """
+    Zeigt die aus der Leistung berechnete Energie je Modul.
+
+    Scan und Track werden getrennt betrachtet, damit die beiden Messarten nicht
+    methodisch vermischt werden. Dadurch entstehen getrennte Energiekurven für
+    Scan und Track.
+    """
+
+    df_energy = add_energy_from_power(df_filtered)
+
+    if df_energy.empty:
+        return
+
+    latest_energy = (
+        df_energy
+        .sort_values("datetime")
+        .groupby(["module_number", "module_label", "orientation", "mode"], as_index=False)
+        .tail(1)
+        .sort_values(["module_number", "mode"])
+    )
+
+    with st.container(border=True):
+        st.subheader("Berechnete Energie")
+        st.caption(
+            "Die Energie wird aus der MPP-Leistung und den realen Zeitabständen berechnet. "
+            "Scan und Track werden dabei getrennt ausgewertet: Track wird nur mit Track "
+            "verglichen, Scan nur mit Scan. Große Messlücken werden nicht integriert."
+        )
+
+        # KPIs je Modul und Messmodus, damit nicht versehentlich Scan und Track addiert werden.
+        st.subheader("Energie je Modul und Messmodus")
+
+        metric_rows = latest_energy.to_dict("records")
+        for start_index in range(0, len(metric_rows), 4):
+            metric_columns = st.columns(min(4, len(metric_rows) - start_index))
+
+            for metric_column, row in zip(metric_columns, metric_rows[start_index:start_index + 4]):
+                metric_column.metric(
+                    f"{row['module_label']} – {row['mode']}",
+                    f"{row['energy_cumulative_kwh']:.4f} kWh",
+                )
+
+        fig_energy = px.line(
+            df_energy,
+            x="datetime",
+            y="energy_cumulative_kwh",
+            color="module_label",
+            line_dash="mode",
+            hover_data=[
+                "mode",
+                "orientation",
+                "module_pair",
+                "channel",
+                "mpp_power_w",
+                "delta_time_s",
+                "energy_interval_wh",
+            ],
+            title="Kumulierte Energie über die Zeit, getrennt nach Scan und Track",
+            labels={
+                "datetime": "Zeit",
+                "energy_cumulative_kwh": "Kumulierte Energie [kWh]",
+                "module_label": "Modul",
+                "mode": "Messmodus",
+                "orientation": "Ausrichtung",
+                "mpp_power_w": "MPP-Leistung [W]",
+                "delta_time_s": "Zeit bis zum nächsten Messpunkt [s]",
+                "energy_interval_wh": "Energie im Intervall [Wh]",
+            },
+        )
+
+        st.plotly_chart(fig_energy, use_container_width=True)
+
+        # Nicht-kumulierte Darstellung: Energie je Zeitabschnitt.
+        # Diese Kurve kann wieder hoch und runter gehen, weil sie nicht die
+        # Gesamtsumme zeigt, sondern den neu erzeugten Ertrag pro Stunde.
+        df_energy_hourly = (
+            df_energy
+            .set_index("datetime")
+            .groupby(["module_label", "mode"])["energy_interval_wh"]
+            .resample("1h")
+            .sum()
+            .reset_index()
+        )
+
+        fig_energy_hourly = px.line(
+            df_energy_hourly,
+            x="datetime",
+            y="energy_interval_wh",
+            color="module_label",
+            line_dash="mode",
+            markers=True,
+            title="Energieertrag pro Stunde, getrennt nach Scan und Track",
+            labels={
+                "datetime": "Zeit",
+                "energy_interval_wh": "Energie pro Stunde [Wh]",
+                "module_label": "Modul",
+                "mode": "Messmodus",
+            },
+        )
+
+        st.plotly_chart(fig_energy_hourly, use_container_width=True)
+
+        with st.expander("Berechnete Energie-Tabelle anzeigen"):
+            energy_display_columns = [
+                "datetime",
+                "module_label",
+                "orientation",
+                "mode",
+                "mpp_power_w",
+                "delta_time_s",
+                "energy_interval_wh",
+                "energy_cumulative_kwh",
+            ]
+
+            st.dataframe(
+                prepare_display_table(df_energy[energy_display_columns]),
+                use_container_width=True,
+                hide_index=True,
+            )
+
+
 def render_sensor_values(df_raw_filtered: pd.DataFrame) -> None:
     """
     Zeigt optional Temperatur und Light Intensity aus der Cont-Datei.
@@ -1349,6 +1531,7 @@ def main() -> None:
 
     # erzeugt Diagramme für: Leistung, Spannung, Strom, Temp, Lichtintensität
     render_electrical_charts(df_filtered)
+    render_energy_chart(df_filtered)
     render_sensor_values(df_raw_filtered)
     # zeigt Modulzuordnung, Rohdatenvorschau, CSV-Download
     render_raw_data_export(df_raw_display, module_mapping_table)
