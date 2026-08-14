@@ -1,0 +1,15 @@
+Simuliert: 27835 Schritte, 278 Tage
+Teufe 1200 m | Gebirge 10 °C + 3 °C/100 m -> T_Gebirge 46 °C
+Rate 55 kg/s | UA 546 kW/K | max. 6 bar/Tag
+
+Phase         Ende t        p       T   Inventar  Zustand
+--------------------------------------------------------------
+aus            66.7d    70.0b   36.0°C     139.6kt  einphasig
+stillstand     88.4d    76.6b   46.0°C     139.6kt  überkritisch
+ein           161.2d   200.0b   56.2°C     485.7kt  überkritisch
+stillstand    182.9d   161.4b   47.1°C     485.7kt  überkritisch
+aus           258.3d    70.0b   36.0°C     139.6kt  einphasig
+stillstand    278.3d    76.6b   46.0°C     139.6kt  überkritisch
+
+Inventar min/max: 139.6 / 485.7 kt -> Arbeitsgas 346.0 kt = 71 %
+Kissengas 29 %  (Vollsimulation der Quelle: 68-78 % Kissengas)

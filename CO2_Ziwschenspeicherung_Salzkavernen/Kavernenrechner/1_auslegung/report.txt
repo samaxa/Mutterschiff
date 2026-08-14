@@ -1,0 +1,35 @@
+==============================================================================
+  CO2-SALZKAVERNE - AUSLEGUNGSRECHNUNG
+==============================================================================
+  Teufe 1200 m | Gebirge 10 °C + 3 °C/100 m | Volumen 650e3 m3
+  Stoffdaten: CoolProp / Span-Wagner | krit. Punkt 31.0 °C / 73.8 bar
+------------------------------------------------------------------------------
+GEOLOGIE UND DRUCKFENSTER
+  Kavernentemperatur (geothermisch)          46.0 °C
+  T unterschreitet T_krit bei Teufe           699 m
+  lithostatischer Gebirgsdruck                259 bar
+  Betriebsfenster LCCS                         70 - 210 bar
+  Regimegrenze (Kopfdruck = p_krit)         171.7 bar
+------------------------------------------------------------------------------
+EINSPEICHERN
+  Anlieferung                                85.0 bar / 15 °C
+  Pumpe auf Kopfdruck                       107.6 bar / 17.5 °C  (flüssig)
+  spezifische Arbeit                         3.21 kJ/kg
+  Leistung bei 50-100e3 Nm3/h              88 - 176 kW
+  Massenstrom                                27.5 - 54.9 kg/s
+  Saeulengewinn im Bohrloch                 102.7 bar
+  Dichte oben / unten                       926.3 / 817.9 kg/m3
+------------------------------------------------------------------------------
+AUSSPEICHERN (adiabater Grenzfall = Nennrate)
+  Kaverne                                   210.0 bar / 46.0 °C
+  am Bohrlochkopf                           120.0 bar / 34.2 °C
+  nach Drossel auf Pipelinedruck             85.0 bar / 29.5 °C  (flüssig)
+  -> AUSSERHALB Spezifikation (5-25 °C): Nachkuehler 0.5 - 0.9 MW
+------------------------------------------------------------------------------
+ARBEITSGAS (Massenbilanz m = rho(p,T) * V)
+  Variante                              isotherm   mit Abkuehlung
+  A Bohrloch durchgehend dicht     p_min  171.7 bar     6.6 %      1.9 %
+  B Kaverne ueberkritisch          p_min   73.8 bar    76.3 %     61.6 %
+  C geomechanisches Minimum        p_min   70.0 bar    78.4 %     68.3 %
+  Hinweis: obere Abschaetzung. Vollsimulation der Quelle: 22-32 % Arbeitsgas.
+==============================================================================

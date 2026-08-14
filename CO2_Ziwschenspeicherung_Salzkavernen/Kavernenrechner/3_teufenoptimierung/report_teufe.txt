@@ -1,0 +1,75 @@
+====================================================================================
+  OPTIMALE KAVERNENTEUFE FÜR CO2-SPEICHERUNG
+====================================================================================
+  Volumen 650e3 m3 | Gebirge 10 °C + 3 °C/100 m
+  p_max = 80 %, p_min = 30 % des lithostatischen Drucks
+  Geomechanisches Fenster: 700 - 2000 m
+  Kritischer Punkt CO2: 31.0 °C / 73.8 bar | Sicherheitsmarge 3 K
+------------------------------------------------------------------------------------
+  Teufe  p_max  p_min  T_Geb T_isentr  AG langsam  AG schnell  Status
+------------------------------------------------------------------------------------
+   400m    69b    26b    22°C     -11°C       474kt       373kt  Flüssigphase in Kaverne möglich | außerhalb geomech. Fenster | bei schneller Rate ZWEIPHASIG in der Kaverne (q=0.28)
+   500m    86b    32b    25°C      -3°C       469kt       330kt  Flüssigphase in Kaverne möglich | außerhalb geomech. Fenster | bei schneller Rate ZWEIPHASIG in der Kaverne (q=0.24)
+   600m   104b    39b    28°C       4°C       462kt       279kt  Flüssigphase in Kaverne möglich | außerhalb geomech. Fenster | bei schneller Rate ZWEIPHASIG in der Kaverne (q=0.20)
+   700m   121b    45b    31°C      10°C       453kt       220kt  Flüssigphase in Kaverne möglich | bei schneller Rate ZWEIPHASIG in der Kaverne (q=0.16)
+   800m   138b    52b    34°C      16°C       442kt       153kt  Gasumwandlung (günstig) | bei schneller Rate ZWEIPHASIG in der Kaverne (q=0.11) <<<
+   900m   155b    58b    37°C      21°C       430kt        77kt  Gasumwandlung (günstig) | bei schneller Rate ZWEIPHASIG in der Kaverne (q=0.04)
+  1000m   173b    65b    40°C      24°C       417kt        45kt  Gasumwandlung (günstig)
+  1100m   190b    71b    43°C      25°C       402kt        47kt  Gasumwandlung (günstig)
+  1200m   207b    78b    46°C      27°C       386kt        49kt  
+  1300m   224b    84b    49°C      29°C       369kt        52kt  
+  1400m   242b    91b    52°C      31°C       352kt        54kt  
+  1500m   259b    97b    55°C      33°C       335kt        56kt  
+  1600m   276b   104b    58°C      35°C       320kt        58kt  
+  1700m   294b   110b    61°C      36°C       306kt        60kt  
+  1800m   311b   117b    64°C      38°C       294kt        62kt  
+  1900m   328b   123b    67°C      40°C       284kt        64kt  
+  2000m   345b   129b    70°C      42°C       276kt        66kt  
+------------------------------------------------------------------------------------
+  OPTIMUM (konservativer Grenzfall):   800 m mit 153 kt Arbeitsgas (29 %)
+  EMPFEHLUNGSFENSTER (95 % davon):     800 - 800 m
+  Untere Grenze gesetzt durch: Temperatur
+
+  Lesart: 'AG langsam' = isotherm (Gebirge heizt nach) = obere Schranke.
+          'AG schnell' = isentrop (keine Wärmezufuhr)  = untere Schranke.
+          Der reale Wert liegt ratenabhängig dazwischen.
+====================================================================================
+
+======================================================================================
+  AUSLEGUNGSFENSTER: TEUFE UND AUSSPEICHERRATE
+======================================================================================
+  Schritt 1 – Teufenfenster (analytisch)
+    (1) p_min < p_krit          -> z < 1139 m
+        sonst liegt der kritische Druck außerhalb des Betriebsfensters
+        und man fährt nur im flachen Teil der Dichtekurve
+    (2) T_Gebirge > T_krit + 3 K -> z > 799 m
+        sonst Flüssigphase in der Kaverne möglich
+    (3) Geomechanik             -> z > 700 m  (standortabhängig)
+    ==> zulässige Teufe: 799 - 1139 m
+        Untergrenze durch Temperatur (Flüssigphase), Obergrenze durch p_min über p_krit
+--------------------------------------------------------------------------------------
+  Schritt 2 – Grenzrate je Teufe (Kaverne bleibt einphasig)
+  Teufe  p_min   Grenzrate   = Nm³/h  Dauer  AG %   AG kt  Zykl./a  Durchsatz
+--------------------------------------------------------------------------------------
+   799m    52b       10 kg/s    17384   535d   84%    441      0.3     144 kt/a
+   884m    57b       19 kg/s    34595   261d   82%    429      0.6     276 kt/a
+   969m    63b       29 kg/s    53331   163d   78%    413      1.0     406 kt/a
+  1054m    68b       41 kg/s    73809   112d   74%    392      1.4     532 kt/a
+  1139m    74b       53 kg/s    96031    78d   67%    353      1.8     644 kt/a
+--------------------------------------------------------------------------------------
+  ZWEI OPTIMA – je nach Zielgröße
+    (a) maximaler Arbeitsgas-ANTEIL:  799 m, bis 10 kg/s
+        84 % Arbeitsgas, aber 535 d je Ausspeicherung -> 0.3 Zyklen/a
+        sinnvoll, wenn das Kissengas teuer ist (Kapitalbindung im Speicherinhalt)
+    (b) maximaler JAHRESDURCHSATZ:   1139 m, bis 53 kg/s
+        644 kt/a bei 67 % Arbeitsgas und 1.8 Zyklen/a
+        sinnvoll, wenn der Speicher Netzschwankungen ausgleichen soll
+
+  Der Zielkonflikt: flacher = höherer Anteil nutzbar, aber kleinere zulässige Rate.
+  Welches Optimum gilt, hängt vom Geschäftsmodell ab (Saisonspeicher vs. Netzpuffer).
+
+  VORBEHALTE
+    UA = 546 kW/K ist eine Annahme und geht direkt in die Grenzrate ein.
+    Die Faustwerte 80 %/30 % für p_max/p_min sind standortabhängig zu ersetzen.
+    Kaverne ideal durchmischt, Bohrloch nicht modelliert.
+======================================================================================
