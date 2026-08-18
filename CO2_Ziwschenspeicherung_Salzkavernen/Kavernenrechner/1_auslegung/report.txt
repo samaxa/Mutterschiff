@@ -4,29 +4,49 @@
   Teufe 1200 m | Gebirge 10 °C + 3 °C/100 m | Volumen 650e3 m3
   Stoffdaten: CoolProp / Span-Wagner | krit. Punkt 31.0 °C / 73.8 bar
 ------------------------------------------------------------------------------
-GEOLOGIE UND DRUCKFENSTER
+BETRIEBSZUSTAENDE - welche Zahl unter welcher Annahme gilt
+  [S] STILLSTAND      Gas ruht, T folgt dem Gebirge (T = 10 degC + 0,03 K/m * z).
+                      Entspricht Kap. 3 'Standstill' der Quelle.
+  [A] AUSSPEICHERN    Gas stroemt, adiabater Grenzfall: h + g*z = konst.
+                      Hohe Rate, kein Waermeaustausch mit dem Gebirge.
+                      Reibungsdruckverluste sind NICHT enthalten.
+  Die beiden Zustaende sind nicht mischbar. Jeder Block unten ist markiert.
+------------------------------------------------------------------------------
+GEOLOGIE UND DRUCKFENSTER                                              [S]
   Kavernentemperatur (geothermisch)          46.0 °C
   T unterschreitet T_krit bei Teufe           699 m
   lithostatischer Gebirgsdruck                259 bar
   Betriebsfenster LCCS                         70 - 210 bar
   Regimegrenze (Kopfdruck = p_krit)         171.7 bar
 ------------------------------------------------------------------------------
-EINSPEICHERN
+EINSPEICHERN                                                           [S]
+  Hinweis: Die Saeule startet oben mit der Gebirgstemperatur, nicht mit der
+  Pumpenaustrittstemperatur. Gilt fuer langsames Einspeichern.
   Anlieferung                                85.0 bar / 15 °C
   Pumpe auf Kopfdruck                       107.6 bar / 17.5 °C  (flüssig)
   spezifische Arbeit                         3.21 kJ/kg
   Leistung bei 50-100e3 Nm3/h              88 - 176 kW
   Massenstrom                                27.5 - 54.9 kg/s
-  Saeulengewinn im Bohrloch                 102.7 bar
-  Dichte oben / unten                       926.3 / 817.9 kg/m3
+  Saeulengewinn im Bohrloch                 102.4 bar
+  Dichte oben / unten                       926.3 / 817.6 kg/m3
 ------------------------------------------------------------------------------
-AUSSPEICHERN (adiabater Grenzfall = Nennrate)
+AUSSPEICHERN                                                           [A]
   Kaverne                                   210.0 bar / 46.0 °C
-  am Bohrlochkopf                           120.0 bar / 34.2 °C
+
+  Bohrlochkopf - Sollwert gegen das, was die Saeule hergibt:
+    gesetzter Sollwert p_kopf_aus           120.0 bar   (Annahme, CFG Zeile 49)
+    aus der Saeule erreichbar               116.3 bar / 33.8 °C  (gerechnet)
+    -> WARNUNG: Sollwert liegt 3.7 bar UEBER der Saeulengrenze.
+       Eine Drossel baut Druck nur ab. Mit Reibung waechst der Abstand.
+
+  gerechnet mit dem Sollwert                120.0 bar / 34.2 °C
   nach Drossel auf Pipelinedruck             85.0 bar / 29.5 °C  (flüssig)
   -> AUSSERHALB Spezifikation (5-25 °C): Nachkuehler 0.5 - 0.9 MW
 ------------------------------------------------------------------------------
-ARBEITSGAS (Massenbilanz m = rho(p,T) * V)
+ARBEITSGAS (Massenbilanz m = rho(p,T) * V)                     [weder S noch A]
+  Eigene Annahme zur Kavernentemperatur, unabhaengig von den Zustaenden oben:
+  'isotherm' haelt 50 degC fest, 'mit Abkuehlung' faehrt linear 33-55 degC.
+  Die ratenabhaengige Abkuehlung rechnet erst Modul 2 (zyklus.py) richtig.
   Variante                              isotherm   mit Abkuehlung
   A Bohrloch durchgehend dicht     p_min  171.7 bar     6.6 %      1.9 %
   B Kaverne ueberkritisch          p_min   73.8 bar    76.3 %     61.6 %
