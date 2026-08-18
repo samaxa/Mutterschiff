@@ -115,7 +115,11 @@ HASH_SPALTE = 10  # Spalte J – technische Import-ID zur Dublettenerkennung
 
 # Spaltennamen, die in Bank-Exporten für dasselbe stehen
 SPALTEN_DATUM = ["buchungstag", "buchungsdatum", "datum", "buchung", "wertstellung", "valutadatum"]
-SPALTEN_BETRAG = ["betrag", "betrag (eur)", "umsatz", "soll/haben", "amount"]
+SPALTEN_BETRAG = ["betrag", "betrag (eur)", "buchungsbetrag", "umsatz", "soll/haben", "amount"]
+# Spalten, die zwar ein Betrags-Stichwort enthalten, aber KEIN Betrag sind
+# (Kreditkarten-Export: "Umsatz getätigt von" = Karteninhaber,
+#  "Originalbetrag" = Fremdwährungsbetrag statt EUR-Buchungsbetrag)
+BETRAG_AUSSCHLUSS = ["getätigt", "getaetigt", "originalbetrag", "währung", "waehrung"]
 SPALTEN_ZWECK = ["verwendungszweck", "buchungstext", "beschreibung", "vorgang/verwendungszweck", "referenz"]
 SPALTEN_PARTNER = ["beguenstigter/zahlungspflichtiger", "begünstigter/zahlungspflichtiger",
                    "auftraggeber/empfänger", "auftraggeber/empfaenger", "empfänger",
@@ -157,14 +161,16 @@ def lese_csv(pfad: Path):
     return list(leser), leser.fieldnames or []
 
 
-def finde_spalte(kopfzeilen, kandidaten):
-    """Sucht die passende Spalte, erst exakt, dann als Teilstring."""
+def finde_spalte(kopfzeilen, kandidaten, ausschluss=()):
+    """Sucht die passende Spalte, erst exakt, dann als Teilstring.
+    Spalten, deren Name eines der Ausschluss-Wörter enthält, werden ignoriert."""
     normal = {(k or "").strip().lower().strip('"'): k for k in kopfzeilen}
+    normal = {n: o for n, o in normal.items() if not any(a in n for a in ausschluss)}
     for kandidat in kandidaten:
         if kandidat in normal:
             return normal[kandidat]
-    for name, original in normal.items():
-        for kandidat in kandidaten:
+    for kandidat in kandidaten:
+        for name, original in normal.items():
             if kandidat in name:
                 return original
     return None
@@ -283,7 +289,7 @@ def main():
         raise SystemExit("Keine Datenzeilen in der CSV gefunden.")
 
     sp_datum = finde_spalte(kopf, SPALTEN_DATUM)
-    sp_betrag = finde_spalte(kopf, SPALTEN_BETRAG)
+    sp_betrag = finde_spalte(kopf, SPALTEN_BETRAG, ausschluss=BETRAG_AUSSCHLUSS)
     sp_zweck = finde_spalte(kopf, SPALTEN_ZWECK)
     sp_partner = finde_spalte(kopf, SPALTEN_PARTNER)
     sp_info = finde_spalte(kopf, SPALTEN_INFO)
