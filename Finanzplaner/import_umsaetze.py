@@ -7,9 +7,10 @@ Aufruf:
     python import_umsaetze.py Umsaetze.csv --excel Finanzplaner_Sarah.xlsx
     python import_umsaetze.py Umsaetze.csv --dry-run     # nur anzeigen, nichts schreiben
 
-Getestet mit dem Sparkassen-Export "CSV-CAMT". Andere Banken (ING, DKB,
-Comdirect, N26 ...) werden über die Spaltenerkennung unten meist automatisch
-mitgenommen.
+    python import_umsaetze.py DATEI1.CSV --konto "Girokonto"
+    python import_umsaetze.py DATEI2.CSV --konto "Gemeinschaftskonto"
+    python import_umsaetze.py DATEI3.CSV --konto "Tagesgeld / Sparkonto"
+    python import_umsaetze.py DATEI4.CSV --konto "Kreditkarte"
 
 Benötigt nur openpyxl:  pip install openpyxl
 """
@@ -234,41 +235,163 @@ def import_id(datum, betrag, partner, zweck):
     return hashlib.sha1(roh.encode("utf-8")).hexdigest()[:16]
 
 
+# --- Layout der Dashboard-Diagramme -----------------------------------
+# Startmonat der Blätter Monatsübersicht / Vermögen / Prognose
+STARTMONAT = dt.date(2026, 1, 1)
+MONATE_ERSTE_ZEILE = 4
+MONATE_LETZTE_ZEILE = 27
+
+_TITEL = Font(name="Arial", size=10, bold=True, color="1F3864")
+_ERKLAERUNG = Font(name="Arial", size=9, italic=True, color="595959")
+
+
+def _letzte_monatszeile(wb):
+    """
+    Bis zu welcher Zeile der Monatsübersicht gibt es überhaupt Buchungen?
+    Ohne das zeichnen die Diagramme 24 Monate, von denen die meisten leer
+    sind – die Kurven fallen dann auf null und sehen kaputt aus.
+    """
+    bu = wb["Buchungen"]
+    letztes = None
+    for r in range(BUCHUNGEN_ERSTE_ZEILE, BUCHUNGEN_LETZTE_ZEILE + 1):
+        wert = bu.cell(row=r, column=1).value
+        if isinstance(wert, dt.datetime):
+            wert = wert.date()
+        if isinstance(wert, dt.date) and (letztes is None or wert > letztes):
+            letztes = wert
+    if letztes is None:
+        return MONATE_ERSTE_ZEILE + 2
+    versatz = (letztes.year - STARTMONAT.year) * 12 + (letztes.month - STARTMONAT.month)
+    zeile = MONATE_ERSTE_ZEILE + versatz
+    return max(MONATE_ERSTE_ZEILE + 2, min(MONATE_LETZTE_ZEILE, zeile))
+
+
+def _vermoegen_zeilen(wb):
+    """Zeilen des Blatts Vermögen, in denen tatsächlich Kontostände stehen."""
+    ve = wb["Vermögen"]
+    return [r for r in range(MONATE_ERSTE_ZEILE, MONATE_LETZTE_ZEILE + 1)
+            if any(ve.cell(row=r, column=c).value not in (None, "")
+                   for c in (2, 3, 4, 5, 6, 8))]
+
+
+def _kategorien_letzte_zeile(wb):
+    """Letzte belegte Kategoriezeile – verhindert leere Balken im Diagramm."""
+    ein = wb["Einstellungen"]
+    letzte = 5
+    for r in range(4, 41):
+        if ein.cell(row=r, column=1).value:
+            letzte = 6 + (r - 4)
+    return letzte
+
+
+def _beschriftung(da, zelle, titel, erklaerung):
+    """Überschrift und Erklärsatz über ein Diagramm setzen."""
+    spalte, zeile = zelle[0], int(zelle[1:])
+    da[f"{spalte}{zeile}"] = titel
+    da[f"{spalte}{zeile}"].font = _TITEL
+    da[f"{spalte}{zeile + 1}"] = erklaerung
+    da[f"{spalte}{zeile + 1}"].font = _ERKLAERUNG
+
+
 def diagramme_neu_aufbauen(wb):
     """
     openpyxl verliert beim Öffnen/Speichern alle Diagramme einer Datei.
-    Deshalb werden die fünf Dashboard-Diagramme hier neu erzeugt.
+    Deshalb werden die Dashboard-Diagramme hier neu erzeugt – jeweils mit
+    Überschrift und einem Satz, der erklärt, was zu sehen ist.
     """
     da, mo, ve, pr, ka = (wb["Dashboard"], wb["Monatsübersicht"], wb["Vermögen"],
                           wb["Prognose"], wb["Kategorien"])
     da._charts = []
+    for zelle in ("D3", "D4", "D23", "D24", "D43", "D44",
+                  "P3", "P4", "P23", "P24", "P43", "P44"):
+        da[zelle] = None
 
-    monate = Reference(mo, min_col=1, min_row=4, max_row=27)
+    bis = _letzte_monatszeile(wb)
+    monate = Reference(mo, min_col=1, min_row=MONATE_ERSTE_ZEILE, max_row=bis)
 
-    c1 = BarChart(); c1.type = "col"; c1.title = "Einnahmen vs. Ausgaben pro Monat"
-    c1.y_axis.title = "€"; c1.height, c1.width = 8.5, 20
-    c1.add_data(Reference(mo, min_col=4, max_col=5, min_row=3, max_row=27), titles_from_data=True)
-    c1.set_categories(monate); da.add_chart(c1, "D4")
+    # 1 – Einnahmen und Ausgaben je Monat
+    _beschriftung(da, "D3", "Einnahmen und Ausgaben je Monat",
+                  "Zwei Balken pro Monat: was reingekommen ist und was rausgegangen ist. "
+                  "Ist der rechte Balken höher, war der Monat im Minus.")
+    c1 = BarChart(); c1.type = "col"; c1.style = 10
+    c1.title = "Einnahmen und Ausgaben je Monat (€)"
+    c1.y_axis.title = "Euro"; c1.x_axis.title = "Monat"
+    c1.height, c1.width = 8.5, 20
+    c1.add_data(Reference(mo, min_col=4, max_col=5, min_row=3, max_row=bis),
+                titles_from_data=True)
+    c1.set_categories(monate); da.add_chart(c1, "D5")
 
-    c2 = LineChart(); c2.title = "Kumulierter Saldo"; c2.y_axis.title = "€"
+    # 2 – Kontostände je Konto (Datenblock steht auf dem Dashboard selbst)
+    _beschriftung(da, "P3", "Kontostände je Konto",
+                  "Der zuletzt im Blatt Vermögen eingetragene Stand deiner drei Konten "
+                  "und der Kreditkarte. Die Kreditkarte zeigt nach unten, weil sie Schulden sind.")
+    c2 = BarChart(); c2.type = "col"; c2.style = 10
+    c2.title = "Kontostände je Konto (€)"
+    c2.y_axis.title = "Euro"
     c2.height, c2.width = 8.5, 20
-    c2.add_data(Reference(mo, min_col=8, min_row=3, max_row=27), titles_from_data=True)
-    c2.set_categories(monate); da.add_chart(c2, "D22")
+    c2.legend = None
+    c2.add_data(Reference(da, min_col=2, min_row=27, max_row=31), titles_from_data=True)
+    c2.set_categories(Reference(da, min_col=1, min_row=28, max_row=31))
+    da.add_chart(c2, "P5")
 
-    c3 = LineChart(); c3.title = "Nettovermögen"; c3.y_axis.title = "€"
+    # 3 – Kumulierter Saldo
+    _beschriftung(da, "D23", "Kumulierter Saldo seit Januar",
+                  "Alle Monatssalden aufaddiert. Steigt die Linie, hast du unterm Strich "
+                  "gespart; fällt sie, hast du mehr ausgegeben als eingenommen.")
+    c3 = LineChart(); c3.style = 12
+    c3.title = "Kumulierter Saldo seit Januar (€)"
+    c3.y_axis.title = "Euro"; c3.x_axis.title = "Monat"
     c3.height, c3.width = 8.5, 20
-    c3.add_data(Reference(ve, min_col=9, min_row=3, max_row=27), titles_from_data=True)
-    c3.set_categories(Reference(ve, min_col=1, min_row=4, max_row=27)); da.add_chart(c3, "P4")
+    c3.add_data(Reference(mo, min_col=8, min_row=3, max_row=bis), titles_from_data=True)
+    c3.set_categories(monate); da.add_chart(c3, "D25")
 
-    c4 = LineChart(); c4.title = "Prognose Nettovermögen (12 Monate)"; c4.y_axis.title = "€"
-    c4.height, c4.width = 8.5, 20
-    c4.add_data(Reference(pr, min_col=3, min_row=16, max_row=29), titles_from_data=True)
-    c4.set_categories(Reference(pr, min_col=2, min_row=17, max_row=29)); da.add_chart(c4, "P22")
+    # 4 – Nettovermögen (nur sinnvoll ab zwei Monatsständen)
+    vz = _vermoegen_zeilen(wb)
+    if len(vz) >= 2:
+        _beschriftung(da, "P23", "Nettovermögen im Zeitverlauf",
+                      "Alle Guthaben minus Schulden, Monat für Monat aus dem Blatt Vermögen.")
+        c4 = LineChart(); c4.style = 12
+        c4.title = "Nettovermögen (€)"
+        c4.y_axis.title = "Euro"; c4.x_axis.title = "Monat"
+        c4.height, c4.width = 8.5, 20
+        c4.add_data(Reference(ve, min_col=9, min_row=3, max_row=max(vz)), titles_from_data=True)
+        c4.set_categories(Reference(ve, min_col=1, min_row=MONATE_ERSTE_ZEILE, max_row=max(vz)))
+        da.add_chart(c4, "P25")
+    else:
+        _beschriftung(da, "P23", "Nettovermögen im Zeitverlauf",
+                      "Hier entsteht eine Kurve, sobald im Blatt Vermögen mindestens zwei "
+                      "Monate mit Kontoständen stehen. Aktuell ist erst einer erfasst.")
 
-    c5 = BarChart(); c5.type = "bar"; c5.title = "Ausgaben je Kategorie (gewähltes Jahr)"
+    # 5 – Ausgaben je Kategorie
+    _beschriftung(da, "D43", "Ausgaben je Kategorie",
+                  "Womit ist im Jahr aus dem Blatt Kategorien das Geld weggegangen? "
+                  "Der längste Balken ist dein größter Posten.")
+    c5 = BarChart(); c5.type = "bar"; c5.style = 10
+    c5.title = "Ausgaben je Kategorie im gewählten Jahr (€)"
+    c5.x_axis.title = "Euro"
     c5.height, c5.width = 12, 20
-    c5.add_data(Reference(ka, min_col=19, min_row=5, max_row=42), titles_from_data=True)
-    c5.set_categories(Reference(ka, min_col=1, min_row=6, max_row=42)); da.add_chart(c5, "D40")
+    c5.legend = None
+    kbis = _kategorien_letzte_zeile(wb)
+    c5.add_data(Reference(ka, min_col=19, min_row=5, max_row=kbis), titles_from_data=True)
+    c5.set_categories(Reference(ka, min_col=1, min_row=6, max_row=kbis))
+    da.add_chart(c5, "D45")
+
+    # 6 – Prognose (braucht mindestens einen Vermögensstand)
+    if vz:
+        _beschriftung(da, "P43", "Prognose der nächsten 12 Monate",
+                      "Fortschreibung deines Nettovermögens mit deiner bisherigen "
+                      "Sparrate. Die Annahmen dazu stehen im Blatt Prognose.")
+        c6 = LineChart(); c6.style = 12
+        c6.title = "Prognose Nettovermögen, 12 Monate (€)"
+        c6.y_axis.title = "Euro"; c6.x_axis.title = "Monat"
+        c6.height, c6.width = 8.5, 20
+        c6.add_data(Reference(pr, min_col=3, min_row=16, max_row=29), titles_from_data=True)
+        c6.set_categories(Reference(pr, min_col=2, min_row=17, max_row=29))
+        da.add_chart(c6, "P45")
+    else:
+        _beschriftung(da, "P43", "Prognose der nächsten 12 Monate",
+                      "Sobald im Blatt Vermögen ein Kontostand steht, wird hier "
+                      "hochgerechnet, wie sich dein Vermögen entwickelt.")
 
 
 def main():
