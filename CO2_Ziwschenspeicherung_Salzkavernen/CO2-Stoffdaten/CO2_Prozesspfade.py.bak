@@ -29,56 +29,12 @@ P_CRIT_BAR = PropsSI("Pcrit", "CO2") / 1e5
 C_FLUE, C_GAS, C_SUP = "#D9EAD3", "#CFE2F3", "#FCE5CD"
 NAVY, ORNG, GREEN, RED, GREY = "#00304F", "#EE7203", "#007335", "#CA220E", "#666666"
 
-# ---- Bohrlochsaeule ------------------------------------------------------
-# Wird live integriert (dp/dz = rho(p,T)*g) statt aus der alten Excel uebernommen.
-# Randbedingungen identisch mit Kavernenrechner/1_auslegung:
-#   Kopfdruck 107,6 bar | Gebirge 10 degC + 0,03 K/m | Teufe 1200 m -> 210 bar / 46 degC
-P_KOPF_EIN    = 107.6   # bar,  Ergebnis aus co2_kaverne3.py (Sekantenloesung)
-T_OBERFLAECHE = 10.0    # degC, Annahme der Quelle Buzogany & Kruck
-GEO_GRADIENT  = 0.03    # K/m
-TEUFE         = 1200.0  # m
-G_ERD         = 9.81
-
-
-def _saeule(p_kopf=P_KOPF_EIN, n=600, n_plot=25):
-    """Integriert die Gassaeule von oben nach unten. -> (T-Liste, p-Liste)."""
-    dz = TEUFE / n
-    p_ = p_kopf
-    Ts, ps = [], []
-    for i in range(n + 1):
-        T = T_OBERFLAECHE + GEO_GRADIENT * (i * dz)
-        Ts.append(T)
-        ps.append(p_)
-        if i < n:
-            p_ += PropsSI("D", "P", p_ * 1e5, "T", T + 273.15, "CO2") * G_ERD * dz / 1e5
-    k = max(1, n // (n_plot - 1))
-    return Ts[::k] + [Ts[-1]], ps[::k] + [ps[-1]]
-
-
-SAEULE_T, SAEULE_P = _saeule()
-
-# Zweiter Grenzfall: das Fluid gibt unterwegs keine Waerme ans Gebirge ab und
-# behaelt die Pumpenaustrittstemperatur als Offset (schnelles Einspeichern).
-# Liefert bei gleichem Kopfdruck einen kleineren Saeulengewinn - die Differenz
-# ist die Bandbreite, mit der die Auslegung behaftet ist.
-T_PUMPE_AUS = 17.5      # degC, Ergebnis der Pumpenrechnung (Blatt 03)
-
-
-def _saeule_warm(p_kopf=P_KOPF_EIN, n=600, n_plot=25):
-    dz = TEUFE / n
-    p_ = p_kopf
-    Ts, ps = [], []
-    for i in range(n + 1):
-        T = T_PUMPE_AUS + GEO_GRADIENT * (i * dz)
-        Ts.append(T)
-        ps.append(p_)
-        if i < n:
-            p_ += PropsSI("D", "P", p_ * 1e5, "T", T + 273.15, "CO2") * G_ERD * dz / 1e5
-    k = max(1, n // (n_plot - 1))
-    return Ts[::k] + [Ts[-1]], ps[::k] + [ps[-1]]
-
-
-SAEULE_WARM_T, SAEULE_WARM_P = _saeule_warm()
+# ---- Bohrlochsaeule (Blatt 'Berechnung') ---------------------------------
+SAEULE_T = [15.0, 16.5, 18.0, 19.5, 21.0, 22.5, 24.0, 25.5, 27.0, 28.5, 30.0, 31.5,
+            33.0, 34.5, 36.0, 37.5, 39.0, 40.5, 42.0, 43.5, 45.0, 46.5, 48.0, 49.5, 51.0]
+SAEULE_P = [110.79, 115.2, 119.59, 123.95, 128.3, 132.61, 136.9, 141.17, 145.42,
+            149.64, 153.83, 158.01, 162.16, 166.29, 170.39, 174.48, 178.54, 182.58,
+            186.6, 190.6, 194.58, 198.53, 202.47, 206.39, 210.28]
 
 KAVERNE = dict(T=(30.0, 60.0), p=(70.0, 210.0))
 
@@ -162,35 +118,24 @@ def pfeile(ax, punkte, color):
 fig, ax = plt.subplots(figsize=(11.4, 7.0))
 hintergrund(ax, (0, 62), (0, 240), krit_off=(-104, -54))
 
-EIN_D = [("E1/E2", 15.0, 85.0), ("E3", 17.5, 107.6)]
-AUS_D = [("A1/A2", 34.2, 120.0), ("A3", 29.5, 85.0), ("A4/A5", 25.0, 85.0)]
+EIN_D = [("E1/E2", 15.0, 85.0), ("E3", 17.9, 110.8)]
+AUS_D = [("A1/A2", 37.9, 120.0), ("A3", 32.0, 85.0), ("A4/A5", 25.0, 85.0)]
 
-# Band zwischen den beiden Waermeaustausch-Grenzfaellen
-_poly = list(zip(SAEULE_T, SAEULE_P)) + list(zip(SAEULE_WARM_T[::-1], SAEULE_WARM_P[::-1]))
-ax.add_patch(Polygon(_poly, closed=True, fc=GREEN, ec="none", alpha=0.16, zorder=5))
-ax.plot(SAEULE_WARM_T, SAEULE_WARM_P, ls=(0, (5, 3)), color=GREEN, lw=1.9, zorder=6)
 ax.plot(SAEULE_T, SAEULE_P, "-", color=GREEN, lw=2.6, zorder=7)
-ax.annotate("Bandbreite je nach W\u00e4rmeaustausch mit dem Gebirge\n"
-            "durchgezogen: Fluid folgt dem Gebirge (langsam) \u2192 210 bar\n"
-            "gestrichelt: Fluid beh\u00e4lt 17,5 \u00b0C (schnell) \u2192 204 bar",
-            xy=(27.5, 150.0), xytext=(1.5, 196), fontsize=8.6, color=GREEN,
-            ha="left", va="center", zorder=11, linespacing=1.5,
-            bbox=dict(boxstyle="round,pad=0.28", fc="white", ec=GREEN, lw=1.0, alpha=0.95),
-            arrowprops=dict(arrowstyle="->", color=GREEN, lw=1.1))
 ax.annotate("E4  Bohrloch abwärts\n1200 m, homogen –\nkeine Phasengrenze",
-            xy=(30.0, 163), xytext=(0.8, 52), fontsize=10, color=GREEN, weight="bold",
+            xy=(33, 162), xytext=(3.0, 178), fontsize=10, color=GREEN, weight="bold",
             ha="left", va="center", zorder=11,
             bbox=dict(boxstyle="round,pad=0.3", fc="white", ec=GREEN, lw=1.2, alpha=0.95),
             arrowprops=dict(arrowstyle="->", color=GREEN, lw=1.4))
 
-h1 = pfad(ax, EIN_D, GREEN, "① Einspeicherung", off={"E1/E2": (-18, -26), "E3": (14, -4)})
+h1 = pfad(ax, EIN_D, GREEN, "① Einspeicherung", off={"E1/E2": (-16, -26), "E3": (-58, 6)})
 pfeile(ax, EIN_D, GREEN)
 h2 = pfad(ax, AUS_D, RED, "② Ausspeicherung", off={"A1/A2": (14, 8), "A3": (14, -6), "A4/A5": (-20, -26)})
 pfeile(ax, AUS_D, RED)
 
 ax.plot([SAEULE_T[-1]], [SAEULE_P[-1]], "s", color=ORNG, ms=13, zorder=10,
         mec="white", mew=1.6)
-ax.annotate("KAVERNE\n210 bar · 46 °C", (SAEULE_T[-1], SAEULE_P[-1]),
+ax.annotate("KAVERNE\n210 bar · 51 °C", (SAEULE_T[-1], SAEULE_P[-1]),
             textcoords="offset points", xytext=(-40, 16), fontsize=10.5,
             weight="bold", color=ORNG, ha="center", zorder=11,
             bbox=dict(boxstyle="round,pad=0.25", fc="white", ec=ORNG, lw=1.3, alpha=0.95))
@@ -205,7 +150,7 @@ fig.text(0.5, 0.925, "Prozesspfad im p-T-Diagramm · Punktbezeichnungen wie im B
 fig.text(0.5, 0.018, "Der Strom bleibt über die gesamte Kette einphasig – die Phasengrenze wird nie gequert.",
          ha="center", fontsize=11.5, color=NAVY, weight="bold")
 fig.tight_layout(rect=[0, 0.035, 1, 0.90])
-fig.savefig(f"{OUT}/abbC_prozesspfad_szenarioD.png", dpi=260)
+fig.savefig(f"{OUT}/abbC_prozesspfad_szenarioD.png", dpi=200)
 print("geschrieben:", f"{OUT}/abbC_prozesspfad_szenarioD.png")
 
 # =========================================================== Szenario G
@@ -254,7 +199,7 @@ ax.annotate("ohne Vorwärmung:\n−5,6 °C, zweiphasig (q = 0,21)\naußerhalb Sp
 
 ax.plot([SAEULE_T[-1]], [SAEULE_P[-1]], "s", color=ORNG, ms=13, zorder=10,
         mec="white", mew=1.6)
-ax.annotate("KAVERNE\n210 bar · 46 °C", (SAEULE_T[-1], SAEULE_P[-1]),
+ax.annotate("KAVERNE\n210 bar · 51 °C", (SAEULE_T[-1], SAEULE_P[-1]),
             textcoords="offset points", xytext=(4, 16), fontsize=10.5,
             weight="bold", color=ORNG, ha="center", zorder=11,
             bbox=dict(boxstyle="round,pad=0.25", fc="white", ec=ORNG, lw=1.3, alpha=0.95))
@@ -267,5 +212,5 @@ fig.text(0.5, 0.018, "Hier wird die Phasengrenze zweimal gequert: bei der Verfl�
                      "und bei der Drosselung (A4).",
          ha="center", fontsize=11.5, color=NAVY, weight="bold")
 fig.tight_layout(rect=[0, 0.035, 1, 0.90])
-fig.savefig(f"{OUT}/abbD_prozesspfad_szenarioG.png", dpi=260)
+fig.savefig(f"{OUT}/abbD_prozesspfad_szenarioG.png", dpi=200)
 print("geschrieben:", f"{OUT}/abbD_prozesspfad_szenarioG.png")

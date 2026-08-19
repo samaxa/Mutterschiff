@@ -1,0 +1,60 @@
+#!usrbinenv python3
+
+Ausspeicherung CO2-Erdgas-Kaverne Vorwärmleistung vor der Druckreduzierung.
+Methode Drossel ist isenthalp (h=const) - der gesamte Enthalpiehub kommt vom Vorwärmer.
+   Q = m_punkt  [ h(p2, T_ziel) - h(p1, T_ein) ]
+Stoffdaten CoolProp (Span-Wagner CO2, GERGSetzmann CH4). Normbedingungen DIN 1343 (0 C, 1,01325 bar).
+
+import CoolProp.CoolProp as CP
+bar=1e5
+C2K=lambda tt+273.15; K2C=lambda tt-273.15
+Tn,pn=273.15,101325.0
+
+def rho_norm(fluid) return CP.PropsSI('D','T',Tn,'P',pn,fluid)
+def m_punkt(fluid,Vn_h) return rho_norm(fluid)Vn_h3600.0   # kgs
+
+def drossel_austritt(fluid,T1,p1,p2)
+    isenthalpe Drossel gibt (T2 [C], Phase, Dampfanteil Q)
+    h=CP.PropsSI('H','T',C2K(T1),'P',p1bar,fluid)
+    T2=K2C(CP.PropsSI('T','P',p2bar,'H',h,fluid))
+    try q=CP.PropsSI('Q','P',p2bar,'H',h,fluid)
+    except q=-1
+    phase=zweiphasigfluessig if 0=q=1 else einphasig (Gas)
+    return T2,phase,q
+
+def vorwaerm_T(fluid,p1,p2,T_ziel)
+    Temperatur vor der Drossel, damit nach Entspannung T_ziel erreicht wird
+    h_ziel=CP.PropsSI('H','P',p2bar,'T',C2K(T_ziel),fluid)
+    return K2C(CP.PropsSI('T','P',p1bar,'H',h_ziel,fluid))
+
+def vorwaerm_leistung(fluid,p1,T_ein,p2,T_ziel,Vn_h)
+    h_in =CP.PropsSI('H','P',p1bar,'T',C2K(T_ein),fluid)
+    h_out=CP.PropsSI('H','P',p2bar,'T',C2K(T_ziel),fluid)
+    return m_punkt(fluid,Vn_h)(h_out-h_in)1000.0   # kW
+
+def T_saturation(fluid,p2)
+    try return K2C(CP.PropsSI('T','P',p2bar,'Q',0,fluid))
+    except return None
+
+# ============ EINGABEN (anpassen) ============
+Vn      = 100000.0   # Nm3h
+p1      = 210.0      # bar  (KaverneWellhead)
+T_ein   = 50.0       # C
+T_ziel  = 17.5       # C    (Ziel nach Drossel, Methan-Hydrat + Trocknung)
+p2_liste= [50,40,30,16]
+# =============================================
+
+print(fEintritt {p1.0f} bar  {T_ein.0f} C    Ziel {T_ziel} C    {Vn.0f} Nm3hn)
+for f,nm in [('CO2','CO2'),('Methane','Erdgas(CH4)')]
+    print(f{nm}  Normdichte {rho_norm(f).3f} kgNm3  -  Massenstrom {m_punkt(f,Vn)3600,.0f} kgh ({m_punkt(f,Vn).1f} kgs))
+print()
+hdr=f{'p2[bar]'8} {'Tsat(CO2)'10} {'Gas'12} {'T2 o.VW'9} {'Phase'20} {'Vorwärm-T'10} {'Q[kW]'9}
+print(hdr); print(-len(hdr))
+for p2 in p2_liste
+    tsat=T_saturation('CO2',p2)
+    for f,nm in [('CO2','CO2'),('Methane','CH4')]
+        T2,ph,q=drossel_austritt(f,T_ein,p1,p2)
+        Tv=vorwaerm_T(f,p1,p2,T_ziel); Q=vorwaerm_leistung(f,p1,T_ein,p2,T_ziel,Vn)
+        ts=f{tsat6.1f}C if (f=='CO2' and tsat) else 
+        print(f{p28} {ts10} {nm12} {T27.1f}C {ph20} {Tv8.1f}C {Q9.0f})
+    print(-len(hdr))
