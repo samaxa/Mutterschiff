@@ -33,7 +33,8 @@ siehe Dokumentation_Stoffmodelle_Validierung.docx, Kapitel 9).
 
 Isentrope Zustandsänderung wie im Clean Case: h2s bei gleicher Entropie,
 mit Wirkungsgrad eta auf die reale Enthalpieerhöhung skaliert.
-Für das Gemisch nutzt CoolProp dafür PS- und PH-Flash (AbstractState).
+Für das Gemisch wird dafür die Temperatur über den PT-Flash gesucht
+(Klasse Gemisch, _T_suchen) - funktioniert in jeder CoolProp-Version.
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -43,6 +44,16 @@ import CoolProp.CoolProp as CP
 from CoolProp.CoolProp import PropsSI, PhaseSI
 
 import gemisch_worstcase as gw
+
+VERSION = CP.get_global_param_string("version")
+print(f"CoolProp-Version: {VERSION}")
+if int(VERSION.split(".")[0]) < 8:
+    # Geprüft mit 6.6.0: Phasengrenze und alle einphasigen Werte identisch zu
+    # 8.0.0, aber der Dampfanteil im Zweiphasengebiet weicht ab (80 bar / 25 °C:
+    # Q = 0,04 statt 0,11; GERG-2008 in thermopack: 0,13). Ältere Versionen
+    # nutzen einen anderen Flash-Algorithmus. Betrifft nur Variante S2-A.
+    print("  Hinweis: CoolProp < 8 - Werte im Zweiphasengebiet (S2-A) ungenau. "
+          "Empfohlen: pip install CoolProp==8.0.0")
 
 # ---- 0) Stoffe: gleiche Schnittstelle für reines CO2 und Gemisch ------------
 # Einheiten an der Schnittstelle: bar, °C, kJ/kg, kJ/(kg K), kg/m3
@@ -110,20 +121,46 @@ class Gemisch:
     def s(self, p_bar, T_C):
         return self._pt(p_bar, T_C).smass() / 1000
 
+    # Isentroper Endzustand und Temperatur aus Enthalpie:
+    # Der PS- bzw. PH-Flash von CoolProp funktioniert für Gemische erst ab
+    # neueren Versionen ohne weiteres (ältere Versionen verlangen eine vorher
+    # gebaute Phasenhüllkurve: "phase envelope must be built to carry out
+    # HSU_P_flash for mixture"). Deshalb wird hier die Temperatur selbst
+    # gesucht: bei festem p steigen s(T) und h(T) streng mit T, also wird
+    # s(p, T) = s_ziel bzw. h(p, T) = h_ziel mit dem PT-Flash nach T gelöst.
+    # Das funktioniert in jeder CoolProp-Version, auch im Zweiphasengebiet.
+
+    def _T_suchen(self, p_bar, groesse, ziel, T_min=-50.0, T_max=250.0, tol=1e-5):
+        """Löst groesse(p, T) = ziel nach T [°C] (Regula falsi, Illinois-Variante)."""
+        a, b = T_min, T_max
+        fa, fb = groesse(p_bar, a) - ziel, groesse(p_bar, b) - ziel
+        if fa * fb > 0:
+            raise ValueError(f"Zielwert bei {p_bar:.1f} bar nicht zwischen {T_min} und {T_max} °C")
+        seite = 0
+        for _ in range(100):
+            c = b - fb * (b - a) / (fb - fa)
+            fc = groesse(p_bar, c) - ziel
+            if abs(fc) < tol or abs(b - a) < 1e-7:
+                return c
+            if fc * fb > 0:
+                b, fb = c, fc
+                if seite == -1:
+                    fa /= 2
+                seite = -1
+            else:
+                a, fa = c, fc
+                if seite == 1:
+                    fb /= 2
+                seite = 1
+        raise RuntimeError(f"T-Suche bei {p_bar:.1f} bar nicht konvergiert")
+
     def h_ps(self, p_bar, s):
-        self.AS.update(CP.PSmass_INPUTS, p_bar * 1e5, s * 1000)
-        h, T = self.AS.hmass() / 1000, self.AS.T() - 273.15
-        # Kontrolle: Rückrechnung mit PT-Flash muss dieselbe Entropie liefern
-        if abs(self.s(p_bar, T) - s) > 1e-4:
-            raise RuntimeError(f"PS-Flash nicht konsistent bei {p_bar:.1f} bar")
-        return h
+        T = self._T_suchen(p_bar, self.s, s, tol=1e-7)     # s in kJ/(kg K)
+        return self.h(p_bar, T)
 
     def T_ph(self, p_bar, h):
-        self.AS.update(CP.HmassP_INPUTS, h * 1000, p_bar * 1e5)
-        T = self.AS.T() - 273.15
-        # Kontrolle wie bei h_ps: Rückrechnung mit PT-Flash
-        if abs(self.h(p_bar, T) - h) > 0.01:
-            raise RuntimeError(f"PH-Flash nicht konsistent bei {p_bar:.1f} bar")
+        T = self._T_suchen(p_bar, self.h, h, tol=1e-5)     # h in kJ/kg
+        self._pt(p_bar, T)
         return T, self._phasenname()
 
     def phase(self, p_bar, T_C):
