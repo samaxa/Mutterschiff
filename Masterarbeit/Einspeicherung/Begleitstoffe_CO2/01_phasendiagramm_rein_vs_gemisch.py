@@ -12,7 +12,7 @@ leichtsiedenden Begleitstoffe (vor allem H2 und N2) schieben die
 Blasenlinie deutlich zu höheren Drücken - man muss also mehr Druck
 halten, damit das Gemisch sicher einphasig (flüssig/dicht) bleibt.
 
-Betriebspunkte (aus den Skripten für reines CO2, Szenario 1 und 2):
+Betriebspunkte (aus den Skripten für reines CO2 in ../Clean_CO2/, Szenario 1 und 2):
   S1 Netzübergabe      91 bar / 15 °C   (dichte Phase)
   S2 Netzübergabe      30 bar / 15 °C   (gasförmig)
   S2 Zwischenkühler    49 bar / 40 °C
@@ -45,7 +45,7 @@ p_krit_bar, p_tripel_bar = p_krit / 1e5, p_tripel / 1e5
 
 
 # Sublimations- und Schmelzlinie von reinem CO2 nach Span & Wagner (1996),
-# wie in 01_02_start_netzuebergabe_filter_messungen.py (Szenario 1)
+# wie in ../Clean_CO2/Reines_CO2_S1_dichte_Phase/01_02_start_netzuebergabe_filter_messungen.py
 def sublimation_bar(T_K):
     a1, a2, a3 = -14.740846, 2.4327015, -5.3061778
     th = 1.0 - T_K / T_tripel
