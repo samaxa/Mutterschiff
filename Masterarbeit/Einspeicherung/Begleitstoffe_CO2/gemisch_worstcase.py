@@ -120,6 +120,12 @@ def phasengrenze():
     s.o.) wird abgeschnitten; dort läuft die Rechnung außerdem in einen
     unphysikalischen Hochdruckast.
 
+    Die Hüllkurve von CoolProp hat nur wenige Stützstellen (sichtbare Knicke).
+    Deshalb wird sie abseits des kritischen Punkts mit direkten Sättigungs-
+    rechnungen (QT-Flash, Q = 0 bzw. 1) im 0,5-K-Raster verdichtet. In den
+    letzten 10 K vor dem kritischen Punkt konvergiert der Flash unzuverlässig;
+    dort bleiben die Punkte der Hüllkurve stehen (dort liegen sie dichter).
+
     Rückgabe: dict mit Arrays T_tau, p_tau, T_blase, p_blase in °C / bar
     sowie kritischem Punkt, Cricondenbar (max. Druck) und
     Cricondentherm (max. Temperatur) des Zweiphasengebiets.
@@ -144,6 +150,15 @@ def phasengrenze():
     T_krit = 0.5 * (T[i_krit - 1] + T[i_krit])
     p_krit = 0.5 * (p[i_krit - 1] + p[i_krit])
 
+    # Verdichten: unterhalb T_schnitt QT-Flash-Raster, darüber Hüllkurvenpunkte.
+    # Geprüft gegen die Hüllkurve: bis ca. 10 K unter T_krit trifft der Flash die
+    # Hüllkurvenpunkte exakt, näher am kritischen Punkt konvergiert er teils
+    # auf falsche Lösungen (bis zu 2 bar daneben) - dort nur Hüllkurvenpunkte.
+    T_schnitt = T_krit - 10.0
+    raster = np.arange(T_TRIPEL_CO2, T_schnitt, 0.5)
+    T_tau, p_tau = _verdichten(AS, 1.0, raster, T_tau, p_tau, T_schnitt)
+    T_bl, p_bl = _verdichten(AS, 0.0, raster, T_bl, p_bl, T_schnitt)
+
     T_alle = np.concatenate([T_tau, T_bl])
     p_alle = np.concatenate([p_tau, p_bl])
     i_pmax, i_Tmax = int(np.argmax(p_alle)), int(np.argmax(T_alle))
@@ -158,11 +173,41 @@ def phasengrenze():
     }
 
 
+def _saettigungsdruck(AS, Q, T):
+    """Sättigungsdruck [Pa] des Gemischs bei T [K] und Dampfanteil Q, None wenn kein Ergebnis."""
+    try:
+        AS.update(CP.QT_INPUTS, Q, T)
+        return AS.p()
+    except ValueError:
+        return None
+
+
+def _verdichten(AS, Q, raster, T_huelle, p_huelle, T_schnitt):
+    """Ersetzt die Hüllkurvenpunkte unterhalb T_schnitt durch ein feines Flash-Raster.
+
+    Ergebnis in der Reihenfolge der Hüllkurve: Taulinie mit steigender T,
+    Blasenlinie mit fallender T (vom kritischen Punkt weg).
+    """
+    punkte = [(T, _saettigungsdruck(AS, Q, T)) for T in raster]
+    # Rasterpunkte ohne Flash-Lösung werden durch die Hüllkurvenpunkte abgedeckt
+    fern = T_huelle < T_schnitt
+    T_f = np.array([T for T, p in punkte if p is not None] + list(T_huelle[fern]))
+    p_f = np.array([p for T, p in punkte if p is not None] + list(p_huelle[fern]))
+    ordnung = np.argsort(T_f)
+    T_f, p_f = T_f[ordnung], p_f[ordnung]
+    nah = ~fern
+    if Q == 1.0:    # Taulinie: erst Raster (aufsteigend), dann Hüllkurve zum krit. Punkt
+        return np.concatenate([T_f, T_huelle[nah]]), np.concatenate([p_f, p_huelle[nah]])
+    # Blasenlinie: erst Hüllkurve vom krit. Punkt, dann Raster absteigend
+    return np.concatenate([T_huelle[nah], T_f[::-1]]), np.concatenate([p_huelle[nah], p_f[::-1]])
+
+
 def blasendruck(T_C):
     """Blasendruck [bar] bei T [°C]: oberhalb davon ist das Gemisch einphasig flüssig.
 
-    Aus der Hüllkurve interpoliert - ein direkter QT-Flash (Q = 0) findet
-    nahe dem kritischen Punkt oft keine Lösung.
+    Interpoliert auf der verdichteten Phasengrenze (0,5-K-Raster). Ein
+    einzelner QT-Flash wäre nicht besser: nahe dem kritischen Punkt findet er
+    oft keine oder eine falsche Lösung.
     """
     pg = phasengrenze()
     # Blasenlinie läuft vom kritischen Punkt zu tiefen T -> für interp umdrehen
@@ -170,7 +215,10 @@ def blasendruck(T_C):
 
 
 def taudruck(T_C):
-    """Taudruck [bar] bei T [°C]: unterhalb davon ist das Gemisch einphasig gasförmig."""
+    """Taudruck [bar] bei T [°C]: unterhalb davon ist das Gemisch einphasig gasförmig.
+
+    Wie blasendruck(), nur auf der Taulinie.
+    """
     pg = phasengrenze()
     i = int(np.argmax(pg["T_tau"]))       # nur bis zum Cricondentherm (monoton in T)
     return float(np.interp(T_C, pg["T_tau"][:i + 1], pg["p_tau"][:i + 1], left=np.nan, right=np.nan))
