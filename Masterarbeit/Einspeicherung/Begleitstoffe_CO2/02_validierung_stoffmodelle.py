@@ -21,7 +21,8 @@ Verglichene Modelle
                          Soave-Redlich-Kwong) - zum Vergleich, wie groß der
                          Fehler eines einfachen Modells wäre
 
-Ergebnis: Konsolenausgabe (Tabellen) und abb_validierung_phasengrenze.png
+Ergebnis: Konsolenausgabe (Tabellen), abb_validierung_phasengrenze.png (Gemisch)
+          und abb_validierung_rein_co2.png (reines CO2)
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -164,3 +165,72 @@ ax.grid(alpha=0.25)
 fig.tight_layout()
 fig.savefig("abb_validierung_phasengrenze.png", dpi=175)
 print("\ngespeichert: abb_validierung_phasengrenze.png")
+
+# ---- 4) Plot: reines CO2 nach vier Modellen --------------------------------
+# oben:  Dampfdrucklinie und ihre Abweichung von CoolProp (Span-Wagner)
+# unten: Dichte auf der 15-°C-Isotherme (Pipelinetemperatur, S1) über dem
+#        Druck und ihre Abweichung - hier zeigt sich, wie stark einfache
+#        kubische Modelle die Dichte der flüssigen/dichten Phase verfehlen
+ORANGE = "#a3480b"
+stil_rein = {"GERG-2008 (thermopack)": (BLAU, "--"), "Peng-Robinson": (GRAU, ":"),
+             "SRK": (ORANGE, "-.")}
+
+T_krit = CP.PropsSI("Tcrit", "CO2")
+T_sat = np.linspace(CP.PropsSI("Ttriple", "CO2"), T_krit - 0.3, 120)
+p_cp = np.array([CP.PropsSI("P", "T", T, "Q", 0, "CO2") for T in T_sat]) / 1e5
+
+T_iso = 15.0 + 273.15
+p_iso = np.linspace(60.0, 220.0, 81)          # alle Punkte oberhalb p_s(15 °C) = 50,9 bar
+rho_cp = np.array([CP.PropsSI("D", "P", p * 1e5, "T", T_iso, "CO2") for p in p_iso])
+
+fig, ((a1, a2), (a3, a4)) = plt.subplots(2, 2, figsize=(12, 8.6))
+a1.plot(T_sat - 273.15, p_cp, color=ROT, lw=2.6, label="CoolProp (Span-Wagner)")
+a3.plot(p_iso, rho_cp, color=ROT, lw=2.6, label="CoolProp (Span-Wagner)")
+for ax in (a2, a4):
+    ax.axhline(0, color=ROT, lw=2.6, label="CoolProp (Span-Wagner)")
+
+for name, eos in rein.items():
+    farbe, ls = stil_rein[name]
+    p_m = []
+    for T in T_sat:
+        try:
+            p_m.append(eos.bubble_pressure(T, eins)[0] / 1e5)
+        except Exception:                      # direkt am kritischen Punkt keine Lösung
+            p_m.append(np.nan)
+    p_m = np.array(p_m)
+    rho_m = np.array([M_CO2 / eos.specific_volume(T_iso, p * 1e5, eins, eos.LIQPH)[0]
+                      for p in p_iso])
+    a1.plot(T_sat - 273.15, p_m, color=farbe, lw=1.8, ls=ls, label=name)
+    a2.plot(T_sat - 273.15, 100 * (p_m - p_cp) / p_cp, color=farbe, lw=1.8, ls=ls, label=name)
+    a3.plot(p_iso, rho_m, color=farbe, lw=1.8, ls=ls, label=name)
+    a4.plot(p_iso, 100 * (rho_m - rho_cp) / rho_cp, color=farbe, lw=1.8, ls=ls, label=name)
+
+# Betriebspunkte auf der 15-°C-Isotherme
+for ax in (a3, a4):
+    ax.axvline(91.0, color=GRUEN, lw=1.0, alpha=0.7)
+a3.annotate("S1 Netzübergabe\n91 bar / 15 °C", (91.0, CP.PropsSI("D", "P", 91e5, "T", T_iso, "CO2")),
+            textcoords="offset points", xytext=(10, -40), fontsize=8.5, color=GRUEN)
+
+a1.set(xlabel="Temperatur [°C]", ylabel="Dampfdruck [bar]",
+       title="a) Dampfdrucklinie (Siedelinie)")
+a2.set(xlabel="Temperatur [°C]", ylabel="Abweichung von CoolProp [%]",
+       title="b) Abweichung Dampfdruck")
+a3.set(xlabel="Druck [bar]", ylabel="Dichte [kg/m³]",
+       title="c) Dichte bei 15 °C (Pipelinetemperatur)")
+a4.set(xlabel="Druck [bar]", ylabel="Abweichung von CoolProp [%]",
+       title="d) Abweichung Dichte bei 15 °C")
+a1.set_xlim(-60, 35)
+a2.set_xlim(-60, 35)
+for ax in (a1, a2, a3, a4):
+    ax.grid(alpha=0.25)
+a1.legend(loc="upper left", fontsize=8.5, framealpha=0.92)
+a2.text(0.02, 0.88, "GERG-2008 liegt auf der Nulllinie (≤ 0,02 %)", transform=a2.transAxes,
+        fontsize=8.5, color=BLAU)
+a4.text(0.30, 0.55, "GERG-2008 liegt auf der Nulllinie (≤ 0,02 %)", transform=a4.transAxes,
+        fontsize=8.5, color=BLAU)
+
+fig.suptitle("Reines CO₂: CoolProp (Span-Wagner) im Vergleich mit drei weiteren Stoffmodellen",
+             fontsize=12)
+fig.tight_layout()
+fig.savefig("abb_validierung_rein_co2.png", dpi=175)
+print("gespeichert: abb_validierung_rein_co2.png")
