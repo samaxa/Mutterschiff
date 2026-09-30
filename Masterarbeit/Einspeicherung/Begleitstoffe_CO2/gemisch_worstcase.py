@@ -73,14 +73,51 @@ def gemisch():
     return AS
 
 
+def pt_zustand(p_bar, T_C, AS=None):
+    """PT-Flash des Gemischs mit Kontrolle der Dichtelösung. Gibt den AbstractState zurück.
+
+    Hintergrund: Der freie PT-Flash von CoolProp 8.0.0 liefert für dieses
+    Gemisch vereinzelt eine unphysikalische Lösung im Gasgebiet, z. B. bei
+    1,01325 bar / 0 °C eine Dichte von 474 statt 1,93 kg/m3 mit einer
+    Enthalpie von -53.000 kJ/kg (gefunden bei -2,5 bis 5 °C und 1 bis 25 bar).
+    Die Zustandsgleichung hat dort eine zweite, rein mathematische Lösung.
+
+    Deshalb entscheidet innerhalb des Temperaturbereichs des Zweiphasengebiets
+    die berechnete Phasengrenze, welche Lösung gilt:
+      p < Taudruck   -> Gasphase vorgeben
+      p > Blasendruck -> Flüssigphase vorgeben
+      dazwischen     -> freier Flash (zweiphasig, liefert Dampfanteil Q)
+    Oberhalb der Cricondentherm (einphasig) gilt der freie Flash, danach
+    eine Plausibilitätsprüfung der Enthalpie.
+    """
+    AS = AS or gemisch()
+    p, T = p_bar * 1e5, T_C + 273.15
+    T_ct = phasengrenze()["cricondentherm"][0]
+    vorgabe = None
+    if T_C <= T_ct:
+        p_tau, p_bl = taudruck(T_C), blasendruck(T_C)
+        if not np.isnan(p_tau) and p_bar < p_tau:
+            vorgabe = CP.iphase_gas
+        elif not np.isnan(p_bl) and p_bar > p_bl:
+            vorgabe = CP.iphase_liquid
+    if vorgabe is not None:
+        AS.specify_phase(vorgabe)
+    try:
+        AS.update(CP.PT_INPUTS, p, T)
+    finally:
+        AS.unspecify_phase()
+    if abs(AS.hmass()) > 5e6:     # J/kg - Enthalpien im Arbeitsbereich liegen bei -200..600 kJ/kg
+        raise ValueError(f"unphysikalische Lösung bei {p_bar} bar / {T_C} °C")
+    return AS
+
+
 def stoffwerte(p_bar, T_C, AS=None):
-    """Zustand des Gemischs bei p [bar], T [°C] (PT-Flash).
+    """Zustand des Gemischs bei p [bar], T [°C] (PT-Flash, siehe pt_zustand).
 
     Gibt ein dict zurück: Phase, Dichte [kg/m3], Enthalpie [kJ/kg],
     Entropie [kJ/kgK] und - falls zweiphasig - den Dampfanteil Q.
     """
-    AS = AS or gemisch()
-    AS.update(CP.PT_INPUTS, p_bar * 1e5, T_C + 273.15)
+    AS = pt_zustand(p_bar, T_C, AS)
     ergebnis = {
         "phase": _phasenname(AS.phase()),
         "rho": AS.rhomass(),
