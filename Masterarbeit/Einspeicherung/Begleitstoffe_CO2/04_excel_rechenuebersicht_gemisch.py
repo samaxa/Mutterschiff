@@ -11,7 +11,11 @@ die gleiche Mappe für das Worst-Case-Gemisch:
     Sicherheitsabstand ±3 bar, Sättigungslinie reines CO2 zum Vergleich
   - neues Blatt "Gemisch & Grenzen": Zusammensetzung, Kennpunkte der
     Phasengrenze, Tabelle Tau-/Blasendruck, neue Grenzen der Anlage
-  - geänderte Annahme: Verflüssigungsdruck p_V = 80 bar (statt 60 bar)
+  - neue Verdichtung: Enddruck p_V = 90 bar (über Cricondenbar + 3 bar), dort in
+    der dichten Phase auf 20 °C kühlen (kein Zweiphasengebiet), Pumpe bis
+    Kopfdruck; 1 Stufe überschreitet 95 °C -> 2 Stufen
+  - alte Verdichtung (wie reines CO2: 60 bar, verflüssigen) zum Vergleich:
+    Pfad im Phasendiagramm und Block auf "Gemisch & Grenzen"
 
 Aufruf:
     python 04_excel_rechenuebersicht_gemisch.py  ORIGINAL.xlsx  [ZIEL.xlsx]
@@ -55,7 +59,7 @@ w_S2 = S2["w1"] + S2["wP"]
 w_S2v = S2v["w1"] + S2v["w2"] + S2["wP"]
 w_Dv = Dv["w1"] + Dv["w2"]
 ersparnis_v = 1 - w_S2v / w_S2
-vorteil_S2 = 1 - w_S2 / w_Dv
+vorteil_S2 = 1 - w_S2v / w_Dv     # Gemisch: 2 Stufen sind Pflicht, deshalb Variante vergleichen
 REIN = dict(p_kopf=107.603219569636, p_grenz=171.6522772915801, p_leer=44.99299418696985,
             tief_leer=236, rho_unten=817.604266524432, psat_TK=57.29052581475148,
             T1a_1stufe=73.15539245907911, w_S1=2.3473871252743947, w_S2=46.42488823757327)
@@ -76,7 +80,7 @@ u.text("B3", "Stand: 30.09.2026 · Stoffdaten: CoolProp 8.0.0, Mehrfluid-Helmhol
 u.text("B6", "Diese Mappe zeigt Schritt für Schritt, wie die Obertageanlage für die Einspeicherung "
              "berechnet wird:\n1. Welcher Druck muss am Bohrlochkopf anliegen? → das gibt die Kaverne über "
              "die Gassäule vor.\n2. Wie bringt die Anlage das CO₂ auf diesen Druck? → Pumpe (dichte "
-             "Anlieferung, S1) bzw. Verdichter, Verflüssiger und Pumpe (gasförmige Anlieferung, S2).\n"
+             "Anlieferung, S1) bzw. Verdichter, Kühler und Pumpe (gasförmige Anlieferung, S2).\n"
              "3. Wo liegen alle Zustände im Phasendiagramm – und wo liegt das Betriebsfenster von Bohrloch "
              "und Kaverne?\nDiese Mappe rechnet das Worst-Case-Gemisch mit 5 % Begleitstoffen – gleicher "
              "Aufbau wie die Mappe für reines CO₂. Was sich an den Grenzen ändert und warum: Blatt "
@@ -84,6 +88,7 @@ u.text("B6", "Diese Mappe zeigt Schritt für Schritt, wie die Obertageanlage fü
 u.zahl("J7", round(S1["h1"], 1))
 u.zahl("J8", round(m_min * S1["w"], 1))
 u.zahl("J9", round(p_kopf, 1))
+u.text("E16", "Anlieferung gasförmig: Verdichtung (2 Stufen), Zwischenkühlung, Kühlung in der dichten Phase, Pumpe.")
 # Inhaltsverzeichnis: neues Blatt
 u.text("B20", "→ Gemisch & Grenzen", stil=u.stil("B19"))
 u.text("E20", "Was die Begleitstoffe ändern: Zweiphasengebiet, Unsicherheit ±3 bar, neue Grenzen der Anlage.",
@@ -95,15 +100,15 @@ u.ersetze('</hyperlinks>', '<hyperlink ref="B20" location="\'Gemisch &amp; Grenz
 # Annahme Verflüssigungsdruck
 u.zahl("F50", A["p_V"])
 u.zahl("M50", A["p_V"])
-u.text("H50", f"Gemisch: Blasendruck bei T_K = {de(S2['p_bl_TK'])} bar + 3 bar Unsicherheit → sicher flüssig "
-              f"(reines CO₂: 60 bar)")
+u.text("B50", "Enddruck Verdichtung = Kühlerdruck")
+u.text("H50", f"Gemisch: ≥ Cricondenbar {de(p_cb)} + 3 bar → Kühlen ohne Zweiphasengebiet (rein: 60 bar, verflüssigen)")
 u.text("H51", f"Gemisch: ≤ Taudruck(T_K) − 3 bar = {de(Dv['p_zw_max'])} bar; Stufe 2 ≤ 95 °C ab "
               f"{de(Dv['p_zw_min'])} bar → zulässig ca. {Dv['p_zw_min']:.0f}–{Dv['p_zw_max']:.0f} bar")
 u.text("H76", f"Gemisch: oberes Bohrloch 0–{K['leer']['tief_2ph']:.0f} m zweiphasig (rein: 45,0 bar, 0–236 m)")
 u.text("B80", "S2 Basisfall 1 Stufe: spezifische Arbeit gesamt")
 u.text("H80", f"Verdichter + Pumpe; 1 Stufe erreicht {de(S2['T1a'])} °C > 95 °C (Q-016)")
 u.text("H82", f"Pflicht beim Gemisch (1 Stufe > 95 °C); spart außerdem rund {ersparnis_v:.0%}")
-u.text("H83", f"S2 braucht rund {vorteil_S2:.0%} weniger Arbeit – deshalb verflüssigen und pumpen")
+u.text("H83", f"S2 (2 Stufen) braucht rund {vorteil_S2:.0%} weniger Arbeit – deshalb dicht kühlen und pumpen")
 u.speichere()
 
 # =============================================================================
@@ -215,7 +220,7 @@ s1.speichere()
 # 5) Einspeicherung S2
 # =============================================================================
 s2 = B["S2"]
-s2.text("B1", "Einspeicherung S2 – gasförmige Anlieferung: verdichten, verflüssigen, pumpen (Worst-Case-Gemisch)")
+s2.text("B1", "Einspeicherung S2 – gasförmige Anlieferung: verdichten, dicht kühlen, pumpen (Worst-Case-Gemisch)")
 s2.text("B4", "AUSGANGSLAGE:  Das CO₂-Gemisch kommt gasförmig an: 30 bar, 15 °C (Annahme).\nQ-016:  Bielka, "
               "Kuczyński, Nagy (2023): CO₂ Compression and Dehydration for Transport and Geological Storage. "
               "Energies 16, 1804 (AGH Krakau). Übersichtsarbeit zu Abscheidung, Trocknung, Transport und "
@@ -228,38 +233,51 @@ s2.text("B4", "AUSGANGSLAGE:  Das CO₂-Gemisch kommt gasförmig an: 30 bar, 15 
               f"auf 20 °C → flüssig. Q-016 verdichtet für die Pipeline, hier für den Bohrlochkopf – das Druckniveau "
               f"(100 bzw. {de(p_kopf)} bar) und der Massenstrom (78 bzw. 27–54 kg/s) sind vergleichbar. NICHT "
               "übernommen: 45 bar Zwischendruck (für die TEG-Trocknung gewählt, Glykol schließt OGE aus).\n"
-              f"VERFLÜSSIGEN BEIM GEMISCH:  Die Begleitstoffe heben den Druck, ab dem bei 20 °C alles flüssig ist, "
-              f"von 57,3 bar (Dampfdruck reines CO₂) auf {de(S2['p_bl_TK'])} bar (Blasendruck). Mit 3 bar "
-              f"Unsicherheit der Phasengrenze → p_V = 80 bar. Die Kondensation läuft über einen Temperaturgleit: "
-              f"sie beginnt bei 80 bar bei {de(S2['T_tau_pV'])} °C (Taulinie) und ist bei {de(S2['T_bl_pV'])} °C "
-              "(Blasenlinie) abgeschlossen.\nZAHL DER STUFEN:  Beim Gemisch reicht eine Stufe NICHT mehr: bis "
-              f"80 bar erreicht sie {de(S2['T1a'])} °C und überschreitet die 95-°C-Grenze aus Q-016 (reines CO₂ "
-              f"bis 60 bar: 73,2 °C). Die zweistufige Variante unten ist deshalb Pflicht – sie spart außerdem "
+              f"NEUE VERDICHTUNG BEIM GEMISCH:  Reines CO₂ wird bei 60 bar und 20 °C verflüssigt (Dampfdruck "
+              f"57,3 bar). Das Gemisch hat bei 20 °C ein Zweiphasengebiet von {de(S2['p_tau_TK'])} bar (Taulinie) bis "
+              f"{de(S2['p_bl_TK'])} bar (Blasenlinie) – bei 60 bar bliebe es gasförmig (alte Verdichtung, Blatt "
+              f"„Gemisch & Grenzen“). Deshalb wird über die Cricondenbar ({de(p_cb)} bar = höchster Druck des "
+              f"Zweiphasengebiets) + 3 bar Unsicherheit verdichtet: p_V = {de(A['p_V'], 0)} bar. Dort kühlt der "
+              "Kühler von der Verdichteraustrittstemperatur auf 20 °C, ohne das Zweiphasengebiet zu berühren – das "
+              "Gemisch geht stetig in die dichte Phase über, es wird nichts kondensiert (wie Q-016: Endstufe 100 bar, "
+              f"dann 20 °C). Danach bringt die Pumpe das dichte Gemisch auf {de(p_kopf)} bar.\nZAHL DER STUFEN:  Eine "
+              f"Stufe bis {de(A['p_V'], 0)} bar erreicht {de(S2['T1a'])} °C und überschreitet die 95-°C-Grenze aus Q-016 "
+              "(reines CO₂ bis 60 bar: 73,2 °C). Die zweistufige Variante unten ist deshalb Pflicht – sie spart außerdem "
               f"{ersparnis_v:.0%} Arbeit.\nRECHENWEG:  Verdichter und Pumpe wie in S1: isentrop + Wirkungsgrad, "
-              "h_aus = h_ein + (h_s − h_ein) / η. Verflüssiger: abgeführte Wärme je kg q = h_vor − h_nach.\n"
+              "h_aus = h_ein + (h_s − h_ein) / η. Kühler: abgeführte Wärme je kg q = h_vor − h_nach.\n"
               f"GRENZEN:  20 °C setzen Kühlwasser voraus. Mit Luftkühlung (ca. 35 °C) läge die Kühltemperatur "
-              f"über der kritischen Temperatur des Gemischs ({de(T_kG)} °C) – dann gäbe es keine Kondensation mehr.")
+              f"über der kritischen Temperatur des Gemischs ({de(T_kG)} °C): das Gemisch wäre dann vor der Pumpe "
+              "überkritisch und deutlich weniger dicht.")
 s2.zahl("E12", S2["h1"]), s2.zahl("E14", S2["h1s"]), s2.zahl("E16", S2["T1a"])
-s2.text("C20", "Blasendruck bei T_K (Gemisch)")
-s2.text("D20", "CoolProp: p(Q = 0, T_K)")
-s2.zahl("E20", S2["p_bl_TK"])
-s2.text("C21", "Abstand p_V − p_Blase")
-s2.text("D21", "muss ≥ 3 bar sein (Unsicherheit der Phasengrenze)")
-s2.text("C22", "Blasentemperatur bei p_V")
-s2.text("D22", f"CoolProp: T(Q = 0, p_V) – Kondensation beginnt bei {de(S2['T_tau_pV'])} °C")
-s2.zahl("E22", S2["T_bl_pV"])
-s2.zahl("E23", S2["hV"]), s2.text("E24", "flüssig")
+s2.text("B2", "Netzübergabe → Messtechnik/Filtration → Verdichter → Kühler (dicht) → Pumpe → Bohrlochkopf")
+s2.text("B19", "Kühler (dichte Phase)")
+s2.text("C11", "Austrittsdruck = Kühlerdruck p_V")
+s2.text("C20", "Cricondenbar Gemisch")
+s2.text("D20", "CoolProp: höchster Druck der Phasengrenze")
+s2.zahl("E20", p_cb)
+s2.text("C21", "Abstand p_V − Cricondenbar")
+s2.text("D21", "muss ≥ 3 bar sein, dann kein Zweiphasengebiet beim Kühlen")
+s2.text("C22", "Blasendruck bei T_K")
+s2.text("D22", f"CoolProp: p(Q = 0, T_K) – Taudruck {de(S2['p_tau_TK'])} bar")
+s2.zahl("E22", S2["p_bl_TK"])
+s2.text("C23", "Enthalpie nach Kühler")
+s2.text("C24", "Phase nach Kühler")
+s2.zahl("E23", S2["hV"]), s2.text("E24", S2["phaseV"])
+s2.text("C36", "Kühlleistung Kühler, oberer Fall")
 s2.zahl("E28", S2["hPs"]), s2.zahl("E30", S2["TPa"])
-s2.text("I24", f"S2 braucht rund {w_S2 / S1['w']:.0f}-mal so viel Arbeit wie S1 – und rund {vorteil_S2:.0%} "
+s2.text("I24", f"S2 (2 Stufen) braucht rund {w_S2v / S1['w']:.0f}-mal so viel Arbeit wie S1 – und rund {vorteil_S2:.0%} "
                f"weniger als Durchverdichten. Beim Gemisch ist die zweite Verdichterstufe Pflicht "
-               f"(1 Stufe: {de(S2['T1a'])} °C > 95 °C) und spart weitere {ersparnis_v:.0%}.")
+               f"(1 Stufe: {de(S2['T1a'])} °C > 95 °C) und spart gegenüber einer Stufe {ersparnis_v:.0%}.")
 s2.text("B40", f"AUFBAU:  Stufe 1 30 → {de(S2v['p_zw'])} bar, Zwischenkühlung auf 20 °C (das Gemisch bleibt "
-               f"gasförmig: Taudruck bei 20 °C = {de(S2['p_tau_TK'])} bar), Stufe 2 → 80 bar. Zwischendruck mit "
+               f"gasförmig: Taudruck bei 20 °C = {de(S2['p_tau_TK'])} bar), Stufe 2 → {de(A['p_V'], 0)} bar. Zwischendruck mit "
                "gleichem Druckverhältnis in beiden Stufen: p_zw = √(p_ein · p_V). Wirkungsgrade 84 / 82 % (Q-016). "
-               "Verflüssiger und Pumpe wie im Basisfall. Beim Gemisch ist diese Variante Pflicht (95-°C-Grenze).")
+               "Kühler und Pumpe wie im Basisfall. Beim Gemisch ist diese Variante Pflicht (95-°C-Grenze).")
+s2.text("B39", "Variante: zweistufige Verdichtung bis zum Kühlerdruck p_V (sonst wie Basisfall)")
+s2.text("B58", "Kühler und Pumpe wie Basisfall")
+s2.text("C59", "Abgeführte Wärme Kühler")
 s2.zahl("E45", S2v["h1s"]), s2.zahl("E47", S2v["T1a"]), s2.zahl("E50", S2v["hZK"])
 s2.zahl("E54", S2v["h2s"]), s2.zahl("E56", S2v["T2a"])
-s2.text("B68", f"FRAGE:  Warum nicht einfach gasförmig bis {de(p_kopf)} bar durchverdichten, statt zu verflüssigen "
+s2.text("B68", f"FRAGE:  Warum nicht einfach gasförmig bis {de(p_kopf)} bar durchverdichten, statt dicht zu kühlen "
                "und zu pumpen?\nAUFBAU nach denselben Regeln aus Q-016:  Zwischenkühlung auf 20 °C, höchstens "
                "95 °C je Stufe, Wirkungsgrade 84 / 82 %. Der Zwischendruck muss mit 3 bar Abstand unter dem "
                f"Taudruck des Gemischs bei 20 °C bleiben ({de(S2['p_tau_TK'])} − 3 = {de(Dv['p_zw_max'])} bar; "
@@ -273,7 +291,11 @@ s2.zahl("E86", Dv["h2s"]), s2.zahl("E88", Dv["T2a"]), s2.zahl("E93", Dv["hN"])
 s2.text("D80", "p_zw ≤ p_Tau(T_K) − 3 bar ?")
 s2.formel("E80", 'IF(p_zw<=p_tau_TK-U_PG,"✔ gasförmig (≥ 3 bar unter der Taulinie)",'
                  '"⚠ zu nah an der Taulinie – Zwischendruck senken")', ist_text=True)
-s2.text("E102", "S2 Basisfall: 1 Stufe (> 95 °C!) + Verflüssiger + Pumpe")
+s2.text("E102", "S2 Basisfall: 1 Stufe (> 95 °C!) + Kühler + Pumpe")
+s2.text("F102", "S2 Variante: 2 Stufen + Kühler + Pumpe")
+s2.formel("B109", '"Ergebnis: Die zweite Verdichterstufe ist beim Gemisch Pflicht (1 Stufe > 95 °C) und spart "'
+                  '&TEXT(1-Szen2v_w_ges/Szen2_w_ges,"0%")&" gegenüber einer Stufe. Dicht kühlen und pumpen (2 Stufen) '
+                  'braucht "&TEXT(1-Szen2v_w_ges/Dv_w_ges,"0%")&" weniger Arbeit als Durchverdichten."', ist_text=True)
 s2.speichere()
 
 # =============================================================================
@@ -286,7 +308,9 @@ ph.text("B2", "Worst-Case-Gemisch (95 % CO₂ + 5 % Begleitstoffe) · Stoffdaten
               "· Fest-Gebiet, Sublimations- und Schmelzlinie: Näherung reines CO₂ (Span & Wagner 1996)")
 ph.text("B36", "DIAGRAMM 1:  Farbflächen = Phasengebiete des Gemischs, rot = Zweiphasengebiet (reines CO₂ hat nur "
                "eine Linie, grau zum Vergleich). Rot gestrichelt = ±3 bar Unsicherheit der Phasengrenze. Grün = S1 "
-               f"(Pumpe). Blau = S2 Basisfall (1 Stufe bis 80 bar, {de(S2['T1a'])} °C > 95 °C). Hellblau gepunktet = "
+               f"(Pumpe). Blau = S2 Basisfall (1 Stufe bis {de(A['p_V'], 0)} bar, {de(S2['T1a'])} °C > 95 °C, Kühler dicht auf "
+               "20 °C, Pumpe). Grau gestrichelt = alte Verdichtung wie reines CO₂ (60 bar) – bleibt beim Gemisch "
+               "gasförmig, die Pumpe könnte nicht fördern. Hellblau gepunktet = "
                "S2-Variante mit 2 Stufen (beim Gemisch Pflicht). Violett gestrichelt = Durchverdichten (2 Stufen bis "
                f"{de(p_kopf)} bar, dann Nachkühler).\nENDPUNKT:  Alle Pfade enden am Bohrlochkopf bei {de(p_kopf)} bar "
                "(reines CO₂: 107,6 bar). Diagramm 2 zeigt Bohrloch und Kaverne – nur im Stillstand.")
@@ -342,7 +366,7 @@ d.text("B2", "Grundlage für das Phasendiagramm. Farbflächen: gestapelte Druckb
              "Diagramm.")
 st_kopf = d.stil("G7")
 d.text("H7", "zweiphasig [bar]", stil=st_kopf)
-# Temperaturachse bis 110 °C verlängern (S2 Basisfall erreicht 100,3 °C)
+# Temperaturachse bis 120 °C verlängern (S2 Basisfall 1 Stufe erreicht 111,6 °C)
 for i, (T, gas, zwei, flue, sup, fest) in enumerate(dia["flaechen"]):
     r = 8 + i
     if r > 368:
@@ -351,7 +375,7 @@ for i, (T, gas, zwei, flue, sup, fest) in enumerate(dia["flaechen"]):
     d.zahl(f"D{r}", gas), d.zahl(f"E{r}", flue), d.zahl(f"F{r}", sup), d.zahl(f"G{r}", fest)
     d.zahl(f"H{r}", zwei)
 letzte = 8 + len(dia["flaechen"]) - 1
-assert letzte == 388, letzte
+assert letzte == 408, letzte
 d.ersetze('<col min="8" max="8" width="2.7109375" customWidth="1"/>',
           '<col min="8" max="8" width="12.7109375" customWidth="1"/>')
 # Phasengrenze Gemisch statt Sättigungslinie (Zeilen 8-77)
@@ -359,13 +383,14 @@ d.text("I8", "Phasengrenze Gemisch (Tau-/Blasenlinie)")
 for i, (T, p) in enumerate(dia["huelle"]):
     d.zahl(f"J{8 + i}", T), d.zahl(f"K{8 + i}", p)
 d.text("I123", "Kritischer Punkt Gemisch")
+d.text("I128", "S2: verdichten → dicht kühlen → pumpen")
 d.zahl("J123", T_kG), d.zahl("K123", p_kG)
 # Beschriftung Phasengebiete E (+ neu: zweiphasig in Zeile 148)
 for r, (T, p) in zip(range(144, 149), [(-71, 70), (-30, 105), (72, 12), (85, 120), (-22, 34)]):
     d.zahl(f"J{r}", T), d.zahl(f"K{r}", p)
 d.formel("L148", "(J148-Diagramm_Tmin)/Diagramm_dT+1")
 # Beschriftung Punkte E
-pos_E = [(1, 91), (15, 25), (S2["T1a"] - 8, A["p_V"] + 5), (8, A["p_V"]), (23, p_kopf + 6),
+pos_E = [(1, 91), (15, 25), (S2["T1a"] - 12, A["p_V"] + 5), (45, A["p_V"] + 4), (23, p_kopf + 6),
          (Dv["T1a"] + 9, A["p_zw"] - 4), (36, A["p_zw"] + 3), (Dv["T2a"] + 9, p_kopf - 4)]
 for r, (T, p) in zip(range(149, 157), pos_E):
     d.zahl(f"J{r}", T), d.zahl(f"K{r}", p)
@@ -379,9 +404,12 @@ pos_K = [(60, 216), (60, 172), (58, 64), (-6, p_kopf + 4), (-8, p_cb + 1), (-11,
 for r, (T, p) in zip(range(247, 254), pos_K):
     d.zahl(f"J{r}", T), d.zahl(f"K{r}", p)
 # neue Linien: reines CO2, sicher flüssig (+3 bar), sicher gasförmig (-3 bar)
+ALT = W["alt"]
 NEUE_LINIEN = [("Sättigungslinie reines CO₂ (Vergleich)", dia["rein"], 256),
                ("Blasenlinie + 3 bar (sicher flüssig)", dia["sicher_fl"], 298),
-               ("Taulinie − 3 bar (sicher gasförmig)", dia["sicher_gas"], 329)]
+               ("Taulinie − 3 bar (sicher gasförmig)", dia["sicher_gas"], 329),
+               ("Alte Verdichtung (60 bar wie reines CO₂) – bleibt gasförmig",
+                [(A["T_S2"], A["p_S2"]), (ALT["T1a"], ALT["p_V"]), (A["T_K"], ALT["p_V"])], 360)]
 st_I = d.stil("I8")
 for name, pts, r0 in NEUE_LINIEN:
     d.text(f"I{r0}", name, stil=st_I)
@@ -389,7 +417,7 @@ for name, pts, r0 in NEUE_LINIEN:
         r = r0 + i
         d.zahl(f"J{r}", T), d.zahl(f"K{r}", p)
         d.formel(f"L{r}", f"(J{r}-Diagramm_Tmin)/Diagramm_dT+1")
-d.ersetze('<dimension ref="B1:L368"/>', '<dimension ref="B1:L388"/>')
+d.ersetze('<dimension ref="B1:L368"/>', '<dimension ref="B1:L408"/>')
 d.speichere()
 
 # =============================================================================
@@ -398,10 +426,10 @@ d.speichere()
 FARBE_ZWEI = "F4B6B0"
 
 
-def chart_bearbeiten(name, labels_punkte, mit_bereich_label_zeile, titel_zusatz):
+def chart_bearbeiten(name, labels_punkte, mit_bereich_label_zeile, titel_zusatz, linien):
     xml = pk.text(name)
-    # Bereiche bis Zeile 388 verlängern
-    xml = xml.replace("$368", "$388")
+    # Bereiche bis Zeile 408 verlängern (120 °C)
+    xml = xml.replace("$368", "$408")
     # Zahlen-Caches entfernen (Excel liest die Zellen beim Öffnen neu)
     xml = re.sub(r"<c:numCache>.*?</c:numCache>", "", xml, flags=re.S)
     xml = re.sub(r"<c:strCache>.*?</c:strCache>", "", xml, flags=re.S)
@@ -423,13 +451,14 @@ def chart_bearbeiten(name, labels_punkte, mit_bereich_label_zeile, titel_zusatz)
     scat = re.search(r"<c:scatterChart>.*?</c:scatterChart>", xml, re.S).group(0)
     s_sat = [s_ for s_ in re.findall(r"<c:ser>.*?</c:ser>", scat, re.S) if "$L$8:$L$77" in s_][0]
     zus = ""
-    for j, (lname, pts, r0) in enumerate(NEUE_LINIEN):
+    for j, (lname, pts, r0) in enumerate(linien):
         r1 = r0 + len(pts) - 1
         s_ = s_sat.replace("$L$8:$L$77", f"$L${r0}:$L${r1}").replace("$K$8:$K$77", f"$K${r0}:$K${r1}")
         s_ = re.sub(r'<c:idx val="\d+"/>', f'<c:idx val="{41 + j}"/>', s_, count=1)
         s_ = re.sub(r'<c:order val="\d+"/>', f'<c:order val="{41 + j}"/>', s_, count=1)
         s_ = s_.replace("<c:v>Phasengrenze Gemisch (Tau-/Blasenlinie)</c:v>", f"<c:v>{escape(lname)}</c:v>")
-        farbe, breite, strich = ("808080", "12700", None) if j == 0 else ("CA220E", "12700", "dash")
+        farbe, breite, strich = [("808080", "12700", None), ("CA220E", "12700", "dash"),
+                                 ("CA220E", "12700", "dash"), ("7F7F7F", "22225", "sysDash")][j]
         s_ = re.sub(r"<c:spPr>.*?</c:spPr>",
                     f'<c:spPr><a:ln w="{breite}" cap="rnd"><a:solidFill><a:srgbClr val="{farbe}"/></a:solidFill>'
                     + (f'<a:prstDash val="{strich}"/>' if strich else "") + '<a:round/></a:ln></c:spPr>',
@@ -488,8 +517,8 @@ def chart_bearbeiten(name, labels_punkte, mit_bereich_label_zeile, titel_zusatz)
 
 chart_bearbeiten("xl/charts/chart8.xml",
                  [("Bohrlochkopf 107,6 bar", f"Bohrlochkopf {de(p_kopf)} bar"),
-                  ("Verdichter", "Verdichter 1 Stufe")],
-                 148, " – Worst-Case-Gemisch")
+                  ("Verdichter", "Verdichter 1 Stufe"), ("Verflüssiger", "Kühler (dicht)")],
+                 148, " – Worst-Case-Gemisch", NEUE_LINIEN)
 chart_bearbeiten("xl/charts/chart9.xml",
                  [("Grenzfall 171,7 bar", f"Grenzfall {de(K['grenz']['p_unten'])} bar"),
                   ("Kopf 107,6 bar", f"Kopf {de(p_kopf)} bar"),
@@ -498,13 +527,19 @@ chart_bearbeiten("xl/charts/chart9.xml",
                   ("Gassäule Grenzfall (Kopf = p_krit)", "Gassäule Grenzfall (Kopf = Cricondenbar)"),
                   ("Bohrlochkopf (0 m): 45–107,6 bar",
                    f"Bohrlochkopf (0 m): {de(K['leer']['p_kopf'])}–{de(p_kopf)} bar")],
-                 246, " – Worst-Case-Gemisch")
+                 246, " – Worst-Case-Gemisch", NEUE_LINIEN[:3])
 # Serienname Diagramm 9 steht als Literal im Diagramm
 x9 = pk.text("xl/charts/chart9.xml")
 x9 = x9.replace("<c:v>Gassäule Grenzfall (Kopf = p_krit)</c:v>", "<c:v>Gassäule Grenzfall (Kopf = Cricondenbar)</c:v>")
 x9 = x9.replace("<c:v>Bohrlochkopf (0 m): 45–107,6 bar</c:v>",
                 f"<c:v>Bohrlochkopf (0 m): {de(K['leer']['p_kopf'])}–{de(p_kopf)} bar</c:v>")
 pk.setze("xl/charts/chart9.xml", x9)
+x8 = pk.text("xl/charts/chart8.xml")
+pk.setze("xl/charts/chart8.xml", x8.replace("S2: verdichten → verflüssigen → pumpen", "S2: verdichten → dicht kühlen → pumpen"))
+x7 = pk.text("xl/charts/chart7.xml")
+x7 = x7.replace("S2 Basisfall: 1 Stufe + Verflüssiger + Pumpe", "S2 Basisfall: 1 Stufe (&gt; 95 °C!) + Kühler + Pumpe")
+x7 = x7.replace("S2 Variante: 2 Stufen + Verflüssiger + Pumpe", "S2 Variante: 2 Stufen + Kühler + Pumpe")
+pk.setze("xl/charts/chart7.xml", x7)
 # Medienvergleich: Reihenname CO2
 for c in ("xl/charts/chart4.xml", "xl/charts/chart5.xml"):
     pk.setze(c, pk.text(c).replace("<c:v>CO₂</c:v>", "<c:v>CO₂-Gemisch</c:v>"))
@@ -514,11 +549,12 @@ for c in ("xl/charts/chart4.xml", "xl/charts/chart5.xml"):
 # =============================================================================
 dr = pk.text("xl/drawings/drawing1.xml")
 for alt, neu_t in [("→ 107,6 bar · 16,8 °C", f"→ {de(p_kopf)} bar · {de(S1['T2'])} °C"),
-                   ("→ 60 bar · 73 °C", f"→ 80 bar · {S2v['T2a']:.0f} °C (2 Stufen)"),
-                   ("60 bar · 20 °C", "80 bar · 20 °C"),
+                   ("→ 60 bar · 73 °C", f"→ {A['p_V']:.0f} bar · {S2v['T2a']:.0f} °C (2 Stufen)"),
+                   ("60 bar · 20 °C", f"{A['p_V']:.0f} bar · 20 °C (dicht)"),
                    ("→ 107,6 bar · 27,5 °C", f"→ {de(p_kopf)} bar · {de(S2['TPa'])} °C"),
                    ("Kopf: 107,6 bar", f"Kopf: {de(p_kopf)} bar"),
                    ("+102 bar aus der Säule", f"+{210 - p_kopf:.0f} bar aus der Säule"),
+                   ("Verflüssiger", "Kühler (dicht)"),
                    ("Kühlung auf 20 °C und Stufenregel nach Q-016",
                     "Kühlung auf 20 °C · Gemisch: 2 Stufen nötig (1 Stufe > 95 °C)")]:
     assert f"<a:t>{escape(alt)}</a:t>" in dr, alt
@@ -610,9 +646,9 @@ for sp, t in zip("BCDEFG", ["Grenze", "", "reines CO₂", "Gemisch", "Folge für
 grenzen = [
     ("Mindestdruck dichte Anlieferung bei 15 °C", "50,9 bar", f"{de(gw.blasendruck(15))} + 3 bar",
      f"S1 mit 91 bar sicher dicht ({de(A['p_S1'] - p_cb)} bar über der Cricondenbar)", "Einspeicherung S1"),
-    ("Verflüssigungsdruck bei 20 °C", "> 57,3 bar (gewählt 60)", f"≥ {de(S2['p_bl_TK'] + U_PG)} bar (gewählt 80)",
-     "Verflüssiger bei 80 statt 60 bar; Kondensation über Temperaturgleit "
-     f"{de(S2['T_tau_pV'])} → {de(S2['T_bl_pV'])} °C", "Einspeicherung S2"),
+    ("Enddruck Verdichtung = Kühlerdruck bei 20 °C", "> 57,3 bar (gewählt 60, verflüssigen)",
+     f"≥ {de(p_cb + U_PG)} bar (gewählt {A['p_V']:.0f})",
+     "über der Cricondenbar kühlen: kein Zweiphasengebiet, Gemisch wird stetig dicht", "Einspeicherung S2"),
     ("Verdichtung 30 bar → p_V in einer Stufe", "73,2 °C ✔", f"{de(S2['T1a'])} °C ✘ (> 95 °C)",
      "zwei Verdichterstufen mit Zwischenkühlung nötig", "Einspeicherung S2"),
     ("Zwischendruck (gasförmig bei 20 °C)", "< 57,3 bar", f"≤ {de(Dv['p_zw_max'])} bar",
@@ -625,15 +661,47 @@ grenzen = [
      f"Kopf {de(K['leer']['p_kopf'])} bar, 0–{K['leer']['tief_2ph']:.0f} m zweiphasig",
      "Zweiphasengebiet im oberen Bohrloch kleiner, aber vorhanden", "Kaverne & Gassäule"),
     ("Kritische Temperatur", "31,0 °C", f"{de(T_kG)} °C",
-     "Kühlung muss unter 28 °C liegen, sonst keine Kondensation (Luftkühlung reicht nicht)", "Einspeicherung S2"),
+     "Kühlung unter 28 °C nötig, sonst ist das Gemisch vor der Pumpe überkritisch", "Einspeicherung S2"),
     ("Dichte am Kavernenboden (210 bar, 46 °C)", f"{de(REIN['rho_unten'])} kg/m³", f"{de(K['voll']['rho_unten'])} kg/m³",
-     f"{100 * (K['voll']['rho_unten'] / REIN['rho_unten'] - 1):+.1f} % Masse je m³ Kavernenvolumen", "Kaverne & Gassäule"),
+     f"{de(100 * (K['voll']['rho_unten'] / REIN['rho_unten'] - 1))} % Masse je m³ Kavernenvolumen", "Kaverne & Gassäule"),
 ]
 for i, (g_, rein, gem, folge, blatt) in enumerate(grenzen):
     r = r0 + 2 + i
     zelle(f"B{r}", g_, "zelle"), zelle(f"D{r}", rein, "zelle_m"), zelle(f"E{r}", gem, "zelle_m")
     zelle(f"F{r}", folge, "zelle"), zelle(f"G{r}", blatt, "zelle")
 r_end = r0 + 2 + len(grenzen)
+
+# Alte vs. neue Verdichtung (S2) - gleiche Rechnung wie Blatt "Einspeicherung S2"
+ALT = W["alt"]
+r1 = r_end + 1
+zelle(f"B{r1}", "Alte und neue Verdichtung (S2, gasförmige Anlieferung 30 bar / 15 °C)", "abschnitt")
+for sp, t in zip("BCDEFG", ["", "", "alte Verdichtung (wie reines CO₂)", "neue Verdichtung (Gemisch)",
+                            "Warum", ""]):
+    zelle(f"{sp}{r1 + 1}", t or None, "kopf" if sp == "B" else "kopf2")
+vergleich = [
+    ("Enddruck Verdichtung = Druck beim Kühlen auf 20 °C", f"{ALT['p_V']:.0f} bar", f"{A['p_V']:.0f} bar",
+     f"Cricondenbar {de(p_cb)} bar + 3 bar Unsicherheit = {de(p_cb + U_PG)} bar Minimum"),
+    ("Verdichterstufen", "1 Stufe", "2 Stufen (Zwischenkühlung auf 20 °C)",
+     f"1 Stufe bis {A['p_V']:.0f} bar: {de(S2['T1a'])} °C > 95 °C (Q-016)"),
+    ("Austrittstemperatur Verdichter", f"{de(ALT['T1a'])} °C", f"{de(S2v['T1a'])} / {de(S2v['T2a'])} °C",
+     "höchstens 95 °C je Stufe (Q-016)"),
+    ("Zwischendruck", "–", f"{de(S2v['p_zw'])} bar",
+     f"gasförmig: ≤ Taudruck(20 °C) − 3 = {de(Dv['p_zw_max'])} bar"),
+    ("Zustand nach Kühlung auf 20 °C", f"{ALT['phase']} ✘", f"{S2['phaseV']} ✔",
+     f"alt: {de(ALT['abstand_tau'])} bar unter der Taulinie ({de(ALT['p_tau_TK'])} bar) – nichts kondensiert, "
+     f"die Pumpe kann Gas nicht fördern; neu: {de(A['p_V'] - p_cb)} bar über der Cricondenbar"),
+    ("Spezifische Arbeit Verdichter + Pumpe", "– (Kette funktioniert nicht)",
+     f"{de(w_S2v)} kJ/kg", f"reines CO₂ (alt, 1 Stufe): {de(REIN['w_S2'])} kJ/kg; Durchverdichten Gemisch: "
+                           f"{de(w_Dv)} kJ/kg"),
+    ("Druck am Bohrlochkopf", "–", f"{de(p_kopf)} bar (Pumpe, {de(S2['TPa'])} °C)",
+     "wird mit der neuen Kette erreicht"),
+]
+for i, (g_, alt, neu_, warum) in enumerate(vergleich):
+    r = r1 + 2 + i
+    zelle(f"B{r}", g_, "zelle"), zelle(f"D{r}", alt, "zelle_m"), zelle(f"E{r}", neu_, "zelle_m")
+    zelle(f"F{r}", warum, "zelle")
+r_vgl = (r1 + 1, r1 + 2 + len(vergleich))
+r_end = r_vgl[1]
 
 rows_xml = ""
 for z in sorted(zeilen):
@@ -642,7 +710,9 @@ for z in sorted(zeilen):
         ht = ' ht="30" customHeight="1"'
     elif z == 6:
         ht = ' ht="48" customHeight="1"'
-    elif z in (19, r0 + 1) or r0 + 2 <= z < r_end:
+    elif r_vgl[0] + 1 <= z <= r_vgl[1]:
+        ht = ' ht="45" customHeight="1"'
+    elif z in (19, r0 + 1, r_vgl[0]) or r0 + 2 <= z < r_vgl[0] - 1:
         ht = ' ht="30" customHeight="1"'
     else:
         ht = ""
@@ -661,8 +731,10 @@ sheet9 = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
           '<col min="7" max="9" width="14.7109375" customWidth="1"/>'
           '<col min="10" max="10" width="44.7109375" customWidth="1"/></cols>'
           f'<sheetData>{rows_xml}</sheetData>'
-          f'<mergeCells count="3"><mergeCell ref="B6:J6"/><mergeCell ref="B{r_hinweis}:J{r_hinweis}"/>'
-          '<mergeCell ref="F14:G14"/></mergeCells>'
+          f'<mergeCells count="{3 + r_vgl[1] - r_vgl[0] + 1}"><mergeCell ref="B6:J6"/>'
+          f'<mergeCell ref="B{r_hinweis}:J{r_hinweis}"/><mergeCell ref="F14:G14"/>'
+          + "".join(f'<mergeCell ref="F{r}:J{r}"/>' for r in range(r_vgl[0], r_vgl[1] + 1))
+          + '</mergeCells>'
           '<hyperlinks><hyperlink ref="B3" location="\'Übersicht\'!A1" display="← zur Übersicht"/></hyperlinks>'
           '<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/>'
           '<pageSetup paperSize="9" orientation="landscape" fitToHeight="0"/></worksheet>')
