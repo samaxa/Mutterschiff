@@ -1,0 +1,86 @@
+{
+ "tief": {
+  "name": "Kaverne tief (V1, LCCS 1200 m)",
+  "z_lccs": 1200.0,
+  "z_mitte": 1405.0,
+  "T_lccs": 46.0,
+  "T_mitte": 52.15,
+  "p_max": 210.0,
+  "p_min": 70.0,
+  "volumen": 650000.0,
+  "p_lccs_grenzfall": 171.652277239534,
+  "saeulen": {
+   "voll": {
+    "p_lccs": 210.0,
+    "p_kopf": 107.60321956963604,
+    "z_T_krit": 700.0,
+    "z_p_krit": null,
+    "nassdampf": null,
+    "p_mitte": 225.94860339018118,
+    "rho_kaverne": 801.5020729987388,
+    "phase_kaverne": "supercritical",
+    "phase_kopf": "supercritical_liquid"
+   },
+   "Grenzfall": {
+    "p_lccs": 171.652277239534,
+    "p_kopf": 73.772983734406,
+    "z_T_krit": 700.0,
+    "z_p_krit": 6.992730475418133e-10,
+    "nassdampf": null,
+    "p_mitte": 186.5592245718245,
+    "rho_kaverne": 752.9756766785704,
+    "phase_kaverne": "supercritical",
+    "phase_kopf": "liquid"
+   },
+   "leer": {
+    "p_lccs": 70.0,
+    "p_kopf": 44.99299418696985,
+    "z_T_krit": 700.0,
+    "z_p_krit": null,
+    "nassdampf": [
+     0.0,
+     236.0
+    ],
+    "p_mitte": 73.51761983994294,
+    "rho_kaverne": 182.18590173308343,
+    "phase_kaverne": "supercritical_gas",
+    "phase_kopf": "gas"
+   }
+  }
+ },
+ "flach": {
+  "name": "Kaverne flach (V2, LCCS 700 m)",
+  "z_lccs": 700.0,
+  "z_mitte": 905.0,
+  "T_lccs": 31.0,
+  "T_mitte": 37.15,
+  "p_max": 122.49999999999999,
+  "p_min": 40.833333333333336,
+  "volumen": 650000.0,
+  "p_lccs_grenzfall": 132.6710454397493,
+  "saeulen": {
+   "voll": {
+    "p_lccs": 122.49999999999999,
+    "p_kopf": 64.45160141504729,
+    "z_T_krit": 700.0,
+    "z_p_krit": 107.92521768638034,
+    "nassdampf": null,
+    "p_mitte": 137.95487173343722,
+    "rho_kaverne": 782.1810465802473,
+    "phase_kaverne": "supercritical",
+    "phase_kopf": "liquid"
+   },
+   "leer": {
+    "p_lccs": 40.833333333333336,
+    "p_kopf": 34.7026634200894,
+    "z_T_krit": 700.0,
+    "z_p_krit": null,
+    "nassdampf": null,
+    "p_mitte": 42.64785819303835,
+    "rho_kaverne": 92.8390639877516,
+    "phase_kaverne": "supercritical_gas",
+    "phase_kopf": "gas"
+   }
+  }
+ }
+}
