@@ -1,0 +1,721 @@
+{
+ "auslegungsfall": "tief_gem",
+ "annahmen": {
+  "rate": "100.000 Nm³/h",
+  "finger_anteil": 0.004,
+  "blanket_m3": 1.76,
+  "oel_kg_je_1e5_Nm3": 0.26,
+  "H2S_ppm": 10.0,
+  "CH4_mikrobiell_ppm": 50.0,
+  "a_w_auslegung": 1.0,
+  "a_w_vergleich_q089": 0.75
+ },
+ "faelle": {
+  "tief_rein": {
+   "feucht": {
+    "CO2": 0.9904730853437743,
+    "Methane": 0.0020336587377893156,
+    "HydrogenSulfide": 9.904730853437743e-06,
+    "Diesel (C10-C20)": 5.29946287477311e-07,
+    "Verdichteroel": 1.9240374330252015e-07,
+    "Water": 0.007482628837552071
+   },
+   "trocken_coolprop": {
+    "CO2": 0.9979410285247226,
+    "Methane": 0.0020489920649922233,
+    "HydrogenSulfide": 9.979410285247224e-06
+   }
+  },
+  "tief_rein_ab_2_zyklus": {
+   "feucht": null,
+   "trocken_coolprop": {
+    "CO2": 0.999990000099999,
+    "Methane": 0.0,
+    "HydrogenSulfide": 9.99990000099999e-06
+   }
+  },
+  "tief_gem": {
+   "feucht": {
+    "CO2": 0.9409947114444153,
+    "Nitrogen": 0.023772497973332595,
+    "Argon": 0.009905207488888583,
+    "Methane": 0.012099114060187188,
+    "Hydrogen": 0.00475449959466652,
+    "CarbonMonoxide": 0.0009905207488888582,
+    "HydrogenSulfide": 9.905207488888581e-06,
+    "Diesel (C10-C20)": 5.614895451108548e-07,
+    "Verdichteroel": 1.924130021553137e-07,
+    "Water": 0.007472789579584969
+   },
+   "trocken_coolprop": {
+    "CO2": 0.9480802302698872,
+    "Nitrogen": 0.023951500554186624,
+    "Argon": 0.00997979189757776,
+    "Methane": 0.012190218185855861,
+    "Hydrogen": 0.004790300110837325,
+    "CarbonMonoxide": 0.000997979189757776,
+    "HydrogenSulfide": 9.97979189757776e-06
+   }
+  },
+  "tief_gem_ab_2_zyklus": {
+   "feucht": null,
+   "trocken_coolprop": {
+    "CO2": 0.9501330186226072,
+    "Nitrogen": 0.02400336047046587,
+    "Argon": 0.010001400196027447,
+    "Methane": 0.010051407197007584,
+    "Hydrogen": 0.004800672094093174,
+    "CarbonMonoxide": 0.0010001400196027446,
+    "HydrogenSulfide": 1.0001400196027445e-05
+   }
+  },
+  "flach_rein": {
+   "feucht": {
+    "CO2": 0.9939472533782397,
+    "Methane": 0.001404369131376593,
+    "HydrogenSulfide": 9.939472533782396e-06,
+    "Diesel (C10-C20)": 5.449414902840245e-07,
+    "Verdichteroel": 1.930786156888416e-07,
+    "Water": 0.004637699997743769
+   },
+   "trocken_coolprop": {
+    "CO2": 0.9985791006424901,
+    "Methane": 0.0014109135665033622,
+    "HydrogenSulfide": 9.985791006424901e-06
+   }
+  },
+  "flach_rein_ab_2_zyklus": {
+   "feucht": null,
+   "trocken_coolprop": {
+    "CO2": 0.9999900000999989,
+    "Methane": 0.0,
+    "HydrogenSulfide": 9.999900000999989e-06
+   }
+  },
+  "flach_gem": {
+   "feucht": {
+    "CO2": 0.944285072286685,
+    "Nitrogen": 0.02385562287882152,
+    "Argon": 0.009939842866175632,
+    "Methane": 0.01152639549701615,
+    "Hydrogen": 0.004771124575764303,
+    "CarbonMonoxide": 0.000993984286617563,
+    "HydrogenSulfide": 9.939842866175632e-06,
+    "Diesel (C10-C20)": 6.05665974078109e-07,
+    "Verdichteroel": 1.9308580955809241e-07,
+    "Water": 0.004617219014270268
+   },
+   "trocken_coolprop": {
+    "CO2": 0.9486660288620214,
+    "Nitrogen": 0.02396629967651423,
+    "Argon": 0.009985958198547596,
+    "Methane": 0.011579871549560642,
+    "Hydrogen": 0.004793259935302846,
+    "CarbonMonoxide": 0.0009985958198547595,
+    "HydrogenSulfide": 9.985958198547595e-06
+   }
+  },
+  "flach_gem_ab_2_zyklus": {
+   "feucht": null,
+   "trocken_coolprop": {
+    "CO2": 0.9501330186226072,
+    "Nitrogen": 0.024003360470465872,
+    "Argon": 0.010001400196027447,
+    "Methane": 0.010051407197007584,
+    "Hydrogen": 0.004800672094093174,
+    "CarbonMonoxide": 0.0010001400196027446,
+    "HydrogenSulfide": 1.0001400196027446e-05
+   }
+  }
+ },
+ "details": {
+  "tief_rein": {
+   "voll": [
+    225.94860339016464,
+    52.149999999996794
+   ],
+   "leer": [
+    74.42452577510768,
+    42.14575140998966
+   ],
+   "TGV": 520976.3474491802,
+   "y_voll": 0.007482628837552071,
+   "y_leer": 0.002389392170778982,
+   "y_q089": 0.005611971628164053,
+   "y_h2o": 0.007482628837552071,
+   "ppm": {
+    "Resterdgas_CH4": 2053.219585551354,
+    "H2S": 10.0,
+    "CH4_mikrobiell": 0.0,
+    "Diesel": 0.5350436022129533,
+    "Verdichteroel": 0.19425438828127314,
+    "Wasser": 7482.628837552071
+   },
+   "co2_sole_t": 376.33631013314596,
+   "kopf": [
+    {
+     "p": 119.76318761502661,
+     "T": 38.67439642306556,
+     "y_sat": 0.0045589452836170856,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": true
+    },
+    {
+     "p": 106.90355836737088,
+     "T": 10.0,
+     "y_sat": 0.0022265525269976514,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 64.83914216705362,
+     "T": 25.334607894389137,
+     "y_sat": 0.0028363656567046043,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": true
+    },
+    {
+     "p": 53.621520985831374,
+     "T": 10.0,
+     "y_sat": 0.002043017460791111,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.93230430584085,
+     "T": 8.094540648993302,
+     "y_sat": 0.00042521348594441147,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.934614988058634,
+     "T": 10.0,
+     "y_sat": 0.00047223167760542786,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 40.49645370863744,
+     "T": 5.783418882794422,
+     "y_sat": 0.0003745550804686535,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.95302152323871,
+     "T": 10.0,
+     "y_sat": 0.00047219980760679445,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 45.3247569780431,
+     "T": 10.270685101760478,
+     "y_sat": 0.0020132751456598034,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.85086876037498,
+     "T": 10.0,
+     "y_sat": 0.00047237930619238323,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 45.799522205095094,
+     "T": 10.69218298459532,
+     "y_sat": 0.0020349451269993505,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 45.06343781800593,
+     "T": 10.0,
+     "y_sat": 0.001999645974423704,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 46.087846251038854,
+     "T": 10.946548624500565,
+     "y_sat": 0.002048077374136135,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 45.00897346087891,
+     "T": 10.0,
+     "y_sat": 0.0004721042114812706,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 46.415458873743425,
+     "T": 11.234118270515921,
+     "y_sat": 0.002062972748830713,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 45.07911655562295,
+     "T": 10.0,
+     "y_sat": 0.001999731290650093,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 46.671862133595496,
+     "T": 11.458111727316975,
+     "y_sat": 0.00207461049119724,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.872759494306514,
+     "T": 10.0,
+     "y_sat": 0.00047234030210963095,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 46.77752963998944,
+     "T": 11.550151334135023,
+     "y_sat": 0.0005140459149208516,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.990487065511395,
+     "T": 10.0,
+     "y_sat": 0.00047213558255416625,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 46.65459665620083,
+     "T": 11.443057959832686,
+     "y_sat": 0.0020738273976011936,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 45.01741562318297,
+     "T": 10.0,
+     "y_sat": 0.00047208995552883767,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 46.10716809085201,
+     "T": 10.963551684354968,
+     "y_sat": 0.0020489566530562217,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.991334279143466,
+     "T": 10.0,
+     "y_sat": 0.00047213414023365187,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.775054509513716,
+     "T": 9.778474245844677,
+     "y_sat": 0.00046637668751445743,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 44.93838426130051,
+     "T": 10.0,
+     "y_sat": 0.00047222513432594907,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 41.761303724446556,
+     "T": 6.996084557360405,
+     "y_sat": 0.0018490218071177775,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.073705318827145,
+     "T": 10.0,
+     "y_sat": 0.0004795956894852141,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    }
+   ],
+   "n_tot": 11837734946.516008
+  },
+  "tief_gem": {
+   "voll": [
+    224.70208507374608,
+    52.15
+   ],
+   "leer": [
+    73.88675980480997,
+    42.701579866687815
+   ],
+   "TGV": 481339.6801732901,
+   "y_voll": 0.007472789579584969,
+   "y_leer": 0.0024372639848666776,
+   "y_q089": 0.005604592184688726,
+   "y_h2o": 0.007472789579584969,
+   "ppm": {
+    "Resterdgas_CH4": 2164.902185299679,
+    "H2S": 10.0,
+    "CH4_mikrobiell": 50.0,
+    "Diesel": 0.5668629816596169,
+    "Verdichteroel": 0.19425438828127314,
+    "Wasser": 7472.789579584969
+   },
+   "co2_sole_t": 375.9224182207374,
+   "kopf": [
+    {
+     "p": 126.0771987995927,
+     "T": 37.008885892783844,
+     "y_sat": 0.004492395311954007,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": true
+    },
+    {
+     "p": 42.79882051077744,
+     "T": 9.720759514768618,
+     "y_sat": 0.00046935268040958943,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    }
+   ],
+   "n_tot": 11173254477.268503
+  },
+  "flach_rein": {
+   "voll": [
+    137.95487170519624,
+    37.149999993934046
+   ],
+   "leer": [
+    42.85275399761997,
+    29.28088152023122
+   ],
+   "TGV": 508417.6802771608,
+   "y_voll": 0.004637699997743769,
+   "y_leer": 0.0014297787077031925,
+   "y_q089": 0.003478274998307827,
+   "y_h2o": 0.004637699997743769,
+   "ppm": {
+    "Resterdgas_CH4": 1412.921185307778,
+    "H2S": 10.0,
+    "CH4_mikrobiell": 0.0,
+    "Diesel": 0.5482599689589874,
+    "Verdichteroel": 0.19425438828127314,
+    "Wasser": 4637.699997743769
+   },
+   "co2_sole_t": 380.9914753394737,
+   "kopf": [
+    {
+     "p": 71.26926148131558,
+     "T": 27.209099712997954,
+     "y_sat": 0.0030200444750213148,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": true
+    },
+    {
+     "p": 63.59596105634504,
+     "T": 10.0,
+     "y_sat": 0.0020869071812620304,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 48.48189844263159,
+     "T": 13.013331913470779,
+     "y_sat": 0.000557169018339892,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": true
+    },
+    {
+     "p": 45.002422846531296,
+     "T": 10.0,
+     "y_sat": 0.000472115303603923,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 36.80596997210128,
+     "T": 2.0761744440481493,
+     "y_sat": 0.0016172902426826903,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 37.203653417545645,
+     "T": 10.0,
+     "y_sat": 0.0005026621176239292,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 38.8728873376103,
+     "T": 4.184762293827703,
+     "y_sat": 0.0017142735512861505,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 39.48321745503978,
+     "T": 10.0,
+     "y_sat": 0.0004902031563448535,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 40.40317503354074,
+     "T": 5.692875794152826,
+     "y_sat": 0.0003726969852196134,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 41.15800764631045,
+     "T": 10.0,
+     "y_sat": 0.0004829227914069586,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 41.49703355569182,
+     "T": 6.745006406333232,
+     "y_sat": 0.0018367434135851417,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.348151558391194,
+     "T": 10.0,
+     "y_sat": 0.0004786884710474092,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.21775274766598,
+     "T": 7.426964818473721,
+     "y_sat": 0.001870201244973346,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 43.12885262636802,
+     "T": 10.0,
+     "y_sat": 0.0004763365924742735,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.5948055304354,
+     "T": 7.780275050445539,
+     "y_sat": 0.0018876687625187757,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 43.536097464414034,
+     "T": 10.0,
+     "y_sat": 0.00047524566970644634,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.623206353997254,
+     "T": 7.806792528883818,
+     "y_sat": 0.0018889834133157784,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 43.56673761720046,
+     "T": 10.0,
+     "y_sat": 0.0004751674062868176,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.25605278612537,
+     "T": 7.46296067250853,
+     "y_sat": 0.001871976725160383,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 43.17025802364673,
+     "T": 10.0,
+     "y_sat": 0.0004762213880584093,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 41.38294585939257,
+     "T": 6.636244562637728,
+     "y_sat": 0.0018314392009090893,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 42.224308967157874,
+     "T": 10.0,
+     "y_sat": 0.0004790926951321748,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 41.16778782122461,
+     "T": 6.430519783999159,
+     "y_sat": 0.0003881033774632992,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 41.511975963213345,
+     "T": 10.0,
+     "y_sat": 0.00048158202402738884,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 37.05467768998731,
+     "T": 5.824300631632127,
+     "y_sat": 0.00038754475926720594,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 37.06854443050321,
+     "T": 10.0,
+     "y_sat": 0.0005034966140176079,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 23.66074243357078,
+     "T": 3.3547510582026234,
+     "y_sat": 0.0004279777734842096,
+     "freies_wasser": true,
+     "hydrat": true,
+     "spycher_gueltig": false
+    },
+    {
+     "p": 23.443281976764165,
+     "T": 10.0,
+     "y_sat": 0.0006673693492888258,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    }
+   ],
+   "n_tot": 11552374250.216106
+  },
+  "flach_gem": {
+   "voll": [
+    135.96053205253216,
+    37.15
+   ],
+   "leer": [
+    81.81146568376312,
+    26.13132107807142
+   ],
+   "TGV": 447791.76736067206,
+   "y_voll": 0.004617219014270268,
+   "y_leer": 0.0031324545537021434,
+   "y_q089": 0.003462914260702701,
+   "y_h2o": 0.004617219014270268,
+   "ppm": {
+    "Resterdgas_CH4": 1546.1546396667995,
+    "H2S": 10.0,
+    "CH4_mikrobiell": 50.0,
+    "Diesel": 0.6093315379653882,
+    "Verdichteroel": 0.19425438828127314,
+    "Wasser": 4617.2190142702675
+   },
+   "co2_sole_t": 380.2205065429485,
+   "kopf": [
+    {
+     "p": 78.4390301162133,
+     "T": 23.999430129547292,
+     "y_sat": 0.002972079238499517,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": true
+    },
+    {
+     "p": 52.009449277679636,
+     "T": 11.920392336675885,
+     "y_sat": 0.0021277176694497663,
+     "freies_wasser": true,
+     "hydrat": false,
+     "spycher_gueltig": false
+    }
+   ],
+   "n_tot": 10394512598.141376
+  }
+ }
+}

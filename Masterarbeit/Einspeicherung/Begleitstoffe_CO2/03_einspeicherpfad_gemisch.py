@@ -1,321 +1,196 @@
 # -*- coding: utf-8 -*-
 """
-Schritt 2/3 (Gemisch) - Einspeicherpfad mit Worst-Case-Gemisch vs. reines CO2
+Schritt 3 (Gemisch) - Einspeicherpfad S1 und S2 mit Worst-Case-Gemisch
 ============================================================================
-Gleiche Rechenkette wie im Clean Case (Ordner ../Clean_CO2), aber mit dem
-Worst-Case-Gemisch aus gemisch_worstcase.py:
+Dieselbe Rechnung wie die Excel-Mappe "CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx"
+(Blätter Kaverne & Gassäule, Einspeicherung S1, Einspeicherung S2). Alle Annahmen
+und Bausteine stehen in einspeicherung_bausteine.py.
 
-  1) Gassäule Kaverne -> Zieldruck am Bohrlochkopf
-  2) S1 (dichte Phase):  Pumpe 91 bar / 15 °C -> Bohrlochkopf
-  3) S2 (gasförmig):     Verdichter 1 -> Zwischenkühler -> Verdichter 2
-                         -> Kühler -> Pumpe -> Bohrlochkopf
-  4) Vergleich:          Durchverdichten in 3 Stufen
+  1) Gassäule Kaverne V1 -> Zieldruck am Bohrlochkopf (voll 210 bar, leer 70 bar unten)
+  2) S1 dicht:      Pumpe 91 bar / 15 °C -> Bohrlochkopf
+  3) S2 gasförmig:  Verdichter 1 (30 -> 50 bar) -> Zwischenkühler (26 °C)
+                    -> Verdichter 2 (50 -> 91 bar) -> Kühler (91 bar, 26 °C)
+                    -> Pumpe (91 bar -> Bohrlochkopf)
+Bei 91 bar liegt das Gemisch über der Cricondenbar (82,2 bar): der Kühler
+kreuzt kein Zweiphasengebiet, die Pumpe saugt einphasig dichtes CO₂ an. Warum
+dieser Weg (Pfad B) und nicht verflüssigen bei 80 bar (A), durchverdichten (C)
+oder tiefkalt verflüssigen (D): 04_phasenpfade_vergleich.py und
+Dokumentation_S2_Gemisch.docx.
 
-Jeder Schritt wird zweimal gerechnet - reines CO2 und Gemisch - mit
-denselben Funktionen. Die Werte für reines CO2 müssen dabei exakt die aus
-den Clean-Case-Skripten sein (Kontrolle: Kopfdruck 107,60 bar).
-
-Annahmen: unverändert aus dem Clean Case
-  Kaverne V1     1200 m, 210 bar am Kavernenboden, Gebirge 10 °C + 0,03 K/m
-  S2             30 bar / 15 °C, Zwischendruck 49 bar, Zwischenkühler 40 °C,
-                 Kühler 80 bar / 25 °C
-  Wirkungsgrade  Verdichter 0,84 / 0,82 / 0,80 (Q-016), Pumpe 0,80
-  Durchsatz      50.000-100.000 Nm3/h (0 °C, 1,01325 bar)
-
-Neu für das Gemisch: der S2-Kühleraustritt 80 bar / 25 °C liegt im
-Zweiphasengebiet des Gemischs (siehe 01_phasendiagramm_rein_vs_gemisch.py).
-Deshalb werden für S2 drei Varianten gerechnet:
-  A  wie Clean Case (80 bar / 25 °C)      -> zweiphasig, nicht pumpbar
-  B  stärker kühlen (80 bar / 20 °C)      -> 3,3 bar über der Blasenlinie
-  C  höher verdichten (86 bar / 25 °C)    -> 3,8 bar über der Cricondenbar
-Mindestabstand zur Phasengrenze: 3 bar (Unsicherheit der Phasengrenze,
-siehe Dokumentation_Stoffmodelle_Validierung.docx, Kapitel 9).
-
-Isentrope Zustandsänderung wie im Clean Case: h2s bei gleicher Entropie,
-mit Wirkungsgrad eta auf die reale Enthalpieerhöhung skaliert.
-Für das Gemisch wird dafür die Temperatur über den PT-Flash gesucht
-(Klasse Gemisch, _T_suchen) - funktioniert in jeder CoolProp-Version.
+Prüfungen wie in der Excel-Mappe:
+  - höchstens 95 °C je Verdichterstufe (Q-016)
+  - Realgasfaktor am Eintritt jeder Stufe Z ≥ 0,7 (Q-017 S. 43)
+  - Zwischendruck mindestens 3 bar unter der Taulinie bei 26 °C (kein Kondensat)
+  - Kühldruck mindestens 3 bar über der Cricondenbar (keine Phasengrenze)
+  - Dichte am Pumpeneintritt ≥ 500 kg/m³ (Q-121 S. 2, Q-001 Kap. 5.2)
+Dieselbe Kette wird zum Vergleich auch für reines CO₂ gerechnet. Zum Schluss
+werden die Ergebnisse mit den Werten der Excel-Mappe verglichen.
 """
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-import CoolProp.CoolProp as CP
-from CoolProp.CoolProp import PropsSI, PhaseSI
+from CoolProp.CoolProp import PropsSI
 
+import einspeicherung_bausteine as eb
 import gemisch_worstcase as gw
 
-from stoffmodell import ReinCO2, Gemisch
+REIN, GEM = eb.ReinCO2(), eb.Gemisch()
 
-# ---- 0) Stoffe: reines CO2 und Gemisch (Klassen in stoffmodell.py) --------
-REIN, GEM = ReinCO2(), Gemisch()
-
-# ---- 1) Randbedingungen (identisch Clean Case) ------------------------------
-TEUFE = 1200.0          # m
-P_MAX_LCCS = 210.0      # bar, Kavernenboden
-T_OBERFLAECHE = 10.0    # °C
-GRADIENT = 0.03         # K/m
-G = 9.81                # m/s2
-
-p_S1, T_S1 = 91.0, 15.0             # S1 Netzübergabe
-p_ein, T_ein = 30.0, 15.0           # S2 Netzübergabe
-p_zw, T_ZK = 49.0, 40.0             # Zwischendruck, nach Zwischenkühler
-eta_V1, eta_V2, eta_V3 = 0.84, 0.82, 0.80
-eta_P = 0.80
-V_NORM_MIN, V_NORM_MAX = 50000.0, 100000.0   # Nm3/h
-ABSTAND_MIN = 3.0                            # bar, Unsicherheit Phasengrenze
+# Werte der Excel-Mappe (Gemisch, Stand 01.10.2026) zur Kontrolle
+EXCEL = dict(kopf=114.931, kopf_leer=50.705, S1=3.7235, S2=66.1669, T_V1=57.500, T_V2=77.377, T_P=31.750)
 
 
-def T_gebirge(z):
-    return T_OBERFLAECHE + GRADIENT * z
+def ok(bedingung):
+    return "✔" if bedingung else "✘"
 
 
-# ---- 2) Bausteine (wie Clean Case, aber für beide Stoffe) -------------------
-def gassaeule(stoff, p_lccs_bar, n=600):
-    """dp/dz = rho(p,T)*g von unten (Kavernenboden) nach oben (Kopf).
-
-    Gibt Kopfdruck und das Profil (z, p, T, rho) zurück.
-    """
-    dz = TEUFE / n
-    p = p_lccs_bar
-    profil = []
-    for i in range(n):
-        z = TEUFE - i * dz
-        rho = stoff.rho(p, T_gebirge(z))
-        profil.append((z, p, T_gebirge(z), rho))
-        p -= rho * G * dz / 1e5
-    profil.append((0.0, p, T_gebirge(0.0), stoff.rho(p, T_gebirge(0.0))))
-    return p, np.array(profil)
+def kette_S2(stoff, p_kopf):
+    """S2: 2 Stufen bis P_UEK, Kühler bei P_UEK auf T_K, Pumpe auf den Kopfdruck."""
+    p_zw, V1, ZK, V2 = eb.zweistufig(stoff, eb.P_UEK, p_zw=eb.P_ZW)
+    K = eb.kuehler(stoff, eb.P_UEK, V2["h2"], eb.T_K)
+    P = eb.stufe(stoff, eb.P_UEK, eb.T_K, p_kopf, eb.eta_P)
+    return dict(p_zw=p_zw, V1=V1, ZK=ZK, V2=V2, K=K, P=P, ein=eb.pumpeneintritt(stoff, eb.P_UEK, eb.T_K),
+                w=V1["w"] + V2["w"] + P["w"], q=ZK["q"] + K["q"],
+                pfad=[(eb.T_S2, eb.p_S2), (V1["T2"], p_zw), (eb.T_K, p_zw), (V2["T2"], eb.P_UEK),
+                      (eb.T_K, eb.P_UEK), (P["T2"], p_kopf)])
 
 
-def stufe(stoff, p1_bar, T1_C, p2_bar, eta):
-    """Eine Verdichter- oder Pumpenstufe: isentrop + Wirkungsgrad."""
-    h1 = stoff.h(p1_bar, T1_C)
-    s1 = stoff.s(p1_bar, T1_C)
-    h2s = stoff.h_ps(p2_bar, s1)
-    h2 = h1 + (h2s - h1) / eta
-    T2, phase2 = stoff.T_ph(p2_bar, h2)
-    return dict(p1=p1_bar, T1=T1_C, p2=p2_bar, T2=T2, h1=h1, h2=h2, w=h2 - h1, phase2=phase2)
-
-
-def abstand_phasengrenze(p_bar, T_C):
-    """Abstand eines flüssigen Punkts zur Blasenlinie des Gemischs [bar]."""
-    p_bl = gw.blasendruck(T_C)
-    if np.isnan(p_bl):                      # oberhalb Cricondentherm: keine Blasenlinie
-        return p_bar - gw.phasengrenze()["cricondenbar"][1]
-    return p_bar - p_bl
-
-
-def kette_S2(stoff, p_kopf, p_kuehl, T_kuehl):
-    V1 = stufe(stoff, p_ein, T_ein, p_zw, eta_V1)
-    q_ZK = V1["h2"] - stoff.h(p_zw, T_ZK)
-    V2 = stufe(stoff, p_zw, T_ZK, p_kuehl, eta_V2)
-    q_K = V2["h2"] - stoff.h(p_kuehl, T_kuehl)
-    P = stufe(stoff, p_kuehl, T_kuehl, p_kopf, eta_P)
-    return dict(V1=V1, V2=V2, P=P, q_ZK=q_ZK, q_K=q_K,
-                phase_K=stoff.phase(p_kuehl, T_kuehl), p_kuehl=p_kuehl, T_kuehl=T_kuehl,
-                w=V1["w"] + V2["w"] + P["w"], q=q_ZK + q_K,
-                pfad=[(T_ein, p_ein), (V1["T2"], p_zw), (T_ZK, p_zw), (V2["T2"], p_kuehl),
-                      (T_kuehl, p_kuehl), (P["T2"], p_kopf)])
-
-
-def durchverdichten(stoff, p_kopf, T_end):
-    r = (p_kopf / p_ein) ** (1 / 3)
-    p_D = [p_ein, p_ein * r, p_ein * r**2, p_kopf]
-    D1 = stufe(stoff, p_D[0], T_ein, p_D[1], eta_V1)
-    D2 = stufe(stoff, p_D[1], T_ZK, p_D[2], eta_V2)
-    D3 = stufe(stoff, p_D[2], T_ZK, p_D[3], eta_V3)
-    q = (D1["h2"] - stoff.h(p_D[1], T_ZK)) + (D2["h2"] - stoff.h(p_D[2], T_ZK)) \
-        + (D3["h2"] - stoff.h(p_kopf, T_end))
-    return dict(D=[D1, D2, D3], w=D1["w"] + D2["w"] + D3["w"], q=q,
-                pfad=[(T_ein, p_ein), (D1["T2"], p_D[1]), (T_ZK, p_D[1]), (D2["T2"], p_D[2]),
-                      (T_ZK, p_D[2]), (D3["T2"], p_kopf), (T_end, p_kopf)])
-
-
-def massenstrom(stoff):
-    rho_n = stoff.rho_norm()
-    return V_NORM_MIN * rho_n / 3600.0, V_NORM_MAX * rho_n / 3600.0
-
-
-# ---- 3) Rechnen: reines CO2 und Gemisch ------------------------------------
+# ---- 1) Rechnen: Gemisch (Excel) und reines CO2 (Vergleich) ------------------
 erg = {}
-for stoff in (REIN, GEM):
+for stoff in (GEM, REIN):
+    p_kopf, profil = eb.gassaeule(stoff, eb.P_MAX_LCCS)
+    p_kopf_leer, profil_leer = eb.gassaeule(stoff, eb.P_MIN_LCCS)
+    S1 = eb.stufe(stoff, eb.p_S1, eb.T_S1, p_kopf, eb.eta_P)
+    S2 = kette_S2(stoff, p_kopf)
+    m_min, m_max = eb.massenstrom(stoff)
+    p_tau_ZK = stoff.taudruck(eb.T_K)
+    erg[stoff.name] = dict(p_kopf=p_kopf, p_kopf_leer=p_kopf_leer, profil=profil, profil_leer=profil_leer,
+                           S1=S1, S2=S2, m=(m_min, m_max))
+
+    V1, ZK, V2, K, P, e = S2["V1"], S2["ZK"], S2["V2"], S2["K"], S2["P"], S2["ein"]
     print(f"\n==== {stoff.name} ====")
-    p_kopf, profil = gassaeule(stoff, P_MAX_LCCS)
-    S1 = stufe(stoff, p_S1, T_S1, p_kopf, eta_P)
-    m_min, m_max = massenstrom(stoff)
-    e = dict(p_kopf=p_kopf, profil=profil, S1=S1, m=(m_min, m_max),
-             rho_kav=stoff.rho(P_MAX_LCCS, T_gebirge(TEUFE)))
-    print(f"Gassäule: {P_MAX_LCCS:.0f} bar unten -> {p_kopf:.2f} bar am Bohrlochkopf")
-    print(f"Dichte am Kavernenboden: {e['rho_kav']:.1f} kg/m3")
-    print(f"S1 Pumpe: {p_S1:.0f} -> {p_kopf:.2f} bar, {T_S1:.0f} -> {S1['T2']:.2f} °C, "
-          f"w = {S1['w']:.2f} kJ/kg ({S1['phase2']})")
+    print(f"Gassäule: 210 bar unten -> {p_kopf:.2f} bar am Kopf (leer: 70 bar -> {p_kopf_leer:.2f} bar)")
+    print(f"S1 Pumpe {eb.p_S1:.0f} -> {p_kopf:.2f} bar: {eb.T_S1:.0f} -> {S1['T2']:.2f} °C, w = {S1['w']:.2f} kJ/kg")
+    print(f"S2 (verdichten -> überkritisch kühlen -> pumpen, Kühlung auf {eb.T_K:.0f} °C):")
+    print(f"   Verdichter 1 {eb.p_S2:.0f} -> {S2['p_zw']:.0f} bar: T_aus {V1['T2']:.1f} °C {ok(V1['T2'] <= eb.T_MAX_STUFE)}, "
+          f"Z_ein {V1['Z1']:.3f} {ok(V1['Z1'] >= eb.Z_MIN)}, w = {V1['w']:.2f} kJ/kg")
+    abst = (p_tau_ZK - S2["p_zw"]) if not np.isnan(p_tau_ZK) else float("inf")
+    print(f"   Zwischenkühler {S2['p_zw']:.0f} bar -> {eb.T_K:.0f} °C: q = {ZK['q']:.2f} kJ/kg, "
+          f"{abst:.1f} bar unter der Taulinie {ok(abst >= eb.U_PG)}")
+    print(f"   Verdichter 2 {S2['p_zw']:.0f} -> {eb.P_UEK:.0f} bar: T_aus {V2['T2']:.1f} °C {ok(V2['T2'] <= eb.T_MAX_STUFE)}, "
+          f"Z_ein {V2['Z1']:.3f} {ok(V2['Z1'] >= eb.Z_MIN)}, w = {V2['w']:.2f} kJ/kg")
+    print(f"   Kühler {eb.P_UEK:.0f} bar -> {eb.T_K:.0f} °C: q = {K['q']:.2f} kJ/kg, "
+          f"{eb.P_UEK - stoff.P_GRENZE:.1f} bar über der Phasengrenze {ok(eb.P_UEK - stoff.P_GRENZE >= eb.U_PG)}, "
+          f"ρ = {e['rho']:.0f} kg/m³ {ok(e['rho'] >= eb.RHO_MIN)}")
+    print(f"   Pumpe {eb.P_UEK:.0f} -> {p_kopf:.2f} bar: T_aus {P['T2']:.2f} °C, w = {P['w']:.2f} kJ/kg")
+    print(f"   Summe w = {S2['w']:.2f} kJ/kg, q = {S2['q']:.1f} kJ/kg, "
+          f"Leistung {m_min * S2['w']:.0f}-{m_max * S2['w']:.0f} kW, Kühlleistung {m_min * S2['q']:.0f}-{m_max * S2['q']:.0f} kW")
 
-    if stoff is REIN:
-        varianten = {"S2": (80.0, 25.0)}
-    else:
-        varianten = {"S2-A wie Clean Case": (80.0, 25.0),
-                     "S2-B Kühler 20 °C": (80.0, 20.0),
-                     "S2-C 86 bar": (86.0, 25.0)}
-    e["S2"] = {}
-    for vname, (pk, Tk) in varianten.items():
-        k = kette_S2(stoff, p_kopf, pk, Tk)
-        e["S2"][vname] = k
-        print(f"{vname}:")
-        print(f"  V1 {p_ein:.0f}->{p_zw:.0f} bar: T_aus {k['V1']['T2']:.1f} °C, w = {k['V1']['w']:.2f} kJ/kg")
-        print(f"  Zwischenkühler -> {T_ZK:.0f} °C: q = {k['q_ZK']:.2f} kJ/kg")
-        print(f"  V2 {p_zw:.0f}->{pk:.0f} bar: T_aus {k['V2']['T2']:.1f} °C, w = {k['V2']['w']:.2f} kJ/kg")
-        print(f"  Kühler -> {pk:.0f} bar / {Tk:.0f} °C: q = {k['q_K']:.2f} kJ/kg  ({k['phase_K']})")
-        if stoff is GEM:
-            a = abstand_phasengrenze(pk, Tk)
-            bewertung = "ok" if a >= ABSTAND_MIN else "NICHT ausreichend"
-            print(f"  Abstand zur Phasengrenze: {a:+.1f} bar (mind. {ABSTAND_MIN:.0f} bar) -> {bewertung}")
-            k["abstand"] = a
-        print(f"  Pumpe {pk:.0f}->{p_kopf:.2f} bar: T_aus {k['P']['T2']:.2f} °C, w = {k['P']['w']:.2f} kJ/kg")
-        print(f"  Summe: w = {k['w']:.2f} kJ/kg, q = {k['q']:.2f} kJ/kg")
+M, R = erg[GEM.name], erg[REIN.name]
 
-    T_end = e["S2"][list(varianten)[-1]]["P"]["T2"]
-    e["D"] = durchverdichten(stoff, p_kopf, T_end)
-    print(f"Durchverdichten: w = {e['D']['w']:.2f} kJ/kg, q = {e['D']['q']:.2f} kJ/kg")
-    erg[stoff.name] = e
+# ---- 2) Auswirkungen des Gemischs --------------------------------------------
+w_CO2 = gw.MOLANTEILE[0] * PropsSI("M", "CO2") / gw.gemisch().molar_mass()   # Massenanteil CO2
+print("\n==== Gemisch gegenüber reinem CO₂ (gleiche Kette) ====")
+print(f"CO₂-Massenanteil im Gemisch: {100 * w_CO2:.1f} %")
+print(f"Kopfdruck voll:  rein {R['p_kopf']:7.2f} | Gemisch {M['p_kopf']:7.2f} bar ({M['p_kopf'] - R['p_kopf']:+.2f})")
+for key, text in (("S1", "S1 Pumpe"), ("S2", "S2 gesamt")):
+    wr, wg = R[key]["w"], M[key]["w"]
+    print(f"{text:<10} rein {wr:6.2f} | Gemisch {wg:6.2f} kJ/kg ({100 * (wg / wr - 1):+.0f} %)")
 
-R, M = erg[REIN.name], erg[GEM.name]
+# ---- 3) Kontrolle gegen die Excel-Mappe -------------------------------------
+werte = dict(kopf=M["p_kopf"], kopf_leer=M["p_kopf_leer"], S1=M["S1"]["w"], S2=M["S2"]["w"],
+             T_V1=M["S2"]["V1"]["T2"], T_V2=M["S2"]["V2"]["T2"], T_P=M["S2"]["P"]["T2"])
+abw = max(abs(werte[k] - EXCEL[k]) for k in EXCEL)
+print(f"\nKontrolle gegen die Excel-Mappe: größte Abweichung {abw:.3f} {ok(abw < 0.01)}  "
+      + ", ".join(f"{k} {werte[k]:.3f}" for k in EXCEL))
 
-# ---- 4) Auswirkungen: Gegenüberstellung ------------------------------------
-M_CO2 = PropsSI("M", "CO2")
-M_gem = gw.gemisch().molar_mass()
-w_CO2 = gw.MOLANTEILE[0] * M_CO2 / M_gem           # Massenanteil CO2 im Gemisch
-
-
-def leistung(w, m):
-    return f"{m[0] * w:6.0f}-{m[1] * w:6.0f} kW"
-
-
-print("\n==== Auswirkungen des Worst-Case-Gemischs ====")
-print(f"CO2-Massenanteil im Gemisch: {100 * w_CO2:.1f} %")
-print(f"Massenstrom bei 50.000-100.000 Nm3/h: rein {R['m'][0]:.1f}-{R['m'][1]:.1f} kg/s, "
-      f"Gemisch {M['m'][0]:.1f}-{M['m'][1]:.1f} kg/s")
-print(f"Kopfdruck:           rein {R['p_kopf']:7.2f} bar | Gemisch {M['p_kopf']:7.2f} bar "
-      f"({M['p_kopf'] - R['p_kopf']:+.2f} bar)")
-print(f"Dichte Kavernenboden: rein {R['rho_kav']:6.1f} kg/m3 | Gemisch {M['rho_kav']:6.1f} kg/m3 "
-      f"({100 * (M['rho_kav'] / R['rho_kav'] - 1):+.1f} %), CO2 darin "
-      f"{100 * (M['rho_kav'] * w_CO2 / R['rho_kav'] - 1):+.1f} %")
-print(f"S1 Pumpe:            rein {R['S1']['w']:6.2f} kJ/kg | Gemisch {M['S1']['w']:6.2f} kJ/kg "
-      f"({100 * (M['S1']['w'] / R['S1']['w'] - 1):+.0f} %)")
-print(f"                     rein {leistung(R['S1']['w'], R['m'])} | Gemisch {leistung(M['S1']['w'], M['m'])}")
-wR = R["S2"]["S2"]
-for vname, k in M["S2"].items():
-    print(f"{vname:<20} w = {k['w']:6.2f} kJ/kg ({100 * (k['w'] / wR['w'] - 1):+.0f} % zu rein {wR['w']:.2f}), "
-          f"q = {k['q']:6.2f} kJ/kg, Leistung {leistung(k['w'], M['m'])}")
-print(f"Durchverdichten:     rein {R['D']['w']:6.2f} kJ/kg | Gemisch {M['D']['w']:6.2f} kJ/kg")
-
-# ---- 5) Diagramm 1: Einspeicherpfade im Phasendiagramm des Gemischs --------
-ROT, GRUEN, BLAU, VIOLETT, GRAU = "#CA220E", "#007335", "#0476D9", "#7030A0", "#8C8C8C"
-pg = gw.phasengrenze()
-T_krit_C = REIN.T_KRIT_C
-p_krit_bar = PropsSI("Pcrit", "CO2") / 1e5
+# ---- 4) Diagramm 1: Einspeicherpfade im Phasendiagramm des Gemischs ---------
+ROT, GRUEN, TUERKIS, ORANGE = "#CA220E", "#007335", "#00B0B0", "#EE7203"
+pg = GEM.pg
 T_s = np.linspace(PropsSI("Ttriple", "CO2"), PropsSI("Tcrit", "CO2"), 150)
 p_s = np.array([PropsSI("P", "T", T, "Q", 0, "CO2") for T in T_s]) / 1e5
 
-Tmin, Tmax, Pmin, Pmax = -20.0, 100.0, 0.0, 130.0
 fig, ax = plt.subplots(figsize=(11, 7))
-# Hintergrund neutral: die farbigen Phasenflächen von reinem CO2 gelten für
-# das Gemisch nicht mehr; maßgebend ist die Phasengrenze des Gemischs
-ax.plot(T_s - 273.15, p_s, color="#00304F", lw=1.4, zorder=3, label="Sättigungslinie reines CO₂")
-T_kG, p_kG = pg["krit"]
-ax.plot(T_kG, p_kG, "o", color=ROT, ms=7, markeredgecolor="white", zorder=5)
+ax.plot(T_s - 273.15, p_s, color="#8C8C8C", lw=1.2, zorder=3, label="Sättigungslinie reines CO₂ (Vergleich)")
+huelle_T = np.concatenate([pg["T_tau"], pg["T_blase"]])
+huelle_p = np.concatenate([pg["p_tau"], pg["p_blase"]])
+ax.fill(huelle_T, huelle_p, fc=ROT, alpha=0.15, lw=0, zorder=1)
+ax.plot(huelle_T, huelle_p, color=ROT, lw=2.0, zorder=4, label="Zweiphasengebiet Gemisch")
+ax.plot(*pg["krit"], "o", color=ROT, ms=7, markeredgecolor="white", zorder=5)
+ax.axhline(GEM.P_GRENZE, color=ROT, lw=0.8, ls=":", zorder=2)
+ax.text(-18, GEM.P_GRENZE + 1.5, "Cricondenbar 82,2 bar", color=ROT, fontsize=8)
+
+ax.plot([eb.T_S1, M["S1"]["T2"]], [eb.p_S1, M["p_kopf"]], "-D", color=GRUEN, lw=2.5, ms=6, zorder=7,
+        label="S1: Pumpe")
+ax.plot(*zip(*M["S2"]["pfad"]), "-o", color=TUERKIS, lw=2.5, ms=6, zorder=6,
+        label="S2: verdichten → überkritisch kühlen → pumpen")
+
+txt = dict(fontsize=8.5, color="#303030", zorder=8)
+ax.text(eb.T_S2 + 2, eb.p_S2 - 5, "S2 Netzübergabe", **txt)
+ax.text(M["S2"]["V1"]["T2"] + 2, eb.P_ZW - 4, "Verdichter 1", **txt)
+ax.text(eb.T_K - 21, eb.P_ZW + 1, "Zwischenkühler", **txt)
+ax.text(M["S2"]["V2"]["T2"] + 2, eb.P_UEK - 4, "Verdichter 2", **txt)
+ax.text(eb.T_K - 30, eb.P_UEK - 4, "Kühler 91 bar → Pumpe", **txt)
+ax.text(eb.T_S1 - 19, eb.p_S1 + 2, "S1 Netzübergabe", **txt)
+ax.text(5, M["p_kopf"] + 4, f"Bohrlochkopf {M['p_kopf']:.1f} bar".replace(".", ","), **txt)
+ax.axhline(M["p_kopf"], color=GRUEN, lw=0.8, ls=":", zorder=2)
 bereich = dict(fontsize=11, weight="bold", color="#9A9A9A", ha="center", zorder=2)
 ax.text(-5, 110, "flüssig / dicht", **bereich)
 ax.text(80, 20, "gasförmig", **bereich)
 ax.text(80, 110, "überkritisch", **bereich)
-
-# Zweiphasengebiet Gemisch mit Unsicherheitsband ±3 bar
-huelle_T = np.concatenate([pg["T_tau"], pg["T_blase"]])
-huelle_p = np.concatenate([pg["p_tau"], pg["p_blase"]])
-ax.fill(huelle_T, huelle_p, fc="none", ec=ROT, hatch="///", lw=0, alpha=0.45, zorder=1)
-ax.fill_between(pg["T_blase"], pg["p_blase"] - ABSTAND_MIN, pg["p_blase"] + ABSTAND_MIN,
-                color=ROT, alpha=0.13, lw=0, zorder=1, label="Unsicherheit Phasengrenze ±3 bar")
-ax.fill_between(pg["T_tau"], pg["p_tau"] - ABSTAND_MIN, pg["p_tau"] + ABSTAND_MIN,
-                color=ROT, alpha=0.13, lw=0, zorder=1)
-ax.plot(huelle_T, huelle_p, color=ROT, lw=2.0, zorder=4, label="Phasengrenze Gemisch")
-
-# Clean Case S2 zum Vergleich
-ax.plot(*zip(*R["S2"]["S2"]["pfad"]), "-", color=GRAU, lw=1.2, zorder=5,
-        label="S2 reines CO₂ (Clean Case)")
-stile = {"S2-A wie Clean Case": (ROT, "--", "o"), "S2-B Kühler 20 °C": (BLAU, "-", "o"),
-         "S2-C 86 bar": (VIOLETT, "-", "s")}
-for vname, k in M["S2"].items():
-    farbe, ls, mk = stile[vname]
-    ax.plot(*zip(*k["pfad"]), ls=ls, marker=mk, color=farbe, lw=2.0, ms=5, zorder=6,
-            label=f"{vname} (Gemisch)")
-ax.plot([T_S1, M["S1"]["T2"]], [p_S1, M["p_kopf"]], "-D", color=GRUEN, lw=2.5, ms=6, zorder=7,
-        label="S1 Pumpe (Gemisch)")
-
-txt = dict(fontsize=8.5, color="#303030", zorder=8)
-ax.annotate("S2-A: Kühleraustritt 80 bar / 25 °C\nim Zweiphasengebiet", (25, 80), xytext=(40, 96),
-            arrowprops=dict(arrowstyle="->", color=ROT, lw=1.0), color=ROT, fontsize=8.5, weight="bold")
-ax.text(-19, 41, "Zweiphasengebiet\nGemisch", color=ROT, fontsize=8.5, weight="bold", zorder=8)
-ax.text(T_ein + 2, p_ein - 5, "S2 Netzübergabe", **txt)
-ax.text(T_S1 - 19, p_S1 - 1, "S1 Netzübergabe", **txt)
-ax.text(5, M["p_kopf"] + 4, f"Bohrlochkopf Gemisch {M['p_kopf']:.1f} bar".replace(".", ","), **txt)
-ax.axhline(M["p_kopf"], color=GRUEN, lw=0.8, ls=":", zorder=2)
-ax.set_xlim(Tmin, Tmax)
-ax.set_ylim(Pmin, Pmax)
+ax.set_xlim(-20, 110)
+ax.set_ylim(0, 130)
 ax.set_xlabel("Temperatur [°C]")
 ax.set_ylabel("Druck [bar]")
-ax.set_title("Einspeicherpfade mit Worst-Case-Gemisch im p-T-Diagramm (bis Bohrlochkopf)", fontsize=11)
+ax.set_title("Einspeicherpfade S1 und S2 im p-T-Diagramm des Worst-Case-Gemischs", fontsize=11)
 ax.grid(alpha=0.3, zorder=1)
 ax.legend(loc="center left", bbox_to_anchor=(1.01, 0.5), fontsize=8, frameon=False)
 fig.tight_layout()
 fig.savefig("abb_einspeicherpfad_gemisch.png", dpi=170)
 print("\ngespeichert: abb_einspeicherpfad_gemisch.png")
 
-# ---- 6) Diagramm 2: spezifische Arbeit rein vs. Gemisch --------------------
-zeilen = [("S1 reines CO₂", [0, 0, 0, R["S1"]["w"]]),
-          ("S1 Gemisch", [0, 0, 0, M["S1"]["w"]]),
-          ("S2 reines CO₂", [wR["V1"]["w"], wR["V2"]["w"], 0, wR["P"]["w"]])]
-for vname, k in M["S2"].items():
-    zeilen.append((vname.replace("S2-", "S2 Gemisch ") + (" *" if "A" in vname.split()[0] else ""),
-                   [k["V1"]["w"], k["V2"]["w"], 0, k["P"]["w"]]))
-zeilen += [("Durchverdichten rein", [d["w"] for d in R["D"]["D"]][:2] + [R["D"]["D"][2]["w"], 0]),
-           ("Durchverdichten Gemisch", [d["w"] for d in M["D"]["D"]][:2] + [M["D"]["D"][2]["w"], 0])]
-teile = [("Verdichter 1. Stufe", "#EE7203"), ("Verdichter 2. Stufe", "#F4B183"),
-         ("Verdichter 3. Stufe", "#C55A11"), ("Pumpe", GRUEN)]
-
-fig2, ax2 = plt.subplots(figsize=(10, 5.2))
+# ---- 5) Diagramm 2: spezifische Arbeit rein vs. Gemisch --------------------
+zeilen = []
+for e, name in ((R, "reines CO₂"), (M, "Gemisch")):
+    zeilen += [(f"S1 {name}", [0, 0, e["S1"]["w"]]),
+               (f"S2 {name}", [e["S2"]["V1"]["w"], e["S2"]["V2"]["w"], e["S2"]["P"]["w"]])]
+teile = [("Verdichter 1. Stufe", ORANGE), ("Verdichter 2. Stufe", "#F4B183"), ("Pumpe", GRUEN)]
+fig2, ax2 = plt.subplots(figsize=(9, 3.8))
 namen = [z[0] for z in zeilen]
-werte = np.array([z[1] for z in zeilen], dtype=float)
+werte_w = np.array([z[1] for z in zeilen], dtype=float)
 links = np.zeros(len(zeilen))
 for j, (tname, farbe) in enumerate(teile):
-    ax2.barh(namen, werte[:, j], left=links, color=farbe, label=tname, height=0.6)
-    links += werte[:, j]
+    ax2.barh(namen, werte_w[:, j], left=links, color=farbe, label=tname, height=0.6)
+    links += werte_w[:, j]
 for y, summe in enumerate(links):
     ax2.text(summe + 1, y, f"{summe:.1f} kJ/kg".replace(".", ","), va="center", fontsize=8.5, weight="bold")
 ax2.invert_yaxis()
 ax2.set_xlim(0, links.max() * 1.18)
 ax2.set_xlabel("spezifische Arbeit bis Bohrlochkopf [kJ/kg]")
-ax2.set_title("Spezifische Arbeit: reines CO₂ vs. Worst-Case-Gemisch", fontsize=11)
+ax2.set_title("Spezifische Arbeit: reines CO₂ vs. Worst-Case-Gemisch (gleiche Kette)", fontsize=11)
 ax2.grid(axis="x", alpha=0.3)
-ax2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=4, fontsize=8, frameon=False)
-fig2.text(0.5, 0.01, "* S2-A: Pumpeneintritt zweiphasig (Q = 0,11) - rechnerisch, technisch nicht zulässig",
-          ha="center", fontsize=8, color=ROT)
-fig2.tight_layout(rect=[0, 0.04, 1, 1])
+ax2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3, fontsize=8, frameon=False)
+fig2.tight_layout()
 fig2.savefig("abb_arbeit_rein_vs_gemisch.png", dpi=170)
 print("gespeichert: abb_arbeit_rein_vs_gemisch.png")
 
-# ---- 7) Diagramm 3: Gassäule rein vs. Gemisch ------------------------------
+# ---- 6) Diagramm 3: Gassäule rein vs. Gemisch (voll und leer) ---------------
 fig3, (b1, b2) = plt.subplots(1, 2, figsize=(10, 5.5), sharey=True)
 for e, farbe, name in ((R, "#00304F", "reines CO₂"), (M, ROT, "Gemisch")):
-    z, p, T, rho = e["profil"].T
-    b1.plot(rho, z, color=farbe, lw=2, label=name)
-    b2.plot(p, z, color=farbe, lw=2, label=f"{name}: Kopf {e['p_kopf']:.1f} bar".replace(".", ","))
+    for prof, ls, fall, kopf in ((e["profil"], "-", "voll", e["p_kopf"]),
+                                 (e["profil_leer"], "--", "leer", e["p_kopf_leer"])):
+        z, p, T, rho = prof.T
+        b1.plot(rho, z, color=farbe, lw=2, ls=ls, label=f"{name} {fall}")
+        b2.plot(p, z, color=farbe, lw=2, ls=ls, label=f"{name} {fall}: Kopf {kopf:.1f} bar".replace(".", ","))
 b1.set(xlabel="Dichte [kg/m³]", ylabel="Teufe [m]", title="Dichte in der Gassäule")
 b2.set(xlabel="Druck [bar]", title="Druck in der Gassäule")
 b1.invert_yaxis()
 for b in (b1, b2):
     b.grid(alpha=0.3)
-    b.legend(fontsize=8.5)
-fig3.suptitle("Gassäule Kaverne V1 (1200 m, 210 bar unten): reines CO₂ vs. Gemisch", fontsize=11)
+    b.legend(fontsize=8)
+fig3.suptitle("Gassäule Kaverne V1 (1200 m; voll 210 bar, leer 70 bar unten): reines CO₂ vs. Gemisch",
+              fontsize=11)
 fig3.tight_layout()
 fig3.savefig("abb_gassaeule_rein_vs_gemisch.png", dpi=170)
 print("gespeichert: abb_gassaeule_rein_vs_gemisch.png")
