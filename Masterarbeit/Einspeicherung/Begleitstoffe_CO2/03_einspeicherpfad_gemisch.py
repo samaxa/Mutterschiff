@@ -171,9 +171,9 @@ for j, (tname, farbe) in enumerate(teile):
     ax2.barh(namen, werte_w[:, j], left=links, color=farbe, label=tname, height=0.6)
     links += werte_w[:, j]
 for y, summe in enumerate(links):
-    ax2.text(summe + 1, y, f"{de(summe)} kJ/kg", va="center", fontsize=8.5, weight="bold")
+    ax2.text(summe + 1, y, f"{summe:.1f} kJ/kg".replace(".", ","), va="center", fontsize=8.5, weight="bold")
 ax2.invert_yaxis()
-ax2.set_xlim(0, links.max() * 1.2)
+ax2.set_xlim(0, links.max() * 1.18)
 ax2.set_xlabel("spezifische Arbeit bis Bohrlochkopf [kJ/kg]")
 ax2.set_title("Spezifische Arbeit: reines CO₂ vs. Worst-Case-Gemisch (gleiche Kette)", fontsize=11)
 ax2.grid(axis="x", alpha=0.3)
