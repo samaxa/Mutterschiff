@@ -15,7 +15,7 @@
   "DT_KUEHLER": 6.0,
   "RHO_MIN": 500.0,
   "RHO_WLOKA": 650.0,
-  "Z_MIN": 0.7,
+  "Z_MIN": 0.65,
   "GAS_MAX": 0.02,
   "U_PG": 3.0
  },

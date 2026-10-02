@@ -19,7 +19,9 @@ Dokumentation_S2_Gemisch.docx.
 
 Prüfungen wie in der Excel-Mappe:
   - höchstens 95 °C je Verdichterstufe (Q-016)
-  - Realgasfaktor am Eintritt jeder Stufe Z ≥ 0,7 (Q-017 S. 43)
+  - Realgasfaktor am Eintritt jeder Verdichterstufe Z > 0,65 (Siemens Energy,
+    E-Mail-Auskunft 08/2026); Literaturrichtwert Z ≥ 0,7 (Q-017 S. 43) zum Vergleich.
+    Für die Pumpe gilt stattdessen die Mindestdichte.
   - Zwischendruck mindestens 3 bar unter der Taulinie bei 26 °C (kein Kondensat)
   - Kühldruck mindestens 3 bar über der Cricondenbar (keine Phasengrenze)
   - Dichte am Pumpeneintritt ≥ 500 kg/m³ (Q-121 S. 2, Q-001 Kap. 5.2)
@@ -43,6 +45,11 @@ EXCEL = dict(kopf=114.931, kopf_leer=50.705, S1=3.7235, S2=66.1669, T_V1=57.500,
 
 def ok(bedingung):
     return "✔" if bedingung else "✘"
+
+
+def z_text(Z):
+    """Realgasfaktor am Verdichtereintritt: Siemens-Grenze (maßgebend) und Q-017 zum Vergleich."""
+    return f"Z_ein {Z:.3f} {ok(Z > eb.Z_MIN)} (Siemens > {eb.Z_MIN}; Q-017 ≥ {eb.Z_Q017}: {ok(Z >= eb.Z_Q017)})"
 
 
 def kette_S2(stoff, p_kopf):
@@ -74,12 +81,12 @@ for stoff in (GEM, REIN):
     print(f"S1 Pumpe {eb.p_S1:.0f} -> {p_kopf:.2f} bar: {eb.T_S1:.0f} -> {S1['T2']:.2f} °C, w = {S1['w']:.2f} kJ/kg")
     print(f"S2 (verdichten -> überkritisch kühlen -> pumpen, Kühlung auf {eb.T_K:.0f} °C):")
     print(f"   Verdichter 1 {eb.p_S2:.0f} -> {S2['p_zw']:.0f} bar: T_aus {V1['T2']:.1f} °C {ok(V1['T2'] <= eb.T_MAX_STUFE)}, "
-          f"Z_ein {V1['Z1']:.3f} {ok(V1['Z1'] >= eb.Z_MIN)}, w = {V1['w']:.2f} kJ/kg")
+          f"{z_text(V1['Z1'])}, w = {V1['w']:.2f} kJ/kg")
     abst = (p_tau_ZK - S2["p_zw"]) if not np.isnan(p_tau_ZK) else float("inf")
     print(f"   Zwischenkühler {S2['p_zw']:.0f} bar -> {eb.T_K:.0f} °C: q = {ZK['q']:.2f} kJ/kg, "
           f"{abst:.1f} bar unter der Taulinie {ok(abst >= eb.U_PG)}")
     print(f"   Verdichter 2 {S2['p_zw']:.0f} -> {eb.P_UEK:.0f} bar: T_aus {V2['T2']:.1f} °C {ok(V2['T2'] <= eb.T_MAX_STUFE)}, "
-          f"Z_ein {V2['Z1']:.3f} {ok(V2['Z1'] >= eb.Z_MIN)}, w = {V2['w']:.2f} kJ/kg")
+          f"{z_text(V2['Z1'])}, w = {V2['w']:.2f} kJ/kg")
     print(f"   Kühler {eb.P_UEK:.0f} bar -> {eb.T_K:.0f} °C: q = {K['q']:.2f} kJ/kg, "
           f"{eb.P_UEK - stoff.P_GRENZE:.1f} bar über der Phasengrenze {ok(eb.P_UEK - stoff.P_GRENZE >= eb.U_PG)}, "
           f"ρ = {e['rho']:.0f} kg/m³ {ok(e['rho'] >= eb.RHO_MIN)}")

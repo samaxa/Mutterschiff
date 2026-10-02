@@ -11,7 +11,8 @@ wie in 03_einspeicherpfad_gemisch.py und in der Excel-Mappe
 "CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx":
   Übergabe S2        30 bar / 15 °C
   Kühlung            Kühlwasser 20 °C -> CO₂ auf 26 °C (Kühlmittel + 6 K, Q-120 Folie 24)
-  Grenzen            höchstens 95 °C je Stufe (Q-016), Z ≥ 0,7 (Q-017 S. 43)
+  Grenzen            höchstens 95 °C je Stufe (Q-016), Z > 0,65 (Siemens Energy,
+                     E-Mail-Auskunft 08/2026; Q-017 S. 43: Z ≥ 0,7)
   Wirkungsgrade      Verdichter 0,84 / 0,82 (Q-016), Pumpe 0,80 (eigene Annahme)
   Unsicherheit       Phasengrenze ±3 bar (Dokumentation Stoffmodelle, Kap. 9)
 
@@ -33,8 +34,9 @@ Bewertet wird, was die Maschinen brauchen (Q-Kürzel = Quellen- und Wissensmatri
   Pumpe      einphasig und dicht am Eintritt: ρ ≥ 500 kg/m³ (Q-001 Kap. 5.2,
              Q-121 S. 2: 400-500 kg/m³), freies Gas höchstens ~2 Vol-%
              (Q-082 Abschn. 6.4.2), Abstand zur Blasenlinie (Q-121 S. 2, Q-040 C.5)
-  Verdichter Eintritt gasförmig, kein Tropfen (Q-017 S. 44), Z ≥ 0,7 als
-             Richtwert (Q-017 S. 43), höchstens 95 °C je Stufe (Q-016)
+  Verdichter Eintritt gasförmig, kein Tropfen (Q-017 S. 44), Z > 0,65 (Siemens
+             Energy, E-Mail-Auskunft 08/2026; Q-017 S. 43 nennt 0,7 als Richtwert),
+             höchstens 95 °C je Stufe (Q-016)
   Kühlung    CO₂ wird selten kälter als Kühlmittel + 6 K (Q-120, Folie 24)
 
 Ausgabe: Konsole, zwei Abbildungen und phasenpfade_ergebnisse.json
@@ -199,7 +201,7 @@ for z in sens:
           f"| {z['B_rein_rho']:8.0f} | {z['B_gem_rho']:7.0f} {z['B_gem_wP']:5.2f}")
 
 # Z-Faktor vor Stufe 2: wie warm muss der Zwischenkühler bei 50 bar mindestens
-# sein, damit Z ≥ 0,7 (Q-017)? Begründung für Zwischendruck 50 bar / 26 °C
+# sein, damit Z > 0,65 (Siemens) bzw. Z ≥ 0,7 (Q-017)? Begründung für Zwischendruck 50 bar / 26 °C
 p_zw_B = erg[GEM.name]["B"]["p_zw"]
 zk_variation = []
 for T_zk in (20.0, 25.0, 30.0, 35.0, 40.0):

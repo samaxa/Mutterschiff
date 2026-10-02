@@ -16,9 +16,14 @@ Annahmen (Stand 01.10.2026):
                      2 Verdichterstufen 30 -> 50 -> 91 bar, Kühler bei 91 bar, Pumpe
   Kühlung            Kühlwasser 20 °C (Auslegung) -> CO₂ auf T_K = 26 °C nach jedem
                      Kühler (Kühlmittel + 6 K, Q-120 Folie 24)
-  Grenzen            höchstens 95 °C je Verdichterstufe (Q-016), Z ≥ 0,7 am
-                     Stufeneintritt (Q-017 S. 43), Dichte am Pumpeneintritt
-                     ≥ 500 kg/m³ (Q-121 S. 2, Q-001 Kap. 5.2)
+  Grenzen            höchstens 95 °C je Verdichterstufe (Q-016); Realgasfaktor am
+                     Eintritt jeder Verdichterstufe Z > 0,65 (Siemens Energy Duisburg,
+                     E-Mail-Auskunft 08/2026: "Damit die Berechnung der Laufräder in
+                     unseren Berechnungsprogrammen zuverlässig ausgeführt wird, bleiben
+                     wir bei einem Z-Wert von > 0,65"; strengerer Literaturrichtwert
+                     Z ≥ 0,7 nach Q-017 S. 43 wird zum Vergleich mit ausgegeben);
+                     gilt nur für Verdichter, nicht für die Pumpe. Dichte am
+                     Pumpeneintritt ≥ 500 kg/m³ (Q-121 S. 2, Q-001 Kap. 5.2)
   Wirkungsgrade      Verdichter 0,84 / 0,82 (Q-016), Pumpe 0,80 (eigene Annahme)
   Durchsatz          50.000-100.000 Nm³/h (0 °C, 1,01325 bar)
   Unsicherheit       Phasengrenze ±3 bar (Dokumentation Stoffmodelle, Kap. 9)
@@ -47,9 +52,10 @@ T_KW = 20.0                 # °C, Kühlwasser (Auslegung)
 DT_KUEHLER = 6.0            # K, CO₂ selten kälter als Kühlmittel + 6 K (Q-120, Folie 24)
 T_K = T_KW + DT_KUEHLER     # °C, CO₂ nach Zwischenkühler und Kühler = 26 °C
 T_MAX_STUFE = 95.0          # °C, höchstens je Verdichterstufe (Q-016)
-Z_MIN = 0.7                 # Realgasfaktor am Stufeneintritt mindestens (Q-017 S. 43)
+Z_MIN = 0.65                # Realgasfaktor am Verdichterstufeneintritt mindestens (Siemens Energy Duisburg, E-Mail-Auskunft 08/2026)
+Z_Q017 = 0.7                # strengerer Literaturrichtwert (Q-017 S. 43), nur zum Vergleich
 RHO_MIN = 500.0             # kg/m³, Pumpeneintritt mindestens (Q-121 S. 2, Q-001 Kap. 5.2)
-P_ZW = 50.0                 # bar, Zwischendruck S2 (Stufe 2 ≤ 95 °C und Z ≥ 0,7)
+P_ZW = 50.0                 # bar, Zwischendruck S2 (Stufe 2 ≤ 95 °C und Z > 0,65)
 P_UEK = 91.0                # bar, Druck nach Verdichtung = Kühldruck = Pumpeneintritt S2
                             # (Cricondenbar 82,2 bar + 8,8 bar; = Übergabedruck S1)
 P_ZW_DV = 52.0              # bar, Zwischendruck Pfad C Durchverdichten (nur Vergleich)
