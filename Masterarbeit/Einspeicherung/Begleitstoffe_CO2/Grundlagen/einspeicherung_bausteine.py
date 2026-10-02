@@ -3,7 +3,8 @@
 Gemeinsame Bausteine der Einspeicherrechnung - reines CO₂ und Worst-Case-Gemisch
 ============================================================================
 Hier stehen die Annahmen und Rechenbausteine an EINER Stelle, damit
-03_einspeicherpfad_gemisch.py und 04_phasenpfade_vergleich.py mit genau
+Prozesskette/03_S1_pumpe_gemisch.py, 03_S2_verdichtung_kuehlung_pumpe_gemisch.py
+und 04_phasenpfade_vergleich.py mit genau
 denselben Werten rechnen wie die Excel-Mappe
 "CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx" (Blatt Übersicht).
 

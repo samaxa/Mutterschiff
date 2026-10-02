@@ -4,7 +4,7 @@ Erzeugt Dokumentation_Kaverne.docx aus den Ergebnissen der Schritte 01-06
 ============================================================================
 Zahlen kommen aus den JSON-Dateien der Kette (also immer der letzte
 Rechenstand), Annahmen und Begründungen aus den Tabellen unten. Formatvorlagen
-wie die übrigen Dokumentationen (Vorlage: Einspeicherung/Begleitstoffe_CO2/
+wie die übrigen Dokumentationen (Vorlage: Einspeicherung/Begleitstoffe_CO2/Grundlagen/
 Dokumentation_S2_Gemisch.docx).
 
 Aufruf (nach 01-06):  python dokumentation_erzeugen.py
@@ -22,7 +22,7 @@ from CoolProp import __version__ as COOLPROP_VERSION
 import ausspeichergas as ag
 import kaverne_bausteine as kb
 
-VORLAGE = kb.ORDNER.parent / "Einspeicherung" / "Begleitstoffe_CO2" / "Dokumentation_S2_Gemisch.docx"
+VORLAGE = kb.ORDNER.parent / "Einspeicherung" / "Begleitstoffe_CO2" / "Grundlagen" / "Dokumentation_S2_Gemisch.docx"
 ZIEL = kb.ORDNER / "Dokumentation_Kaverne.docx"
 R50, R100 = "50.000 Nm³/h", "100.000 Nm³/h"
 

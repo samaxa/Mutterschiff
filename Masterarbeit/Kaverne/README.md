@@ -1,7 +1,7 @@
 # Kaverne – Prozessschritte zwischen Einspeicherung und Ausspeicherung
 
 Jedes Skript ist ein Prozessschritt. Die Skripte laufen in der Reihenfolge der Nummern, und jedes übergibt sein Ergebnis als JSON an die nächsten.
-Annahmen und Rechenbausteine stehen nur in `kaverne_bausteine.py`. Die Stoffe (reines CO₂, Worst-Case-Gemisch) kommen unverändert aus `Einspeicherung/Begleitstoffe_CO2`.
+Annahmen und Rechenbausteine stehen nur in `kaverne_bausteine.py`. Die Stoffe (reines CO₂, Worst-Case-Gemisch) kommen unverändert aus `Einspeicherung/Begleitstoffe_CO2/Grundlagen`.
 
 | Schritt | Skript | Frage | Ergebnis (→ wer nutzt es) |
 |---|---|---|---|
