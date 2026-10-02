@@ -12,11 +12,14 @@ leichtsiedenden Begleitstoffe (vor allem H2 und N2) schieben die
 Blasenlinie deutlich zu höheren Drücken - man muss also mehr Druck
 halten, damit das Gemisch sicher einphasig (flüssig/dicht) bleibt.
 
-Betriebspunkte (aus den Skripten für reines CO2 in ../Clean_CO2/, Szenario 1 und 2):
-  S1 Netzübergabe      91 bar / 15 °C   (dichte Phase)
-  S2 Netzübergabe      30 bar / 15 °C   (gasförmig)
-  S2 Zwischenkühler    49 bar / 40 °C
-  S2 Kühleraustritt    80 bar / 25 °C   ("Verflüssiger", vor der Pumpe)
+Betriebspunkte (aktueller Stand, aus einspeicherung_bausteine.py = Excel-Mappe):
+  S1 Netzübergabe          91 bar / 15 °C   (dichte Phase)
+  S2 Netzübergabe          30 bar / 15 °C   (gasförmig)
+  S2 nach Zwischenkühler   50 bar / 26 °C   (gasförmig, vor Stufe 2)
+  S2 nach Kühler           91 bar / 26 °C   (über der Cricondenbar, vor der Pumpe)
+Grau zum Vergleich der frühere Kühleraustritt 80 bar / 25 °C (erste Annahme aus
+den Skripten für reines CO2): beim Gemisch zweiphasig und innerhalb der
+Unsicherheit ±3 bar - deshalb verworfen (Dokumentation Stoffmodelle, Kap. 9).
 
 Stoffdaten des Gemischs: gemisch_worstcase.py (gleicher Ordner).
 
@@ -29,6 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from CoolProp.CoolProp import PropsSI, PhaseSI
 
+import einspeicherung_bausteine as eb
 import gemisch_worstcase as gw
 
 # ---- 1) Reines CO2: Sättigungslinie, kritischer Punkt, Tripelpunkt ---------
@@ -91,13 +95,14 @@ print(f"  Gemisch Blasendruck:    {gw.blasendruck(15):5.1f} bar  (darüber einph
 # ---- 3) Betriebspunkte: rein vs. Gemisch -----------------------------------
 PUNKTE = [
     # (Name, p [bar], T [°C], Markerfarbe, Marker)
-    ("S1 Netzübergabe",   91.0, 15.0, "#007335", "s"),
-    ("S2 Netzübergabe",   30.0, 15.0, "#164a73", "o"),
-    ("S2 Zwischenkühler", 49.0, 40.0, "#164a73", "D"),
-    ("S2 Kühleraustritt", 80.0, 25.0, "#164a73", "^"),
+    ("S1 Netzübergabe",        eb.p_S1,  eb.T_S1, "#007335", "s"),
+    ("S2 Netzübergabe",        eb.p_S2,  eb.T_S2, "#164a73", "o"),
+    ("S2 nach Zwischenkühler", eb.P_ZW,  eb.T_K,  "#164a73", "D"),
+    ("S2 nach Kühler",         eb.P_UEK, eb.T_K,  "#164a73", "^"),
+    ("Kühleraustritt alt (verworfen)", 80.0, 25.0, "#9A9A9A", "x"),
 ]
 
-print(f"\n{'Betriebspunkt':<19} {'p':>6} {'T':>5} | {'Phase rein':<21} {'rho rein':>8} | "
+print(f"\n{'Betriebspunkt':<31} {'p':>6} {'T':>5} | {'Phase rein':<21} {'rho rein':>8} | "
       f"{'Phase Gemisch':<14} {'rho Gem.':>8}")
 AS = gw.gemisch()
 ergebnisse = {}
@@ -107,7 +112,7 @@ for name, p, T, _, _ in PUNKTE:
     g = gw.stoffwerte(p, T, AS)
     ergebnisse[name] = g
     zusatz = f"  (Dampfanteil Q = {g['Q']:.2f})" if "Q" in g else ""
-    print(f"{name:<19} {p:6.1f} {T:5.1f} | {ph_rein:<21} {rho_rein:8.1f} | "
+    print(f"{name:<31} {p:6.1f} {T:5.1f} | {ph_rein:<21} {rho_rein:8.1f} | "
           f"{g['phase']:<14} {g['rho']:8.1f}{zusatz}")
 
 # Abstand S1 zum Zweiphasengebiet
@@ -170,8 +175,9 @@ def linien(ax, beschriften=True):
 
 def betriebspunkte(ax, texte):
     for name, p, T, farbe, marker in PUNKTE:
+        alt = marker == "x"
         ax.plot(T, p, marker, color=farbe, ms=10, zorder=6,
-                markeredgecolor="black", markeredgewidth=0.8)
+                markeredgecolor=farbe if alt else "black", markeredgewidth=2.2 if alt else 0.8)
         if name in texte:
             dx, dy = texte[name]
             g = ergebnisse[name]
@@ -209,8 +215,8 @@ ax1.grid(alpha=0.25, zorder=1)
 # -- rechts: Ausschnitt kritischer Bereich --
 phasenflaechen_rein(ax2)
 linien(ax2, beschriften=False)
-betriebspunkte(ax2, {"S1 Netzübergabe": (10, 8), "S2 Zwischenkühler": (-40, -48),
-                     "S2 Kühleraustritt": (10, 45)})
+betriebspunkte(ax2, {"S1 Netzübergabe": (-120, 2), "S2 nach Zwischenkühler": (40, 4),
+                     "S2 nach Kühler": (14, 6), "Kühleraustritt alt (verworfen)": (70, 18)})
 ax2.annotate(f"krit. Punkt rein\n{T_krit_C:.1f} °C / {p_krit_bar:.1f} bar", (T_krit_C, p_krit_bar),
              textcoords="offset points", xytext=(12, -30), fontsize=8.5, color=COL_REIN)
 ax2.annotate(f"krit. Punkt Gemisch\n{T_krit_G:.1f} °C / {p_krit_G:.1f} bar", (T_krit_G, p_krit_G),
