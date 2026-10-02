@@ -33,6 +33,13 @@ import CoolProp.CoolProp as CP
 from thermopack.multiparameter import multiparam
 from thermopack.cubic import cubic
 
+import sys
+from pathlib import Path
+
+ORDNER = Path(__file__).resolve().parents[1]          # Begleitstoffe_CO2
+sys.path.insert(0, str(ORDNER / "Grundlagen"))         # gemisch_worstcase, einspeicherung_bausteine
+ABB = ORDNER / "Abbildungen"                           # Abbildungen und Ergebnisdateien
+
 import gemisch_worstcase as gw
 
 print(f"CoolProp-Version: {CoolProp.__version__}")
@@ -163,7 +170,7 @@ ax.set_title("Phasengrenze Worst-Case-Gemisch: drei Stoffmodelle im Vergleich")
 ax.legend(loc="upper left", fontsize=8.5, framealpha=0.92)
 ax.grid(alpha=0.25)
 fig.tight_layout()
-fig.savefig("abb_validierung_phasengrenze.png", dpi=175)
+fig.savefig(ABB / "abb_validierung_phasengrenze.png", dpi=175)
 print("\ngespeichert: abb_validierung_phasengrenze.png")
 
 # ---- 4) Plot: reines CO2 nach vier Modellen --------------------------------
@@ -232,5 +239,5 @@ a4.text(0.30, 0.55, "GERG-2008 liegt auf der Nulllinie (≤ 0,02 %)", transform=
 fig.suptitle("Reines CO₂: CoolProp (Span-Wagner) im Vergleich mit drei weiteren Stoffmodellen",
              fontsize=12)
 fig.tight_layout()
-fig.savefig("abb_validierung_rein_co2.png", dpi=175)
+fig.savefig(ABB / "abb_validierung_rein_co2.png", dpi=175)
 print("gespeichert: abb_validierung_rein_co2.png")

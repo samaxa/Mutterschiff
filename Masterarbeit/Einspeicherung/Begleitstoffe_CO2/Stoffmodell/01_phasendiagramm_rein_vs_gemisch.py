@@ -21,7 +21,7 @@ Grau zum Vergleich der frühere Kühleraustritt 80 bar / 25 °C (erste Annahme a
 den Skripten für reines CO2): beim Gemisch zweiphasig und innerhalb der
 Unsicherheit ±3 bar - deshalb verworfen (Dokumentation Stoffmodelle, Kap. 9).
 
-Stoffdaten des Gemischs: gemisch_worstcase.py (gleicher Ordner).
+Stoffdaten des Gemischs: Grundlagen/gemisch_worstcase.py.
 
 Diagramm links: gleiche Achsen und Farben wie abb_startpunkt_netzuebergabe.png
 (-80 bis 100 °C, 0 bis 130 bar). Rechts: Ausschnitt um den kritischen Bereich.
@@ -31,6 +31,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from CoolProp.CoolProp import PropsSI, PhaseSI
+
+import sys
+from pathlib import Path
+
+ORDNER = Path(__file__).resolve().parents[1]          # Begleitstoffe_CO2
+sys.path.insert(0, str(ORDNER / "Grundlagen"))         # gemisch_worstcase, einspeicherung_bausteine
+ABB = ORDNER / "Abbildungen"                           # Abbildungen und Ergebnisdateien
 
 import einspeicherung_bausteine as eb
 import gemisch_worstcase as gw
@@ -239,5 +246,5 @@ ax2.grid(alpha=0.25, zorder=1)
 fig.suptitle("p-T-Diagramm: reines CO₂ vs. Worst-Case-Gemisch "
              "(95 % CO₂, 2,4 % N₂, 1 % Ar, 1 % CH₄, 0,5 % H₂, 0,1 % CO)", fontsize=12)
 fig.tight_layout()
-fig.savefig("abb_phasendiagramm_rein_vs_gemisch.png", dpi=175)
+fig.savefig(ABB / "abb_phasendiagramm_rein_vs_gemisch.png", dpi=175)
 print("\ngespeichert: abb_phasendiagramm_rein_vs_gemisch.png")

@@ -4,7 +4,7 @@ Gemeinsame Bausteine der Kavernenrechnung - tiefe und flache Kaverne
 ============================================================================
 Annahmen und Rechenbausteine aller Kaverne-Skripte (01-06) stehen hier an
 EINER Stelle. Die Stoffe (reines CO₂, Worst-Case-Gemisch) kommen unverändert
-aus Einspeicherung/Begleitstoffe_CO2 (gemisch_worstcase.py,
+aus Einspeicherung/Begleitstoffe_CO2/Grundlagen (gemisch_worstcase.py,
 einspeicherung_bausteine.py) - Ein- und Ausspeicherung rechnen also mit
 demselben Stoffmodell und derselben Zusammensetzung.
 
@@ -57,7 +57,7 @@ from matplotlib.path import Path as Polygonpfad
 from scipy.optimize import brentq
 
 ORDNER = Path(__file__).resolve().parent
-sys.path.insert(0, str(ORDNER.parent / "Einspeicherung" / "Begleitstoffe_CO2"))
+sys.path.insert(0, str(ORDNER.parent / "Einspeicherung" / "Begleitstoffe_CO2" / "Grundlagen"))
 import einspeicherung_bausteine as eb  # noqa: E402  (Stoffklassen, Durchsatz, Gebirge)
 import gemisch_worstcase as gw         # noqa: E402  (Zusammensetzung, Phasengrenze)
 

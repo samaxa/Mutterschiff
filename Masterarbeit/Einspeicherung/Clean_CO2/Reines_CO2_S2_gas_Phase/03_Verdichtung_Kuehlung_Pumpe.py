@@ -31,7 +31,7 @@ hier wirklich - bei 22,0 °C (Sättigungstemperatur bei 60 bar) - und wird danac
 auf 20 °C unterkühlt. Der Abstand zur Sättigungslinie ist nur 2,7 bar bzw. 2,0 K
 (Unsicherheit der Phasengrenze nach Doku: 3 bar). Welcher Weg durchs
 Phasendiagramm robuster ist (z. B. überkritisch auf 91 bar verdichten und dann
-kühlen), zeigt ../../Begleitstoffe_CO2/04_phasenpfade_vergleich.py.
+kühlen), zeigt ../../Begleitstoffe_CO2/Prozesskette/04_phasenpfade_vergleich.py.
 
 Rechenweg jeder Stufe wie in Szenario 1: isentrope Zustandsänderung
 (h_s bei gleicher Entropie), mit Wirkungsgrad eta auf die reale

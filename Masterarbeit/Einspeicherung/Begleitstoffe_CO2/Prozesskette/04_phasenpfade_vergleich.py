@@ -7,7 +7,7 @@ gasförmigen Übergabe (30 bar / 15 °C) auf den Kopfdruck der Kaverne - und
 welcher Weg funktioniert auch mit dem Worst-Case-Gemisch noch sicher?
 
 Annahmen und Rechenbausteine kommen aus einspeicherung_bausteine.py - dieselben
-wie in 03_einspeicherpfad_gemisch.py und in der Excel-Mappe
+wie in 03_S1_pumpe_gemisch.py / 03_S2_verdichtung_kuehlung_pumpe_gemisch.py und in der Excel-Mappe
 "CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx":
   Übergabe S2        30 bar / 15 °C
   Kühlung            Kühlwasser 20 °C -> CO₂ auf 26 °C (Kühlmittel + 6 K, Q-120 Folie 24)
@@ -51,6 +51,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from CoolProp.CoolProp import PropsSI
 from scipy.optimize import brentq
+
+import sys
+from pathlib import Path
+
+ORDNER = Path(__file__).resolve().parents[1]          # Begleitstoffe_CO2
+sys.path.insert(0, str(ORDNER / "Grundlagen"))         # gemisch_worstcase, einspeicherung_bausteine
+ABB = ORDNER / "Abbildungen"                           # Abbildungen und Ergebnisdateien
 
 from einspeicherung_bausteine import (ReinCO2, Gemisch, kopfdruck, stufe, kuehler, pumpeneintritt,
                                       zweistufig, p_S1, T_S1, p_S2, T_S2, T_K, T_KW, DT_KUEHLER,
@@ -259,7 +266,7 @@ ax.set(xlim=(-45, 100), ylim=(0, 125), xlabel="Temperatur [°C]", ylabel="Druck 
 ax.grid(alpha=0.3)
 ax.legend(loc="upper left", fontsize=8)
 fig.tight_layout()
-fig.savefig("abb_phasenpfade_gemisch.png", dpi=200)
+fig.savefig(ABB / "abb_phasenpfade_gemisch.png", dpi=200)
 print("\ngespeichert: abb_phasenpfade_gemisch.png")
 
 # ---- 9) Abbildung 2: Dichte am Pumpeneintritt über der Kühltemperatur -------
@@ -284,7 +291,7 @@ ax.set(xlabel="Kühltemperatur T_K = Pumpeneintritt [°C]", ylabel="Dichte am Pu
 ax.grid(alpha=0.3)
 ax.legend(fontsize=8, loc="lower left")
 fig.tight_layout()
-fig.savefig("abb_kuehltemperatur_pumpeneintritt.png", dpi=200)
+fig.savefig(ABB / "abb_kuehltemperatur_pumpeneintritt.png", dpi=200)
 print("gespeichert: abb_kuehltemperatur_pumpeneintritt.png")
 
 
@@ -312,6 +319,6 @@ export = dict(
     dichtefeld=dict(p=P_RASTER, T=T_RASTER, rho=dichtefeld, zweiphasig=zweiphasig),
     iso500=iso500,
 )
-with open("phasenpfade_ergebnisse.json", "w", encoding="utf-8") as f:
+with open(ABB / "phasenpfade_ergebnisse.json", "w", encoding="utf-8") as f:
     json.dump(rein_json(export), f, ensure_ascii=False, indent=1)
 print("gespeichert: phasenpfade_ergebnisse.json")
