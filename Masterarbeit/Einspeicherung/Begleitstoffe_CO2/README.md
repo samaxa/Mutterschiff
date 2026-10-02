@@ -25,6 +25,7 @@ Die Skripte finden die Dateien in `Grundlagen/` selbst und speichern ihre Abbild
 | `gemisch_worstcase.py` | Stoffdatenblatt des Gemischs: Zusammensetzung, Stoffwerte (CoolProp), Phasengrenze (Tau-/Blasenlinie, kritischer Punkt, Cricondenbar). Alle anderen Skripte importieren von hier. |
 | `einspeicherung_bausteine.py` | Alle Annahmen der Einspeicherung an einer Stelle (= Mappe, Blatt „Übersicht“) und die Rechenbausteine: Gassäule, Verdichter-/Pumpenstufe, Kühler, reines CO₂ und Gemisch mit gleicher Schnittstelle. |
 | `CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx` | Rechenübersicht Gemisch (von Hand gepflegt) |
+| `Dokumentation_Einspeicherung_Gemisch.docx` | Gemisch-Szenario im Überblick: Zusammensetzung, Phasengrenze, Gassäule und Kopfdruck, S1, Einordnung von S2, Vergleich mit reinem CO₂ → gehört zu `03_S1`, `03_S2` |
 | `Dokumentation_Stoffmodelle_Validierung.docx` | Stoffmodelle (Span-Wagner, Mehrfluid-Helmholtz/GERG-2008), Validierung, Unsicherheit ±3 bar → gehört zu `01`, `02` |
 | `Dokumentation_S2_Gemisch.docx` | Wege A–E, Wahl des S2-Wegs, Annahmen mit Quellen, Nachweis → gehört zu `03`, `04` |
 
