@@ -13,7 +13,7 @@ Annahmen (Stand 01.10.2026):
                      Gebirge 10 °C + 0,03 K/m
   S1 dicht           91 bar / 15 °C (OGE, 16.09.2026)
   S2 gasförmig       30 bar / 15 °C
-  S2-Pfad            überkritisch kühlen (Pfad B, Begründung: Dokumentation_S2_Gemisch.docx):
+  S2-Pfad            überkritisch kühlen (Pfad B, Begründung: Handbuch_Einspeicherung.docx, Kap. 8.6):
                      2 Verdichterstufen 30 -> 50 -> 91 bar, Kühler bei 91 bar, Pumpe
   Kühlung            Kühlwasser 20 °C (Auslegung) -> CO₂ auf T_K = 26 °C nach jedem
                      Kühler (Kühlmittel + 6 K, Q-120 Folie 24)

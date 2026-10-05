@@ -20,7 +20,7 @@ AS = ag.gemisch_trocken()        # getrocknetes Ausspeichergas als CoolProp-Abst
 y  = ag.wasser_im_co2(p, T)      # Wassersättigung (Spycher et al. 2003) für Abscheider/Trocknung
 ```
 
-Beide Kavernen (tief: LCCS 1200 m, flach: LCCS 700 m) haben dieselbe Form und 650.000 m³ nach Q-028, damit der Vergleich nur die Teufe zeigt. Alle Annahmen mit Herkunft stehen in `Dokumentation_Kaverne.docx`. Nach einer Änderung die Kette 01–06 neu rechnen und dann `python dokumentation_erzeugen.py` ausführen – die Zahlen in der Dokumentation kommen aus den JSON-Dateien.
+Beide Kavernen (tief: LCCS 1200 m, flach: LCCS 700 m) haben dieselbe Form und 650.000 m³ nach Q-028, damit der Vergleich nur die Teufe zeigt. Aufbau des Codes, Gleichungen, Annahmen mit Herkunft und wie jede Abbildung entsteht: `Handbuch_Kaverne.docx`. Nach einer Änderung die Kette 01–06 neu rechnen und die geänderten Zahlen im Handbuch nachziehen.
 
 Die Skripte laufen mit Python310, weil dort CoolProp installiert ist. Eine komplette Kette dauert einige Minuten; Schritt 05 ist der langsamste, weil das Gemisch im Zweiphasengebiet freie Flashes braucht.
 `Kaverne_Version1/` ist das Archiv der ersten Stillstandsrechnung; Schritt 01 ersetzt sie.

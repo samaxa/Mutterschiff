@@ -40,7 +40,7 @@ Bewertet wird, was die Maschinen brauchen (Q-Kürzel = Quellen- und Wissensmatri
   Kühlung    CO₂ wird selten kälter als Kühlmittel + 6 K (Q-120, Folie 24)
 
 Ausgabe: Konsole, zwei Abbildungen und phasenpfade_ergebnisse.json
-(Grundlage für Dokumentation_S2_Gemisch.docx und die Vergleichstabelle auf dem
+(Grundlage für Handbuch_Einspeicherung.docx, Kap. 8.6, und die Vergleichstabelle auf dem
 Excel-Blatt "Einspeicherung S2").
 """
 import json

@@ -3,6 +3,8 @@
 Hier wird gerechnet, was die Begleitstoffe am Einspeicherpfad ändern: Stoffdaten des Gemischs, Phasengrenze, Validierung, Einspeicherpfad S1/S2 und die Begründung für den gewählten S2-Weg.
 Gemisch (mol-%): 95 % CO₂, 2,4 % N₂, 1 % Ar, 1 % CH₄, 0,5 % H₂, 0,1 % CO.
 
+**Handbuch:** `../Handbuch_Einspeicherung.docx` erklärt den gesamten Code der Einspeicherung (Clean_CO2 und Begleitstoffe_CO2): Arbeitsumgebung, Zustandsgleichungen, Rechenbausteine, Architektur, jedes Skript mit seinen Abbildungen, Validierung (Kurzfassung) und Quellen. Es ersetzt die vier früheren Dokumentationen (Einspeicherung Gemisch, S2 Gemisch, S1 dichte Phase, S2 gasförmig); diese liegen in `../Archiv_Dokumentation/`. `Grundlagen/Dokumentation_Stoffmodelle_Validierung.docx` bleibt eine eigene Dokumentation (Gleichungen, Phasendiagramme, Validierung, ± 3 bar).
+
 **Regel:** Die Excel-Mappe `Grundlagen/CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx` wird von Hand gepflegt, kein Skript erzeugt sie. Die Skripte `03_S1` und `03_S2` rechnen dasselbe wie die Mappe und vergleichen am Ende mit deren Werten. Eine Änderung an Annahmen kommt deshalb immer an zwei Stellen: in `Grundlagen/einspeicherung_bausteine.py` und in der Mappe (Blatt „Übersicht“).
 
 ## Ordner
@@ -10,7 +12,7 @@ Gemisch (mol-%): 95 % CO₂, 2,4 % N₂, 1 % Ar, 1 % CH₄, 0,5 % H₂, 0,1 % CO
 ```
 Begleitstoffe_CO2/
 ├── README.md
-├── Grundlagen/      Annahmen, Stoffdaten, Excel-Mappe, Dokumentationen
+├── Grundlagen/      Annahmen, Stoffdaten, Excel-Mappe, Doku Stoffmodelle
 ├── Stoffmodell/     01 Phasendiagramm, 02 Validierung
 ├── Prozesskette/    03 S1 und S2, 04 Vergleich der S2-Wege
 └── Abbildungen/     alle Abbildungen und phasenpfade_ergebnisse.json
@@ -25,9 +27,7 @@ Die Skripte finden die Dateien in `Grundlagen/` selbst und speichern ihre Abbild
 | `gemisch_worstcase.py` | Stoffdatenblatt des Gemischs: Zusammensetzung, Stoffwerte (CoolProp), Phasengrenze (Tau-/Blasenlinie, kritischer Punkt, Cricondenbar). Alle anderen Skripte importieren von hier. |
 | `einspeicherung_bausteine.py` | Alle Annahmen der Einspeicherung an einer Stelle (= Mappe, Blatt „Übersicht“) und die Rechenbausteine: Gassäule, Verdichter-/Pumpenstufe, Kühler, reines CO₂ und Gemisch mit gleicher Schnittstelle. |
 | `CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx` | Rechenübersicht Gemisch (von Hand gepflegt) |
-| `Dokumentation_Einspeicherung_Gemisch.docx` | Gemisch-Szenario im Überblick: Zusammensetzung, Phasengrenze, Gassäule und Kopfdruck, S1, Einordnung von S2, Vergleich mit reinem CO₂ → gehört zu `03_S1`, `03_S2` |
 | `Dokumentation_Stoffmodelle_Validierung.docx` | Stoffmodelle (Span-Wagner, Mehrfluid-Helmholtz/GERG-2008), Validierung, Unsicherheit ±3 bar → gehört zu `01`, `02` |
-| `Dokumentation_S2_Gemisch.docx` | Wege A–E, Wahl des S2-Wegs, Annahmen mit Quellen, Nachweis → gehört zu `03`, `04` |
 
 ## Skripte
 
@@ -43,5 +43,5 @@ Reihenfolge zum Neurechnen: `01` → `02` → `03_S1` → `03_S2` → `04` (jede
 
 ## Wer nutzt die Dateien noch?
 
-- `Kaverne/kaverne_bausteine.py` importiert `Grundlagen/gemisch_worstcase.py` und `Grundlagen/einspeicherung_bausteine.py`, `Kaverne/dokumentation_erzeugen.py` nutzt `Grundlagen/Dokumentation_S2_Gemisch.docx` als Formatvorlage. Ein- und Ausspeicherung rechnen so mit demselben Gemisch. **Diese Dateien deshalb nicht umbenennen oder verschieben** (sonst dort den Pfad anpassen).
+- `Kaverne/kaverne_bausteine.py` importiert `Grundlagen/gemisch_worstcase.py` und `Grundlagen/einspeicherung_bausteine.py`. Ein- und Ausspeicherung rechnen so mit demselben Gemisch. **Diese Dateien deshalb nicht umbenennen oder verschieben** (sonst dort den Pfad anpassen).
 - `Clean_CO2/Reines_CO2_S2_gas_Phase/03_Verdichtung_Kuehlung_Pumpe.py` verweist im Text auf `Prozesskette/04_phasenpfade_vergleich.py`.

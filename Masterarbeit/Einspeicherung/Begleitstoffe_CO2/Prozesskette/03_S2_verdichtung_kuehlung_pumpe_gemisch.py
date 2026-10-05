@@ -13,7 +13,7 @@ Bei 91 bar liegt das Gemisch über der Cricondenbar (82,2 bar): der Kühler
 kreuzt kein Zweiphasengebiet, die Pumpe saugt einphasig dichtes CO₂ an. Warum
 dieser Weg (Pfad B) und nicht verflüssigen bei 80 bar (A), durchverdichten (C)
 oder tiefkalt verflüssigen (D): 04_phasenpfade_vergleich.py und
-Grundlagen/Dokumentation_S2_Gemisch.docx.
+Handbuch_Einspeicherung.docx (Kap. 8.6).
 
 Prüfungen wie in der Excel-Mappe:
   - höchstens 95 °C je Verdichterstufe (Q-016)

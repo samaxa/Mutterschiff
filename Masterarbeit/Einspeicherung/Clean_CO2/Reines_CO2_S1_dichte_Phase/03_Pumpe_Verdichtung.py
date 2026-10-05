@@ -16,7 +16,7 @@ Excel-Rechenübersicht, deshalb überall 107,60 bar. (Früher wurde von oben
 nach unten mit Sekante gerechnet -> 107,58 bar. Der Unterschied kommt nur
 von der Schrittweite 2 m; mit 0,2 m liefern beide Richtungen 107,59 bar.)
 
-Kaverne Version 1 - Randbedingungen (siehe Dokumentation_S1_dichte_Phase.docx):
+Kaverne Version 1 - Randbedingungen (siehe Handbuch_Einspeicherung.docx, Kap. 5):
 Teufe 1200 m, p_max (LCCS) 210 bar, Gebirge 10 °C + 0,03 K/m.
 Grob abgeleitet aus Q-028 (Buzogany & Kruck 2022), Q-029/Q-030 (DBI-Studien
 für Uniper) als plausible Zwischengröße für eine mitteleuropäische
