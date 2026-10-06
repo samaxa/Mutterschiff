@@ -156,11 +156,9 @@ for name, (T, p) in huellen.items():
     ax.plot(*kennwerte[name]["krit"], "o", color=farbe, ms=6,
             markeredgecolor="white", markeredgewidth=1.2)
 
-for name, p_bar, T_C in PUNKTE[:3]:
-    ax.plot(T_C, p_bar, "s", color=GRUEN if p_bar > 85 else BLAU, ms=8,
-            markeredgecolor="black", markeredgewidth=0.7, zorder=5)
-    versatz = (-105, 10) if name == "S2 Kühleraustritt" else (8, 6)
-    ax.annotate(name, (T_C, p_bar), textcoords="offset points", xytext=versatz, fontsize=8.5)
+# Keine Betriebspunkte im Bild: Die Abbildung zeigt nur, wie weit die
+# Stoffmodelle voneinander abweichen. Die Lage der Betriebspunkte zeigt
+# 01_phasendiagramm_rein_vs_gemisch.py.
 
 ax.set_xlim(-60, 40)
 ax.set_ylim(0, 100)

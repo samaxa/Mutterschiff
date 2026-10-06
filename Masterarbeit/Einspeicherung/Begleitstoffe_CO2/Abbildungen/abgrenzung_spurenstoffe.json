@@ -1,0 +1,285 @@
+{
+ "quelle": "03_abgrenzung_spurenstoffe.py",
+ "unsicherheit_phasengrenze_bar": 3.0,
+ "A_darstellbarkeit": [
+  {
+   "stoff": "H2O",
+   "coolprop": "Water",
+   "gruppe": "reaktiv",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.847 bar"
+  },
+  {
+   "stoff": "O2",
+   "coolprop": "Oxygen",
+   "gruppe": "reaktiv",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.896 bar"
+  },
+  {
+   "stoff": "H2S",
+   "coolprop": "HydrogenSulfide",
+   "gruppe": "reaktiv",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.850 bar"
+  },
+  {
+   "stoff": "SO2",
+   "coolprop": "SulfurDioxide",
+   "gruppe": "reaktiv",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.847 bar"
+  },
+  {
+   "stoff": "COS",
+   "coolprop": "CarbonylSulfide",
+   "gruppe": "reaktiv",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.849 bar"
+  },
+  {
+   "stoff": "NOx (Probe N2O)",
+   "coolprop": "NitrousOxide",
+   "gruppe": "reaktiv",
+   "reinstoff": true,
+   "mit_co2": false,
+   "befund": "kein Binaerpaar mit CO2 hinterlegt"
+  },
+  {
+   "stoff": "NH3",
+   "coolprop": "Ammonia",
+   "gruppe": "reaktiv",
+   "reinstoff": true,
+   "mit_co2": false,
+   "befund": "kein Binaerpaar mit CO2 hinterlegt"
+  },
+  {
+   "stoff": "Methanol",
+   "coolprop": "Methanol",
+   "gruppe": "organisch",
+   "reinstoff": true,
+   "mit_co2": false,
+   "befund": "kein Binaerpaar mit CO2 hinterlegt"
+  },
+  {
+   "stoff": "Ethanol",
+   "coolprop": "Ethanol",
+   "gruppe": "organisch",
+   "reinstoff": true,
+   "mit_co2": false,
+   "befund": "kein Binaerpaar mit CO2 hinterlegt"
+  },
+  {
+   "stoff": "n-Butan (C4)",
+   "coolprop": "n-Butane",
+   "gruppe": "organisch",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.847 bar"
+  },
+  {
+   "stoff": "n-Octan (C8)",
+   "coolprop": "n-Octane",
+   "gruppe": "organisch",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.846 bar"
+  },
+  {
+   "stoff": "n-Decan (C10)",
+   "coolprop": "n-Decane",
+   "gruppe": "organisch",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.846 bar"
+  },
+  {
+   "stoff": "Benzol (BTEX)",
+   "coolprop": "Benzene",
+   "gruppe": "organisch",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.846 bar"
+  },
+  {
+   "stoff": "Toluol (BTEX)",
+   "coolprop": "Toluene",
+   "gruppe": "organisch",
+   "reinstoff": true,
+   "mit_co2": true,
+   "befund": "rechenbar, p = 34.846 bar"
+  },
+  {
+   "stoff": "MEA (Amin)",
+   "coolprop": "MEA",
+   "gruppe": "organisch",
+   "reinstoff": false,
+   "mit_co2": false,
+   "befund": "kein Reinstoff in der HEOS-Datenbank"
+  },
+  {
+   "stoff": "MDEA (Amin)",
+   "coolprop": "MDEA",
+   "gruppe": "organisch",
+   "reinstoff": false,
+   "mit_co2": false,
+   "befund": "kein Reinstoff in der HEOS-Datenbank"
+  },
+  {
+   "stoff": "MEG (Glykol)",
+   "coolprop": "EthyleneGlycol",
+   "gruppe": "organisch",
+   "reinstoff": false,
+   "mit_co2": false,
+   "befund": "kein Reinstoff in der HEOS-Datenbank"
+  },
+  {
+   "stoff": "TEG (Glykol)",
+   "coolprop": "TEG",
+   "gruppe": "organisch",
+   "reinstoff": false,
+   "mit_co2": false,
+   "befund": "kein Reinstoff in der HEOS-Datenbank"
+  },
+  {
+   "stoff": "HCN",
+   "coolprop": "HydrogenCyanide",
+   "gruppe": "weitere",
+   "reinstoff": false,
+   "mit_co2": false,
+   "befund": "kein Reinstoff in der HEOS-Datenbank"
+  },
+  {
+   "stoff": "Quecksilber",
+   "coolprop": "Mercury",
+   "gruppe": "weitere",
+   "reinstoff": false,
+   "mit_co2": false,
+   "befund": "kein Reinstoff in der HEOS-Datenbank"
+  }
+ ],
+ "B_vergleich": {
+  "zusatz_ppm": {
+   "Water": 30.0,
+   "Oxygen": 40.0,
+   "HydrogenSulfide": 5.0
+  },
+  "M_6K": 43.07963102,
+  "M_9K": 43.07839095511836,
+  "punkte": [
+   {
+    "T_C": -50.0,
+    "blase_6K": 48.12559068470474,
+    "blase_9K": 48.1509712419224,
+    "d_blase": 0.02538055721765886,
+    "tau_6K": 7.224393047751072,
+    "tau_9K": null,
+    "d_tau": null
+   },
+   {
+    "T_C": -40.0,
+    "blase_6K": 46.017788586322936,
+    "blase_9K": 46.04083047948678,
+    "d_blase": 0.02304189316384253,
+    "tau_6K": 10.656926621011223,
+    "tau_9K": 10.649488586975236,
+    "d_tau": -0.0074380340359869734
+   },
+   {
+    "T_C": -30.0,
+    "blase_6K": 46.414177598252884,
+    "blase_9K": 46.4353648665471,
+    "d_blase": 0.021187268294212913,
+    "tau_6K": 15.186525538033754,
+    "tau_9K": 15.179382174207854,
+    "d_tau": -0.007143363825900195
+   },
+   {
+    "T_C": -20.0,
+    "blase_6K": 48.90885135292231,
+    "blase_9K": 48.928367937538766,
+    "d_blase": 0.019516584616454224,
+    "tau_6K": 21.01918545465133,
+    "tau_9K": 21.012425655731697,
+    "d_tau": -0.006759798919631521
+   },
+   {
+    "T_C": -10.0,
+    "blase_6K": 53.309980530304024,
+    "blase_9K": 53.32785345007357,
+    "d_blase": 0.017872919769544637,
+    "tau_6K": 28.387645915303715,
+    "tau_9K": 28.381388551654076,
+    "d_tau": -0.006257363649638137
+   },
+   {
+    "T_C": 0.0,
+    "blase_6K": 59.51816993180546,
+    "blase_9K": 59.53431838352166,
+    "d_blase": 0.016148451716198053,
+    "tau_6K": 37.57299625383922,
+    "tau_9K": 37.56741230536625,
+    "d_tau": -0.005583948472974498
+   },
+   {
+    "T_C": 10.0,
+    "blase_6K": 67.42855996891684,
+    "blase_9K": 67.44275261964768,
+    "d_blase": 0.014192650730834089,
+    "tau_6K": 48.96397842303137,
+    "tau_9K": 48.95933549469951,
+    "d_tau": -0.00464292833186164
+   },
+   {
+    "T_C": 15.0,
+    "blase_6K": 71.93257398010918,
+    "blase_9K": 71.9456173919212,
+    "d_blase": 0.013043411812020622,
+    "tau_6K": 55.68328978565977,
+    "tau_9K": 55.67927228767111,
+    "d_tau": -0.004017497988655805
+   }
+  ],
+  "max_abweichung_bar": 0.02538055721765886
+ },
+ "C_kohlenwasserstoffe": {
+  "p_bar": 30.0,
+  "varianten": [
+   {
+    "variante": "ohne Kohlenwasserstoff",
+    "stoff": null,
+    "ppm_mol": 0.0,
+    "taupunkt_C": -8.080472310635457
+   },
+   {
+    "variante": "n-Butan (C4)",
+    "stoff": "n-Butane",
+    "ppm_mol": 1200.0,
+    "taupunkt_C": -7.823381971948606
+   },
+   {
+    "variante": "n-Decan (C10)",
+    "stoff": "n-Decane",
+    "ppm_mol": 1200.0,
+    "taupunkt_C": 60.3164802374813
+   },
+   {
+    "variante": "n-Butan (C4)",
+    "stoff": "n-Butane",
+    "ppm_mol": 10000.0,
+    "taupunkt_C": -5.789718623163026
+   },
+   {
+    "variante": "n-Decan (C10)",
+    "stoff": "n-Decane",
+    "ppm_mol": 10000.0,
+    "taupunkt_C": 116.04715429581148
+   }
+  ]
+ }
+}
