@@ -1,0 +1,369 @@
+{
+ "quelle": "04_sensitivitaet_zusammensetzung.py",
+ "coolprop_version": "8.0.0",
+ "A_stoffpaare": {
+  "zaehlung": {
+   "Departure-Funktion": {
+    "sechs": 5,
+    "zusaetzlich": 4
+   },
+   "reduzierende Parameter": {
+    "sechs": 9,
+    "zusaetzlich": 11
+   },
+   "ohne Anpassung": {
+    "sechs": 1,
+    "zusaetzlich": 6
+   },
+   "nicht hinterlegt": {
+    "sechs": 0,
+    "zusaetzlich": 0
+   }
+  },
+  "paare": [
+   {
+    "paar": "CO₂–N₂",
+    "art": "Departure-Funktion",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "CO₂–Ar",
+    "art": "Departure-Funktion",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "CO₂–CH₄",
+    "art": "Departure-Funktion",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "CO₂–H₂",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "CO₂–CO",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "CO₂–H₂O",
+    "art": "Departure-Funktion",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CO₂–O₂",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CO₂–H₂S",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "N₂–Ar",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "N₂–CH₄",
+    "art": "Departure-Funktion",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "N₂–H₂",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "N₂–CO",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "N₂–H₂O",
+    "art": "Departure-Funktion",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "N₂–O₂",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "N₂–H₂S",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "Ar–CH₄",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "Ar–H₂",
+    "art": "ohne Anpassung",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "Ar–CO",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "Ar–H₂O",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "Ar–O₂",
+    "art": "reduzierende Parameter",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "Ar–H₂S",
+    "art": "ohne Anpassung",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CH₄–H₂",
+    "art": "Departure-Funktion",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "CH₄–CO",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "CH₄–H₂O",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CH₄–O₂",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CH₄–H₂S",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "H₂–CO",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": true
+   },
+   {
+    "paar": "H₂–H₂O",
+    "art": "ohne Anpassung",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "H₂–O₂",
+    "art": "ohne Anpassung",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "H₂–H₂S",
+    "art": "ohne Anpassung",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CO–H₂O",
+    "art": "Departure-Funktion",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CO–O₂",
+    "art": "ohne Anpassung",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "CO–H₂S",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "H₂O–O₂",
+    "art": "Departure-Funktion",
+    "quelle": "Gernert-Thesis-2013",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "H₂O–H₂S",
+    "art": "reduzierende Parameter",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   },
+   {
+    "paar": "O₂–H₂S",
+    "art": "ohne Anpassung",
+    "quelle": "Kunz-JCED-2012",
+    "im_6K_modell": false
+   }
+  ]
+ },
+ "B_varianten": [
+  {
+   "variante": "Worst-Case-Gemisch (gewählt)",
+   "molanteile": {
+    "CO2": 0.95,
+    "Nitrogen": 0.024,
+    "Argon": 0.01,
+    "Methane": 0.01,
+    "Hydrogen": 0.005,
+    "CarbonMonoxide": 0.001
+   },
+   "krit_C_bar": [
+    27.955,
+    81.455
+   ],
+   "cricondenbar_C_bar": [
+    27.213,
+    82.178
+   ],
+   "p_blase15_bar": 71.933,
+   "p_tau15_bar": 55.683
+  },
+  {
+   "variante": "4,4 % nur N₂",
+   "molanteile": {
+    "CO2": 0.95,
+    "Nitrogen": 0.044,
+    "Hydrogen": 0.005,
+    "CarbonMonoxide": 0.001
+   },
+   "krit_C_bar": [
+    27.603,
+    82.28
+   ],
+   "cricondenbar_C_bar": [
+    26.748,
+    83.06
+   ],
+   "p_blase15_bar": 74.44,
+   "p_tau15_bar": 55.876
+  },
+  {
+   "variante": "4,4 % nur Ar",
+   "molanteile": {
+    "CO2": 0.95,
+    "Argon": 0.044,
+    "Hydrogen": 0.005,
+    "CarbonMonoxide": 0.001
+   },
+   "krit_C_bar": [
+    28.565,
+    82.371
+   ],
+   "cricondenbar_C_bar": [
+    27.873,
+    82.961
+   ],
+   "p_blase15_bar": 72.079,
+   "p_tau15_bar": 55.665
+  },
+  {
+   "variante": "4,4 % nur CH₄",
+   "molanteile": {
+    "CO2": 0.95,
+    "Methane": 0.044,
+    "Hydrogen": 0.005,
+    "CarbonMonoxide": 0.001
+   },
+   "krit_C_bar": [
+    28.004,
+    79.214
+   ],
+   "cricondenbar_C_bar": [
+    27.586,
+    79.406
+   ],
+   "p_blase15_bar": 65.77,
+   "p_tau15_bar": 55.236
+  },
+  {
+   "variante": "Vergleichsfall Porthos (4 %)",
+   "molanteile": {
+    "CO2": 0.96,
+    "Nitrogen": 0.024,
+    "Argon": 0.004,
+    "Methane": 0.01,
+    "Hydrogen": 0.00125,
+    "CarbonMonoxide": 0.00075
+   },
+   "krit_C_bar": [
+    28.359,
+    79.496
+   ],
+   "cricondenbar_C_bar": [
+    27.923,
+    79.837
+   ],
+   "p_blase15_bar": 67.191,
+   "p_tau15_bar": 54.618
+  },
+  {
+   "variante": "9 Komponenten (+ H₂O, O₂, H₂S)",
+   "molanteile": {
+    "CO2": 0.9499287553433492,
+    "Nitrogen": 0.023998200134989874,
+    "Argon": 0.009999250056245782,
+    "Methane": 0.009999250056245782,
+    "Hydrogen": 0.004999625028122891,
+    "CarbonMonoxide": 0.000999925005624578,
+    "Water": 2.999775016873734e-05,
+    "Oxygen": 3.999700022498312e-05,
+    "HydrogenSulfide": 4.99962502812289e-06
+   },
+   "krit_C_bar": [
+    null,
+    null
+   ],
+   "cricondenbar_C_bar": [
+    null,
+    null
+   ],
+   "p_blase15_bar": 71.946,
+   "p_tau15_bar": 55.679
+  }
+ ],
+ "mindestdruck_bar": 85.178,
+ "p_betrieb_bar": 91.0
+}
