@@ -1,0 +1,28 @@
+# Gemeinsame Python-Umgebung fuer das Repository (Python 3.12 empfohlen)
+# Einrichten: setup_venv.bat ausfuehren (oder Anleitung in README.md)
+#
+# Abgedeckt: Masterarbeit, CO2_Ziwschenspeicherung_Salzkavernen,
+# Finanzplaner, LCA, PV_Projekt.
+# Masterprojekt/IEEJ-energy_system_modelling und
+# EMM_Management_EnergieVerbundSysteme/EMM_Projekt_Gruppe4 haben eigene,
+# fest gepinnte requirements.txt (alte numpy/pypsa-Versionen) und brauchen
+# deshalb jeweils eine eigene Umgebung.
+
+# Rechnen und Plotten
+numpy>=2.0
+scipy>=1.13
+pandas>=2.2
+matplotlib>=3.9
+
+# Stoffdaten (Masterarbeit, CO2-Zwischenspeicherung)
+CoolProp>=6.6
+thermopack>=2.2
+
+# Excel / Word
+openpyxl>=3.1
+python-docx>=1.1
+
+# PV_Projekt (Streamlit-Dashboard)
+plotly>=5.20
+streamlit>=1.35
+streamlit-autorefresh>=1.0
