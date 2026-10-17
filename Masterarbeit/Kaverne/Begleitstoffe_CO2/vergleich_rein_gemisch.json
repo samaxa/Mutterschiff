@@ -1,0 +1,141 @@
+{
+ "rate": "100.000 Nm³/h",
+ "betriebsweise": "Stillstand 21,67 d (Q-028)",
+ "groessen": [
+  {
+   "groesse": "Zieldruck Pumpe S1 (Kaverne voll, strömend)",
+   "einheit": "bar",
+   "rein": 105.4411023087268,
+   "gemisch": 114.27380017709704,
+   "ungünstig_wenn": "höher",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Pumpe S1: Förderhöhe, Auslegungsdruck"
+  },
+  {
+   "groesse": "Zieldruck Pumpe S2 (Kaverne voll, strömend)",
+   "einheit": "bar",
+   "rein": 114.63415898726284,
+   "gemisch": 127.27180321766633,
+   "ungünstig_wenn": "höher",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Pumpe S2: Förderhöhe, Auslegungsdruck"
+  },
+  {
+   "groesse": "Pumpenarbeit S2",
+   "einheit": "kJ/kg",
+   "rein": 3.6974258684438723,
+   "gemisch": 6.674233240659305,
+   "ungünstig_wenn": "höher",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Antriebsleistung"
+  },
+  {
+   "groesse": "Kopfdruck Stillstand voll",
+   "einheit": "bar",
+   "rein": 107.60321956963597,
+   "gemisch": 114.93130198208927,
+   "ungünstig_wenn": "höher",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Druckstufe der Kopfarmaturen"
+  },
+  {
+   "groesse": "Kaverneninhalt voll (TGV)",
+   "einheit": "t",
+   "rein": 520976.3474491802,
+   "gemisch": 481339.6801732901,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Speicherkapazität"
+  },
+  {
+   "groesse": "Arbeitsgas im Zyklus (S2)",
+   "einheit": "t",
+   "rein": 380315.5390422236,
+   "gemisch": 357880.3574870209,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Speicherkapazität, Kavernenzahl"
+  },
+  {
+   "groesse": "Arbeitsgasanteil im Zyklus (S2)",
+   "einheit": "–",
+   "rein": 0.7300053848976749,
+   "gemisch": 0.7435089443658128,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "rein",
+   "betrifft": "Kissengasbedarf"
+  },
+  {
+   "groesse": "Ratengrenze 10 bar/d bei voller Kaverne",
+   "einheit": "kg/s",
+   "rein": 77.22825814374511,
+   "gemisch": 93.55600552352072,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "rein",
+   "betrifft": "Ein-/Ausspeicherrate am Anfang"
+  },
+  {
+   "groesse": "Kaverneninhalt T_min beim Ausspeichern",
+   "einheit": "°C",
+   "rein": 38.08246058891331,
+   "gemisch": 38.79389867776668,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "rein",
+   "betrifft": "Abstand zur Phasengrenze"
+  },
+  {
+   "groesse": "Kopfdruck min beim Ausspeichern",
+   "einheit": "bar",
+   "rein": 40.496453553411556,
+   "gemisch": 42.87140335540005,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "rein",
+   "betrifft": "Rückverdichtung auf 91 bar"
+  },
+  {
+   "groesse": "Kopftemperatur min beim Ausspeichern",
+   "einheit": "°C",
+   "rein": 5.783418732250709,
+   "gemisch": 9.728648246014833,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "rein",
+   "betrifft": "Vorwärmung, Hydrat"
+  },
+  {
+   "groesse": "T nach Drossel auf 30 bar (min)",
+   "einheit": "°C",
+   "rein": -5.552129613720922,
+   "gemisch": -10.131920697313063,
+   "ungünstig_wenn": "niedriger",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Vorwärmung vor der Drossel"
+  },
+  {
+   "groesse": "Strang zweiphasig ab p_LCCS (Ausspeisen)",
+   "einheit": "bar",
+   "rein": 153.97665520806555,
+   "gemisch": 156.78006148078998,
+   "ungünstig_wenn": "höher",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Mindestdruck der Kaverne (vgl. Q-030: 160 bar)"
+  },
+  {
+   "groesse": "Einspeisen einphasig erst ab p_LCCS (S2)",
+   "einheit": "bar",
+   "rein": 150.28027712042348,
+   "gemisch": 157.71328425148903,
+   "ungünstig_wenn": "höher",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Drosselung am Kopf, Zweiphasenströmung im Strang"
+  },
+  {
+   "groesse": "Strömungsgeschwindigkeit max im Strang",
+   "einheit": "m/s",
+   "rein": 14.4503935354743,
+   "gemisch": 15.22331053345763,
+   "ungünstig_wenn": "höher",
+   "ungünstiger_fall": "Gemisch",
+   "betrifft": "Grenze 20 m/s (Q-030)"
+  }
+ ]
+}

@@ -24,6 +24,14 @@ Salzkaverne, abgestimmt mit Martina. Keine exakte Übernahme einer einzelnen Stu
 
 Eine flachere Kaverne (Version 2) ist ein mögliches weiteres Szenario
 
+NEU (15.10.2026, Besprechung K. Vosbeck, Pkt. 6): Auslegungsdruck der Pumpe ist nicht mehr
+der Kopfdruck der ruhenden Säule (Stillstand, 107,60 bar), sondern der Kopfdruck beim
+Einspeisen: Die Säule hat dann die Temperatur nach der Pumpe (adiabat nach unten,
+h + g·z = konst.) und es kommt die Reibung im 8 5/8"-Strang dazu (Q-030 Kap. 1.2.1,
+f = 0,016 nach Q-003 Kap. 6.2). Gerechnet mit Kaverne/Grundlagen/kaverne_bausteine.py
+(zieldruck_einspeisen) bei 100.000 Nm³/h. Bei S1 ist der Strang kälter und damit
+schwerer als im Stillstand -> etwas WENIGER Kopfdruck nötig.
+
 Rechenweg Pumpe: isentrope Zustandsänderung (h2s bei gleicher Entropie),
 mit Wirkungsgrad eta auf die reale Enthalpieerhöhung skaliert - identisch
 zum Ansatz in Kavernenrechner/1_auslegung/co2_kaverne3.py.
@@ -76,11 +84,23 @@ p_kopf_ein = kopfdruck(P_MAX_LCCS)
 
 print("Zieldruck am Bohrlochkopf (aus Gassäule, Kaverne Version 1):")
 print(f"  unten: {P_MAX_LCCS:.0f} bar am Kavernenboden in {TEUFE:.0f} m")
-print(f"  oben:  {p_kopf_ein:.2f} bar am Bohrlochkopf")
+print(f"  oben:  {p_kopf_ein:.2f} bar am Bohrlochkopf (Stillstand)")
+
+# ---- 2b) NEU: Zieldruck im Betrieb - strömende Säule beim Einspeisen ---------
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "Kaverne" / "Grundlagen"))
+import kaverne_bausteine as kb   # Förderstrang und Kopplung, gleiche Funktion wie in der Kavernenrechnung
+
+p_kopf_stillstand = p_kopf_ein
+betrieb = kb.zieldruck_einspeisen(kb.REIN, kb.TIEF, "S1", kb.raten(kb.REIN)["100.000 Nm³/h"])
+p_kopf_ein = betrieb["p_kopf"]   # ab hier: Auslegungsdruck der Pumpe
+print(f"  im Betrieb (Einspeisen S1, 100.000 Nm³/h, strömend): {p_kopf_ein:.2f} bar "
+      f"({p_kopf_ein - p_kopf_stillstand:+.2f} bar gegenüber Stillstand; an der LCCS {betrieb['T_lccs']:.1f} °C)")
 
 # ---- 3) Pumpe: Netzübergabe -> Bohrlochkopf --------------------------------
 p1_bar, T1_C = 91.0, 15.0  # Eingangszustand aus Schritt 01_02
-eta = 0.80  # Wirkungsgrad - eigene Annahme, Vergleichswerte in Q-016 (S. 4, Kap. 2.3), herstellerseitig zu bestätigen
+eta = 0.80  # Wirkungsgrad - eigene Annahme (Q-016 S. 4 nennt nur eine Glykolpumpe mit 70 %), herstellerseitig zu bestätigen
 
 h1 = PropsSI("H", "P", p1_bar * 1e5, "T", T1_C + 273.15, "CO2")
 s1 = PropsSI("S", "P", p1_bar * 1e5, "T", T1_C + 273.15, "CO2")
@@ -187,7 +207,7 @@ ax.plot(T1_C, p1_bar, "s", color=COL_FLUE, ms=10, zorder=7, mec="black", mew=0.8
 ax.annotate(f"Netzübergabe\n{T1_C:.0f} °C / {p1_bar:.0f} bar",
             (T1_C, p1_bar), textcoords="offset points", xytext=(-95, -10), fontsize=9, weight="bold")
 ax.plot(T2_C, p_kopf_ein, "^", color=COL_FLUE, ms=11, zorder=7, mec="black", mew=0.8)
-ax.annotate(f"Bohrlochkopf (nach Pumpe)\n{T2_C:.1f} °C / {p_kopf_ein:.1f} bar",
+ax.annotate(f"Bohrlochkopf im Betrieb (nach Pumpe)\n{T2_C:.1f} °C / {p_kopf_ein:.1f} bar",
             (T2_C, p_kopf_ein), textcoords="offset points", xytext=(10, 10), fontsize=9, weight="bold")
 
 ax.set_xlabel("Temperatur [°C]")

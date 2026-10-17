@@ -10,9 +10,12 @@ Annahmen und Rechenbausteine kommen aus einspeicherung_bausteine.py - dieselben
 wie in 03_S1_pumpe_gemisch.py / 03_S2_verdichtung_kuehlung_pumpe_gemisch.py und in der Excel-Mappe
 "CO2_Einspeicherpfad_Rechenuebersicht_Gemisch.xlsx":
   Übergabe S2        30 bar / 15 °C
-  Kühlung            Kühlwasser 20 °C -> CO₂ auf 26 °C (Kühlmittel + 6 K, Q-120 Folie 24)
-  Grenzen            höchstens 95 °C je Stufe (Q-016), Z > 0,65 (Siemens Energy,
-                     E-Mail-Auskunft 08/2026; Q-017 S. 43: Z ≥ 0,7)
+  Kühlung            Zwischenkühler 40 °C (Q-017 S. 37, Q-063 Kap. 5.1); Kühler vor der
+                     Pumpe: Kühlwasser 20 °C -> CO₂ auf 26 °C (Kühlmittel + 6 K, Q-120 Folie 24)
+  Zieldruck          Kopfdruck im Betrieb S2 (strömende Säule, 100.000 Nm³/h) aus
+                     03_S2_verdichtung_kuehlung_pumpe_gemisch.py (s2_ergebnisse.json)
+  Grenzen            höchstens 95 °C je Stufe (Q-016 S. 4), Z > 0,65 (Siemens Energy,
+                     E-Mail-Auskunft 08/2026; Q-017 S. 44: Z ≥ 0,7)
   Wirkungsgrade      Verdichter 0,84 / 0,82 (Q-016), Pumpe 0,80 (eigene Annahme)
   Unsicherheit       Phasengrenze ±3 bar (Dokumentation Stoffmodelle, Kap. 9)
 
@@ -21,10 +24,12 @@ Die fünf Pfade
                                   Verflüssiger kühlen -> flüssig -> Pumpe. Geht nur bis
                                   20,4 °C (Gemisch) - deshalb mit 20 °C gerechnet
                                   (Kühlwasser 14 °C bzw. Kältemaschine)
-  B  überkritisch kühlen          2 Stufen 30 -> 50 -> 91 bar (über der Cricondenbar),
-                                  auf 26 °C kühlen -> dicht -> Pumpe. Kreuzt keine
-                                  Phasengrenze. = gewählter S2-Pfad der Excel-Mappe
-  C  durchverdichten              2 Stufen 30 -> 52 bar -> Kopfdruck, keine Pumpe
+  B  überkritisch kühlen          2 Stufen 30 -> 55 -> 91 bar (über der Cricondenbar),
+                                  Zwischenkühler 40 °C, Kühler auf 26 °C -> dicht -> Pumpe.
+                                  Kreuzt keine Phasengrenze. = gewählter S2-Pfad der Excel-Mappe
+  C  durchverdichten              2 Stufen 30 -> 52 bar -> Kopfdruck, keine Pumpe. Zwischen-
+                                  kühlung auf 26 °C - mit 40 °C läge Stufe 2 über 95 °C
+                                  (Q-017 S. 44: oberhalb ~60 bar ohnehin keine Zwischenkühlung)
   D  tiefkalt verflüssigen        bei 30 bar mit Kältemaschine abkühlen, dann pumpen
                                   (Weg wie beim Schiffs-/Tankwagentransport)
   E  aus dem Zweiphasengebiet     Pumpe saugt ein Gas-Flüssig-Gemisch an
@@ -35,8 +40,8 @@ Bewertet wird, was die Maschinen brauchen (Q-Kürzel = Quellen- und Wissensmatri
              Q-121 S. 2: 400-500 kg/m³), freies Gas höchstens ~2 Vol-%
              (Q-082 Abschn. 6.4.2), Abstand zur Blasenlinie (Q-121 S. 2, Q-040 C.5)
   Verdichter Eintritt gasförmig, kein Tropfen (Q-017 S. 44), Z > 0,65 (Siemens
-             Energy, E-Mail-Auskunft 08/2026; Q-017 S. 43 nennt 0,7 als Richtwert),
-             höchstens 95 °C je Stufe (Q-016)
+             Energy, E-Mail-Auskunft 08/2026; Q-017 S. 44 nennt 0,7 als Richtwert),
+             höchstens 95 °C je Stufe (Q-016 S. 4)
   Kühlung    CO₂ wird selten kälter als Kühlmittel + 6 K (Q-120, Folie 24)
 
 Ausgabe: Konsole, zwei Abbildungen und phasenpfade_ergebnisse.json
@@ -60,7 +65,7 @@ sys.path.insert(0, str(ORDNER / "Grundlagen"))         # gemisch_worstcase, eins
 ABB = ORDNER / "Abbildungen"                           # Abbildungen und Ergebnisdateien
 
 from einspeicherung_bausteine import (ReinCO2, Gemisch, kopfdruck, stufe, kuehler, pumpeneintritt,
-                                      zweistufig, p_S1, T_S1, p_S2, T_S2, T_K, T_KW, DT_KUEHLER,
+                                      zweistufig, p_S1, T_S1, p_S2, T_S2, T_K, T_ZK, T_KW, DT_KUEHLER,
                                       P_ZW, P_UEK as p_UEK, P_ZW_DV as p_ZW_DV, RHO_MIN, Z_MIN,
                                       eta_V1, eta_V2, eta_P, V_NORM_MAX, U_PG)
 
@@ -108,9 +113,16 @@ def pfad_C(stoff, p_kopf, T_end):
 
 
 # ---- 3) Rechnen -------------------------------------------------------------
+# Zieldruck im Betrieb S2 aus 03_S2 (strömende Säule, Auslegungsrate)
+_s2 = ABB / "s2_ergebnisse.json"
+if not _s2.exists():
+    raise FileNotFoundError("Abbildungen/s2_ergebnisse.json fehlt - zuerst 03_S2_verdichtung_kuehlung_pumpe_gemisch.py ausführen.")
+with open(_s2, encoding="utf-8") as _f:
+    ZIELDRUCK = {k: v["p_kopf"] for k, v in json.load(_f).items()}     # {"rein": ..., "gem": ...}
+
 erg = {}
 for stoff in (REIN, GEM):
-    p_kopf = kopfdruck(stoff)
+    p_kopf = ZIELDRUCK[stoff.kurz]
     A = pfad_A(stoff, p_kopf)
     B = pfad_B(stoff, p_kopf)
     C = pfad_C(stoff, p_kopf, B["P"]["T2"])
@@ -207,8 +219,8 @@ for z in sens:
     print(f"{z['T_K']:5.0f} {z['T_KW']:5.0f} | {zustand_A(z, 'rein'):<24} | {zustand_A(z, 'gem'):<30} "
           f"| {z['B_rein_rho']:8.0f} | {z['B_gem_rho']:7.0f} {z['B_gem_wP']:5.2f}")
 
-# Z-Faktor vor Stufe 2: wie warm muss der Zwischenkühler bei 50 bar mindestens
-# sein, damit Z > 0,65 (Siemens) bzw. Z ≥ 0,7 (Q-017)? Begründung für Zwischendruck 50 bar / 26 °C
+# Z-Faktor vor Stufe 2: Zwischenkühler-Temperatur bei 55 bar variiert (Begründung 40 °C:
+# 05_kuehlung_begruendung.py)
 p_zw_B = erg[GEM.name]["B"]["p_zw"]
 zk_variation = []
 for T_zk in (20.0, 25.0, 30.0, 35.0, 40.0):
@@ -254,7 +266,7 @@ def zeichne(pf, pumpe, farbe, ls, name):
 
 g = erg[GEM.name]
 zeichne(g["A"], True, BLAU, "-", "A unterkritisch verflüssigen (80 bar, 20 °C)")
-zeichne(g["B"], True, GRUEN, "-", "B überkritisch kühlen (91 bar, 26 °C) – gewählt")
+zeichne(g["B"], True, GRUEN, "-", "B überkritisch kühlen (ZK 40 °C, Kühler 91 bar / 26 °C) – gewählt")
 zeichne(g["C"], False, VIOLETT, "--", "C durchverdichten")
 ax.plot([T_S2, -40], [p_S2, p_S2], color=GRAU, lw=2, ls="-.", marker="o", ms=4,
         label="D tiefkalt bei 30 bar (bleibt zweiphasig)")
@@ -309,7 +321,7 @@ def rein_json(x):
 
 
 export = dict(
-    annahmen=dict(p_S2=p_S2, T_S2=T_S2, T_K=T_K, T_KW=T_KW, T_A=T_A, P_ZW=P_ZW, p_V=p_V, p_UEK=p_UEK,
+    annahmen=dict(p_S2=p_S2, T_S2=T_S2, T_K=T_K, T_ZK=T_ZK, T_KW=T_KW, T_A=T_A, P_ZW=P_ZW, p_V=p_V, p_UEK=p_UEK,
                   p_ZW_DV=p_ZW_DV,
                   DT_KUEHLER=DT_KUEHLER, RHO_MIN=RHO_MIN, RHO_WLOKA=RHO_WLOKA, Z_MIN=Z_MIN,
                   GAS_MAX=GAS_MAX, U_PG=U_PG),

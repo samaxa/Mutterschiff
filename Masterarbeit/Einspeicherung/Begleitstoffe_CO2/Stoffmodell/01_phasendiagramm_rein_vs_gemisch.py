@@ -25,6 +25,11 @@ Stoffdaten des Gemischs: Grundlagen/gemisch_worstcase.py.
 
 Diagramm links: gleiche Achsen und Farben wie abb_startpunkt_netzuebergabe.png
 (-80 bis 100 °C, 0 bis 130 bar). Rechts: Ausschnitt um den kritischen Bereich.
+
+Zusätzlich (Abschnitt 5) zwei schlichte Diagramme ohne Betriebspunkte und ohne
+Ausschnitt, gleiche Achsen, zum Nacheinander-Zeigen in Präsentationen:
+  abb_phasendiagramm_rein_schlicht.png      nur reines CO2
+  abb_phasendiagramm_gemisch_schlicht.png   reines CO2 + Zweiphasengebiet des Gemischs
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -104,7 +109,7 @@ PUNKTE = [
     # (Name, p [bar], T [°C], Markerfarbe, Marker)
     ("S1 Netzübergabe",        eb.p_S1,  eb.T_S1, "#007335", "s"),
     ("S2 Netzübergabe",        eb.p_S2,  eb.T_S2, "#164a73", "o"),
-    ("S2 nach Zwischenkühler", eb.P_ZW,  eb.T_K,  "#164a73", "D"),
+    ("S2 nach Zwischenkühler", eb.P_ZW,  eb.T_ZK, "#164a73", "D"),
     ("S2 nach Kühler",         eb.P_UEK, eb.T_K,  "#164a73", "^"),
     ("Kühleraustritt alt (verworfen)", 80.0, 25.0, "#9A9A9A", "x"),
 ]
@@ -248,3 +253,54 @@ fig.suptitle("p-T-Diagramm: reines CO₂ vs. Worst-Case-Gemisch "
 fig.tight_layout()
 fig.savefig(ABB / "abb_phasendiagramm_rein_vs_gemisch.png", dpi=175)
 print("\ngespeichert: abb_phasendiagramm_rein_vs_gemisch.png")
+
+
+# ---- 5) Schlichte Diagramme: erst reines CO2, dann mit Gemisch ---------------
+# Gleiche Achsen und Beschriftung, damit man in der Präsentation von einem zum
+# anderen umschalten kann. Keine Betriebspunkte, kein Ausschnitt.
+def schlicht(mit_gemisch):
+    fig, ax = plt.subplots(figsize=(9, 6.4))
+    phasenflaechen_rein(ax)
+    if mit_gemisch:
+        linien(ax)
+    else:
+        ax.plot(T_sub_C, p_sub_bar, color="#333333", lw=1.4, zorder=3, label="Sublimationslinie")
+        ax.plot(T_melt_C, p_melt_bar, color=COL_FEST, lw=1.4, zorder=3, label="Schmelzlinie")
+        ax.plot(T_saett_C, p_saett_bar, color=COL_REIN, lw=2.0, zorder=3, label="Sättigungslinie")
+        ax.plot(T_krit_C, p_krit_bar, "o", color=COL_REIN, ms=8, zorder=5,
+                markeredgecolor="white", markeredgewidth=1.5)
+    ax.plot(T_tripel_C, p_tripel_bar, "o", color="#333333", ms=6, zorder=5,
+            markeredgecolor="white", markeredgewidth=1.2)
+
+    box = dict(boxstyle="round,pad=0.25", fc="white", ec="none", alpha=0.75)
+    ax.text(-67, 100, "fest\n(Trockeneis)", fontsize=9.5, color=COL_FEST, weight="bold", ha="center", bbox=box)
+    ax.text(72, 55, "gasförmig", fontsize=12, color=COL_GAS, weight="bold", ha="center", bbox=box)
+    ax.text(-5, 105, "flüssig", fontsize=12, color=COL_FLUE, weight="bold", ha="center", bbox=box)
+    ax.text(65, 118, "überkritisch", fontsize=12, color=COL_SUP, weight="bold", ha="center", bbox=box)
+    ax.annotate(f"kritischer Punkt\n{T_krit_C:.1f} °C / {p_krit_bar:.1f} bar", (T_krit_C, p_krit_bar),
+                textcoords="offset points", xytext=(14, -34), fontsize=8.5, color=COL_REIN, bbox=box)
+    ax.annotate(f"Tripelpunkt\n{T_tripel_C:.1f} °C\n{p_tripel_bar:.1f} bar", (T_tripel_C, p_tripel_bar),
+                textcoords="offset points", xytext=(-62, 14), fontsize=8.5, color="#333333", bbox=box)
+    if mit_gemisch:
+        ax.text(-35, 32, "Zweiphasen-\ngebiet Gemisch", fontsize=9, color=COL_GEM, weight="bold",
+                ha="center", bbox=box)
+        ax.annotate(f"krit. Punkt Gemisch\n{T_krit_G:.1f} °C / {p_krit_G:.1f} bar", (T_krit_G, p_krit_G),
+                    textcoords="offset points", xytext=(-120, 22), fontsize=8.5, color=COL_GEM, bbox=box,
+                    arrowprops=dict(arrowstyle="-", color=COL_GEM, lw=0.7))
+
+    ax.set_xlim(Tmin, Tmax)
+    ax.set_ylim(Pmin, Pmax)
+    ax.set_xlabel("Temperatur [°C]")
+    ax.set_ylabel("Druck [bar]")
+    ax.set_title("Reines CO₂ und Worst-Case-Gemisch" if mit_gemisch else "Reines CO₂")
+    ax.legend(loc="lower right", fontsize=8, framealpha=0.92)
+    ax.grid(alpha=0.25, zorder=1)
+    fig.tight_layout()
+    name = "abb_phasendiagramm_gemisch_schlicht.png" if mit_gemisch else "abb_phasendiagramm_rein_schlicht.png"
+    fig.savefig(ABB / name, dpi=175)
+    plt.close(fig)
+    print(f"gespeichert: {name}")
+
+
+schlicht(mit_gemisch=False)
+schlicht(mit_gemisch=True)
