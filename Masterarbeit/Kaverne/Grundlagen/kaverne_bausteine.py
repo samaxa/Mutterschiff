@@ -2,11 +2,13 @@
 """
 Gemeinsame Bausteine der Kavernenrechnung - Referenzkaverne (LCCS 1200 m)
 ============================================================================
-Annahmen und Rechenbausteine aller Kaverne-Skripte stehen hier an EINER Stelle
-(Ordner Reines_CO2/, Begleitstoffe_CO2/, Ausspeichergas/). Die Stoffe (reines CO₂,
-Worst-Case-Gemisch) kommen unverändert aus Einspeicherung/Begleitstoffe_CO2/Grundlagen
-(gemisch_worstcase.py, einspeicherung_bausteine.py) - Ein- und Ausspeicherung rechnen
-also mit demselben Stoffmodell und derselben Zusammensetzung.
+Annahmen und Rechenbausteine aller Kaverne-Skripte stehen hier
+(Ordner Reines_CO2/, Begleitstoffe_CO2/, Ausspeichergas/).
+
+Die Stoffe (reines CO₂, Worst-Case-Gemisch) kommen unverändert aus Einspeicherung/Begleitstoffe_CO2/Grundlagen
+(gemisch_worstcase.py, einspeicherung_bausteine.py) - Ein- und Ausspeicherung rechnen damit mit demselben
+Stoffmodell und derselben Zusammensetzung.
+
 
 Stand 15.10.2026 - nach der Besprechung mit Katrin Vosbeck (Kavernenannahmen):
   * nur noch die tiefe Kaverne (LCCS 1200 m, 650.000 m³); die flache Kaverne entfällt.
@@ -14,9 +16,9 @@ Stand 15.10.2026 - nach der Besprechung mit Katrin Vosbeck (Kavernenannahmen):
     sofort eine Flüssigphase in Kaverne bzw. am Kopf entsteht (Q-030 S. 17, Kap. 1.2.1.2).
     Die Wirkung der Teufe bleibt über das Teufenfenster (Schritt 02) erklärt.
   * 250.000 m³ (Uniper-Bestand) wird nur diskutiert, nicht gerechnet (Q-029, Q-030 Tab. 1).
-  * Förderstrang nur noch adiabat (schnelle Förderung, kein Wärmeaustausch mit dem
-    Gebirge); der Grenzfall "voller Wärmeaustausch" entfällt. Wärmeaustausch zwischen
-    Kaverneninhalt und Gebirge bleibt (UA).
+  * Förderstrang nur noch adiabate betrachtung (schnelle Förderung, kein Wärmeaustausch mit dem
+    Gebirge); der Grenzfall "voller Wärmeaustausch" entfällt, da Katrin meinte das dies vernachlässigbar klein ist.
+    Der Wärmeaustausch zwischen Kaverneninhalt und Gebirge bleibt (UA).
   * Einspeisung gekoppelt an die Einspeicherung: Enthalpie am Kopf = Pumpenaustritt
     S1 bzw. S2, an der LCCS h = h_Kopf + g·z (adiabater Strang) - statt fest 30 °C.
   * Regelung über den Bohrlochkopfdruck: Kopfdruck beim Ein- und Ausspeichern wird
@@ -53,7 +55,7 @@ Annahmen                Wert                    Quelle (Fundstelle)
                                                 temperature at the wellhead")
 
 Modellgrenzen (gelten für alle Skripte)
-  Kaverne als ein ideal durchmischter Knoten (Kavernenmitte), Druck an der
+  Kaverne als ein ideal durchmischtes Kontrollvolumen (Knoten - Kavernenmitte), Druck an der
   LCCS = Knotendruck - ρ·g·(z_Mitte - z_LCCS). Q-028 bestätigt dauerhafte
   Konvektion im Kavernenraum, das stützt die Durchmischung. Keine Sole, keine
   Lösung von CO₂ in Sole (Q-028: "completely debrined"), Wärmeübergang als

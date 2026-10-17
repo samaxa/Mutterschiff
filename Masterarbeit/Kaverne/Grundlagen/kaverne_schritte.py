@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Rechenschritte 01-04 der Kaverne - einmal programmiert, für beide Stoffe genutzt
+Rechenschritte 01-04 der Kaverne - für beide Stoffzusammensetzung genutzt (rein & gemisch)
 ============================================================================
 Die Skripte in Reines_CO2/ und Begleitstoffe_CO2/ rufen diese Funktionen mit ihrem
 Stoff auf (reines CO₂ bzw. Worst-Case-Gemisch) und legen Ergebnisse (JSON) und

@@ -5,6 +5,7 @@ Stand 15.10.2026 (nach der Besprechung mit Katrin Vosbeck). Gerechnet wird nur n
 ```
 Kaverne/
 ├── README.md
+├── Handbuch_Kaverne.docx   Handbuch zum Code: Aufbau, Gleichungen, Abbildungen, Excel, Pakete und Versionen
 ├── Grundlagen/          Annahmen + Rechenbausteine (eine Stelle für alles), Rechenschritte, Excel-Erzeugung
 │   ├── kaverne_bausteine.py      Annahmen mit Fundstellen (Kopf der Datei), Stoffe, Gassäule, Förderstrang, Kavernenbilanz
 │   ├── kaverne_schritte.py       die Schritte 01–04 als Funktionen (gleich für beide Stoffe)
@@ -43,4 +44,4 @@ Reihenfolge: `Reines_CO2/01–04` → `Begleitstoffe_CO2/01–04` → `Begleitst
 
 Die Skripte laufen mit Python310 (dort ist CoolProp installiert). Reines CO₂ braucht für 01–04 wenige Minuten. Beim Gemisch ist Schritt 04 der langsamste (über eine Stunde), weil das Gemisch im Zweiphasengebiet freie Flashes braucht (~0,1–0,4 s je Zustand) – deshalb rechnet 04 beim Gemisch mit gröberem Raster (`n_strang = 50`, 10 Stützstellen).
 
-Die alten Skripte aus `Kaverne/` (01_kavernen_tief_flach_stillstand.py … 06, kaverne_bausteine.py, ausspeichergas.py, JSON, alte Mappe) sind durch diese Struktur ersetzt und können ins Archiv.
+Die alten Skripte, Abbildungen, die alte Mappe und das alte Handbuch (Stand bis 14.10.2026) liegen in `Archiv_Dokumentation/Kaverne_alt_bis_14-10/` und werden nicht mehr gebraucht.
