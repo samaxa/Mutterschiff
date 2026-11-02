@@ -48,7 +48,7 @@ RATE_A, RATE_B = "100.000 Nm³/h", "50.000 Nm³/h"
 RATEN = (RATE_B, RATE_A)
 ST_A, ST_B = "Stillstand 21,67 d (Q-028)", "kontinuierlich (0 d)"
 BLAU, ROT, GRUEN, ORANGE, GRAU = "00304F", "CA220E", "007335", "EE7203", "7F7F7F"
-STAND = "15.10.2026"
+STAND = "02.11.2026"
 
 # ------------------------------------------------------------------ Hausstil
 DUENN = Side(style="thin", color="BFBFBF")
@@ -296,7 +296,6 @@ ANNAHMEN = [
     ("Strömung im Strang", "–", "adiabat", "–",
      "Besprechung K. Vosbeck 15.10.2026: schnelle Förderung, kein Wärmeaustausch mit dem Gebirge (h + g·z = konst.)", None),
     ("Rückgabe ins Netz (dicht)", "p_rueck", 91, "bar", "OGE-Austausch 16.09.2026 (wie Übergabe S1)", "0"),
-    ("Gasförmige Übergabe / Drosselung auf", "p_gas", 30, "bar", "wie Übergabe S2", "0"),
     ("Kopftemperatur mindestens (Vergleich Erdgas)", "T_kopf_min", 5, "°C", "Q-035 Folie 36 (Speicher Epe, Erdgas)", "0"),
     "Einspeisung (gekoppelt an die Einspeicherung)",
     ("Kopftemperatur beim Einspeisen", "–", "Pumpenaustritt", "–",
@@ -318,7 +317,7 @@ def uebersicht(wb, stoff, K):
     z(ws, "B1", f"CO₂-Zwischenspeicherung in Salzkavernen – Kaverne · {NAME[stoff]}", "titel")
     ws.row_dimensions[1].height = 30
     z(ws, "B2", "Rechenübersicht Kaverne · Masterarbeit Sarah Maxara · TH Köln / Uniper Energy Storage", "untertitel")
-    z(ws, "B3", f"Stand: {STAND} (nach der Besprechung mit K. Vosbeck) · Stoffdaten: CoolProp 8.0.0 ("
+    z(ws, "B3", f"Stand: {STAND} (Drossel raus, Kopfzustand und Leitsätze ergänzt) · Stoffdaten: CoolProp 8.0.0 ("
                 + ("Span & Wagner 1996" if stoff == "rein" else "GERG-2008-Mischungsregel, 95 % CO₂ + 5 % Begleitstoffe")
                 + f") · Abbild der Skripte Kaverne/{ORDNER[stoff].name}/01–04"
                 + (", 05" if stoff == "gem" else "") + " und Kaverne/Ausspeichergas/06", "untertitel")
@@ -349,7 +348,7 @@ def uebersicht(wb, stoff, K):
     inhalt = [("01 Stillstand & Zieldruck", "Gassäule für voll, Grenzfall und leer; strömende Säule beim Einspeisen – Zieldruck S1 und S2."),
               ("02 Arbeitsgas & Teufe", "Inhalt, Kissengas und Arbeitsgas (isotherm / isentrop); Kontrolle gegen DBI; Teufenfenster."),
               ("03 Zyklus", "Rate aus 10 bar/d; Kavernenbilanz über einen Zyklus (S1/S2, 2 Raten, mit und ohne Stillstand); Nachrechnung Q-028."),
-              ("04 Bohrlochkopf", "Kopfdruckfenster beim Ein- und Ausspeichern, Pumpe oder Drossel, Phase im Strang, Reibung."),
+              ("04 Bohrlochkopf", "Kopfdruckfenster beim Ein- und Ausspeichern; Zustand und Phase am Kopf beim Ausspeichern; Reibung."),
               ("05 Speicherbedarf", "Arbeitsgas je Kaverne gegen den Bedarf aus Q-002; Zyklen pro Jahr (Q-029). Rechnet live mit."),
               ("06 Ausspeichergas", "Zusammensetzung nach der Kaverne (Min-/Max-Fall), Wasser, Rückgabegrenzen OGE.")]
     if stoff == "gem":
@@ -432,6 +431,13 @@ def uebersicht(wb, stoff, K):
         ws.merge_cells(f"H{r}:O{r}")
         ws.row_dimensions[r].height = 27 if len(bem) > 80 or len(txt) > 45 else 18
         r += 1
+    if LEIT:
+        r += 1
+        for c in range(2, 16):
+            z(ws, f"{get_column_letter(c)}{r}", None, "abschnitt")
+        z(ws, f"B{r}", "Leitsätze zum Merken", "abschnitt")
+        ws.merge_cells(f"B{r}:O{r}")
+        kasten(ws, f"B{r + 1}:O{r + 1}", "\n".join(LEIT), 16 * len(LEIT) + 8)
     return ws
 
 
@@ -557,11 +563,16 @@ def blatt_02(wb, stoff, A, DD):
            "INHALT (TGV):  Masse in der vollen Kaverne bei 210 bar an der LCCS und Gebirgstemperatur: m = ρ(p_Mitte, T)·V.\n"
            "KISSENGAS (CGV):  was bei p_min in der Kaverne bleibt – isotherm (langsam, das Gebirge hält die Temperatur) oder "
            "isentrop (schnell, das CO₂ kühlt beim Entspannen ab und ist dichter → mehr bleibt drin).\n"
+           "WO GILT DAS?  Nur für den Kaverneninhalt, nicht für den Förderstrang. Isotherm heißt Temperatur bleibt gleich: das "
+           "Gebirge liefert so viel Wärme nach, wie das Entspannen kostet. Isentrop heißt adiabat ohne Verluste (Entropie bleibt "
+           "gleich): gar keine Wärme vom Gebirge. „Langsam“ und „schnell“ sind keine bestimmten Raten, sondern die zwei "
+           "Grenzfälle. Die echte Rate liegt dazwischen – Blatt 03 rechnet sie mit Wärmeübergang UA = 546 kW/K und landet nahe "
+           "isotherm. Im Strang dagegen ist das CO₂ nur Minuten unterwegs, dort wird adiabat gerechnet (Blatt 04).\n"
            "ARBEITSGAS (WGV):  TGV − CGV. Realistisch liegt der Zyklus dazwischen – die Kavernenbilanz (Blatt 03) rechnet "
            "den Wärmeübergang mit.\n"
            "TEUFENFENSTER:  ab welcher Teufe bleibt der Kaverneninhalt (Gebirgstemperatur) mit Abstand über der "
            + ("Cricondentherm" if stoff == "gem" else "kritischen Temperatur") + "; bis welche Teufe passt p_max zum Gebirge.",
-           92)
+           150)
     z(ws, "B6", "Inhalt, Kissengas und Arbeitsgas", "h2")
     z(ws, "B7", "Inhalt bei p_max (TGV) [t]", "textfett")
     z(ws, "C7", A["TGV"], "ergebnis", nf="#,##0")
@@ -787,14 +798,18 @@ def blatt_04(wb, stoff, BK, DD):
     kasten(ws, "B4:K4",
            "REGELUNG ÜBER DEN KOPFDRUCK (Besprechung K. Vosbeck 15.10.2026, Pkt. 6):  Die Anlage muss über den ganzen Zyklus "
            "den passenden Kopfdruck liefern bzw. aufnehmen. Höchster Wert = Auslegung der Pumpe (Einspeisen in die volle "
-           "Kaverne bei 100.000 Nm³/h), kleinster Wert = Rückverdichtung bzw. Drossel beim Ausspeichern.\n"
+           "Kaverne bei 100.000 Nm³/h), kleinster Wert = Start des Ausspeicherpfads (Rückverdichtung, wenn er unter 91 bar liegt).\n"
            "EINSPEISEN:  Reicht der Lieferdruck (91 bar) für den nötigen Kopfdruck, läuft die Pumpe nicht – dann wird am Kopf "
            "isenthalp gedrosselt (kalter Kopf, unten zweiphasiger Strang möglich). Erst ab einem höheren Kavernendruck läuft "
            "die Pumpe.\n"
-           "AUSSPEICHERN:  Strömung nach oben, adiabat: das CO₂ entspannt und kühlt im Strang; bei niedrigem Kavernendruck "
-           "wird der Strang zweiphasig (Band unten). Danach Drosselung auf 30 bar (gasförmige Übergabe) oder Rückgabe dicht "
-           "mit 91 bar (Rückverdichtung nötig, wenn der Kopf darunter liegt).\n"
-           "GRENZE:  homogenes Modell – zweiphasige Abschnitte nur angezeigt (Q-028 S. 11).", 120)
+           "AUSSPEICHERN:  Strömung nach oben, adiabat: das CO₂ entspannt und kühlt im Strang. Oben liegt der Kopf dann meist "
+           "unter kritischem Druck und kritischer Temperatur, also auf der Siedelinie: zweiphasig (Tabelle und Diagramm unten). "
+           "Was nach dem Kopf kommt (Abscheiden, Trocknen, H₂S-Entfernung, Rückverdichtung), ist der nächste Schritt "
+           "(Ausspeicherpfad in HYSYS, Konzept nach Q-030 Fig. 15).\n"
+           "QUELLEN:  Q-028 S. 8: die Obertageanlage muss alle Phasen verarbeiten können; S. 14: Phasenwechsel im Bohrloch "
+           "unvermeidbar. Q-030 S. 11: Übergang ins Flüssige beim Ausspeichern vermeiden (Druckstoß).\n"
+           "GRENZE:  homogenes Modell – zweiphasige Abschnitte nur angezeigt; genauer nur mit Mehrphasen-Bohrlochmodell "
+           "(Q-028 S. 11), nicht Teil der Arbeit.", 150)
     z(ws, "B6", "Kopfdruckfenster (Übersicht)", "h2")
     kopfzeile(ws, 7, "BCDEF", ["Betriebsfall", RATE_B, RATE_A, "Einheit", "Bedeutung"], 30)
     ws.merge_cells("F7:H7")
@@ -811,8 +826,6 @@ def blatt_04(wb, stoff, BK, DD):
                 "Ende (Kaverne leer) → Rückverdichtung auf 91 bar"),
                ("Ausspeisen: Kopftemperatur mindestens", F.get(f"ausspeisen_{RATE_B}_T_min"),
                 F.get(f"ausspeisen_{RATE_A}_T_min"), "°C", "Vergleich Epe: 5 °C (Q-035 Folie 36)"),
-               ("Ausspeisen: T nach Drossel auf 30 bar mindestens", F.get(f"ausspeisen_{RATE_B}_T_drossel_min"),
-                F.get(f"ausspeisen_{RATE_A}_T_drossel_min"), "°C", "→ Vorwärmung vor der Drossel nötig"),
                ("Ausspeisen: Geschwindigkeit am Kopf höchstens", F.get(f"ausspeisen_{RATE_B}_v_max"),
                 F.get(f"ausspeisen_{RATE_A}_v_max"), "m/s", "Grenze 20 m/s (Q-030 Kap. 1.2.1)")]
     out = {}
@@ -826,8 +839,6 @@ def blatt_04(wb, stoff, BK, DD):
         ws.merge_cells(f"F{r}:H{r}")
         if t.startswith("Ausspeisen: Kopfdruck mindestens"):
             name(wb, "Kopf_aus_min", ref(ws.title, f"D{r}"))
-        if t.startswith("Ausspeisen: T nach Drossel"):
-            name(wb, "T_drossel_min", ref(ws.title, f"D{r}"))
         if t.startswith("Ausspeisen: Kopftemperatur"):
             name(wb, "T_kopf_aus_min", ref(ws.title, f"D{r}"))
     re_ = 8 + len(zeilen) - 1
@@ -887,6 +898,55 @@ def blatt_04(wb, stoff, BK, DD):
     veraltet(ws, f"C{r + 2}:E{rr - 1}")
     z(ws, f"B{rr}", "Beim Ausspeichern kostet die Reibung Kopfdruck und – über den Joule-Thomson-Effekt – Temperatur, am "
                     "stärksten am Ende (niedriger Druck, hohe Geschwindigkeit).", "notiz")
+    # Zustand am Kopf beim Ausspeichern, Punkt für Punkt
+    rr += 2
+    z(ws, f"B{rr}", "Ausspeisen: Zustand am Kopf, Punkt für Punkt", "h2")
+    z(ws, f"B{rr + 1}", "Rechenpunkte, keine Messwerte: gleichmäßig über die Ausspeicherzeit verteilt, je Punkt wird der Strang "
+                        "von der Kaverne bis zum Kopf gerechnet. Dampfanteil q nur im Zweiphasengebiet.", "notiz")
+    kopfzeile(ws, rr + 2, "BCDEFGH", ["Rate", "Zeit [d]", "p LCCS [bar]", "p Kopf [bar]", "T Kopf [°C]", "Dampfanteil q [–]",
+                                      "Phase am Kopf"], 30)
+    r2 = rr + 3
+    kz = {}
+    for rate in RATEN:
+        pts = [x for x in BK["ausspeisen"][rate]["punkte"] if x["kopf"]]
+        kz[rate] = pts
+        for x in pts:
+            k = x["kopf"]
+            z(ws, f"B{r2}", rate, "text")
+            z(ws, f"C{r2}", x["t"], "grau", nf="0.0")
+            z(ws, f"D{r2}", x["p_lccs"], "grau", nf="0.0")
+            z(ws, f"E{r2}", k["p"], "grau", nf="0.0")
+            z(ws, f"F{r2}", k["T"], "grau", nf="0.0")
+            z(ws, f"G{r2}", k["q"] if k["q"] is not None else "–", "grau", nf="0.00")
+            ph = "zweiphasig" if k["q"] is not None else ("dicht" if k["p"] > 73.8 else "gasförmig")
+            z(ws, f"H{r2}", ph, "warn" if ph == "zweiphasig" else "text")
+            r2 += 1
+    veraltet(ws, f"C{rr + 3}:G{r2 - 1}")
+    rr = r2
+    # Diagramm Kopfzustand im Phasendiagramm
+    cs = DD.max_column + 2
+    DD.cell(5, cs, "04 Kopfzustand beim Ausspeichern (p über T)").font = Font(bold=True, color=BLAU)
+    DD.cell(6, cs, "T Siedelinie").font = Font(bold=True)
+    DD.cell(6, cs + 1, "p Siedelinie").font = Font(bold=True)
+    for i, (t_, p_) in enumerate(SIEDELINIE):
+        DD.cell(7 + i, cs, t_)
+        DD.cell(7 + i, cs + 1, p_)
+    ch3 = streu("Zustand am Kopf beim Ausspeichern – auf der Siedelinie = zweiphasig", "Temperatur am Kopf [°C]",
+                "Druck am Kopf [bar]", b=17, h=10, xmin=0, xmax=45, ymin=20, ymax=130)
+    linie(DD, ch3, cs, cs + 1, 7, 6 + len(SIEDELINIE), "Siedelinie reines CO₂" + (" (Vergleich)" if stoff == "gem" else ""),
+          "1F4E79", 2.5)
+    for j, (rate, farbe) in enumerate(((RATE_A, BLAU), (RATE_B, ORANGE))):
+        cx = cs + 2 + 2 * j
+        DD.cell(6, cx, f"T Kopf {rate}").font = Font(bold=True)
+        DD.cell(6, cx + 1, f"p Kopf {rate}").font = Font(bold=True)
+        pts = sorted(kz[rate], key=lambda x: x["t"])
+        for i, x in enumerate(pts):
+            DD.cell(7 + i, cx, x["kopf"]["T"])
+            DD.cell(7 + i, cx + 1, x["kopf"]["p"])
+        linie(DD, ch3, cx, cx + 1, 7, 6 + len(pts), f"Kopf beim Ausspeichern, {rate}", farbe, 1.5,
+              "dash" if rate == RATE_B else None, marker="circle")
+    ws.add_chart(ch3, f"B{rr + 2}")
+    rr += 22
     # Diagramm: Kopfdruck über Kavernendruck
     c0 = DD.max_column + 2
     DD.cell(5, c0, "04 Kopfdruck über Kavernendruck (100.000 Nm³/h)").font = Font(bold=True, color=BLAU)
@@ -913,6 +973,8 @@ def blatt_04(wb, stoff, BK, DD):
         linie(DD, ch2, cx, cx + 2, 7, 6 + len(pts), t, farbe, 2, marker="circle")
     ws.add_chart(ch, f"B{rr + 2}")
     ws.add_chart(ch2, f"F{rr + 2}")
+    if LEIT:
+        kasten(ws, f"B{rr + 24}:K{rr + 24}", "LEITSÄTZE\n" + "\n".join(LEIT), 16 * (len(LEIT) + 1) + 8)
     return out
 
 
@@ -1049,6 +1111,8 @@ def blatt_vergleich(wb, V):
                                  "betrifft"], 30)
     r = 7
     for g in V.get("groessen", []):
+        if "Drossel auf 30" in g["groesse"]:
+            continue   # Drossel ist Teil des Ausspeicherpfads (nächster Schritt), hier nicht mehr ausgewiesen
         nf = "#,##0" if g["einheit"] == "t" else ("0%" if g["einheit"] == "–" else "0.0")
         z(ws, f"B{r}", g["groesse"], "text")
         for sp, k in (("C", "rein"), ("D", "gemisch")):
@@ -1074,12 +1138,16 @@ QUELLEN = [
      "Kap. 6.2: Rohrreibungszahl 0,015–0,017 → f = 0,016; Kap. 9.3.2.4: Restsole ≤ 1 %"),
     ("Q-028", "Buzogany, R.; Kruck, O. (2022): CO₂ – Storage in Salt Caverns: Thermodynamic Analysis and Challenges. SMRI Fall 2022.",
      "Tab. 1: Kavernendaten (Volumen, p_min, Bezugsteufe); Kap. 3 (S. 5), Fig. 3: Gebirge 10 °C + 0,03 K/m, Gassäulen; S. 10 "
-     "(Kap. 4): Betriebsszenario mit Stillstand 21,67 d, Kalibrierung UA; S. 11: Mehrphasen-Bohrlochmodell nötig"),
+     "(Kap. 4): Betriebsszenario mit Stillstand 21,67 d, Kalibrierung UA; S. 7: Kopf im Stillstand ab ca. 168 bar unterkritisch; "
+     "S. 8: Obertageanlage muss alle Phasen verarbeiten; S. 11: Mehrphasen-Bohrlochmodell nötig; S. 14: Phasenwechsel im "
+     "Bohrloch unvermeidbar"),
     ("Q-029", "DBI für Uniper (2024): CCUS-P2 – CO₂-Storage for CCU/S, Phase 2 – Detailing Study, Final Report V08.",
      "Management Summary (PDF-S. 3), Kap. 5 (PDF-S. 41–43): 4 Zyklen/a (Approach 2) bzw. 1 Zyklus/a (Approach 8)"),
     ("Q-030", "DBI für Uniper (2023): CCUS-P1 – CO₂-Storage for CCU/S, Phase 1 – Initial Concept Study, Final Report.",
      "Tab. 1: Teufe 1200 m (Option 2), Förderstrang 8 5/8\"; Kap. 1.2.1: 10 bar/d, 20 m/s; S. 15: Einspeisung mit konstanter "
-     "Kopftemperatur; S. 17: flache Option verworfen, 160 bar Mindestdruck (Option 2)"),
+     "Kopftemperatur; S. 17: flache Option verworfen, 160 bar Mindestdruck (Option 2); S. 11: Übergang ins Flüssige beim "
+     "Ausspeichern vermeiden; S. 13/15/18: Kopfzustand bei 1.000 t/d bzw. 60.000 Nm³/h; S. 15: 60.000 Nm³/h als Höchstrate aus 20 m/s und 10 bar/d; S. 36 (Fig. 15): Ausspeicherseite "
+     "Szenario 2.2, Rückverdichtung nur unter Netzdruck"),
     ("Q-035", "Uniper Energy Storage (2024): Kavernenspeicher – Technische Kennlinien, Kapazitäten, Restriktionen (Onboarding, intern).",
      "Folie 5: Druckbereich Epe; Folie 31: unterer Druckbereich höchstens 60 Tage je Jahr; Folie 36: Gastemperatur am Kopf ≥ 5 °C"),
     ("Q-089", "UGS GmbH (Frommhold, Schwabe) für DGMK (2024): Konzeptstudie zu Reinheitsanforderungen H₂-Netz.",
@@ -1111,6 +1179,50 @@ def blatt_quellen(wb):
 
 
 # ======================================================================================
+SIEDELINIE = [(-20.0, 19.7), (-17.0, 21.58), (-14.0, 23.59), (-11.0, 25.74), (-8.0, 28.03), (-5.0, 30.46),
+              (-2.0, 33.04), (1.0, 35.78), (4.0, 38.69), (7.0, 41.77), (10.0, 45.02), (13.0, 48.47), (16.0, 52.11),
+              (19.0, 55.96), (22.0, 60.03), (25.0, 64.34), (28.0, 68.92), (30.98, 73.77)]   # CoolProp, Span & Wagner
+LEIT = []
+
+
+def leitsaetze(stoff, D, A, Z, BK):
+    """Kurze Merksätze aus den Ergebnissen (Zahlen aus den JSON-Dateien)."""
+    if not (D and A and Z and BK):
+        return []
+    v = A["varianten"]
+    a70 = v[0]["anteil_iso"]
+    dicht = next((x for x in v if "dicht" in x["variante"].lower()), None)
+    grenz = D.get("p_lccs_grenzfall")
+    vl = Z["zyklen"].get(f"S2|{RATE_A}|{ST_A}", {}).get("verlauf", [])
+    T_kav = min(x["T"] for x in vl) if vl else None
+    pts = sorted([x for x in BK["ausspeisen"][RATE_A]["punkte"] if x["kopf"]], key=lambda x: x["p_lccs"])
+    p91 = None
+    for a, b in zip(pts, pts[1:]):
+        if a["kopf"]["p"] <= 91 <= b["kopf"]["p"]:
+            p91 = a["p_lccs"] + (91 - a["kopf"]["p"]) * (b["p_lccs"] - a["p_lccs"]) / (b["kopf"]["p"] - a["kopf"]["p"])
+    zw = {r: sum(1 for x in BK["ausspeisen"][r]["punkte"] if x["kopf"] and x["kopf"]["q"] is not None) for r in RATEN}
+    n = {r: sum(1 for x in BK["ausspeisen"][r]["punkte"] if x["kopf"]) for r in RATEN}
+    L = ["1  Isotherm (langsam) und isentrop (schnell) beschreiben nur die Kaverne: mit voller bzw. ohne Wärme vom Gebirge. "
+         "Die echte Kaverne liegt dazwischen, nahe isotherm (Blatt 03).",
+         "2  Im Förderstrang wird adiabat gerechnet: das CO₂ ist nur Minuten unterwegs, das Gebirge liefert kaum Wärme nach "
+         "(Besprechung K. Vosbeck 15.10.2026)."]
+    if T_kav is not None:
+        L.append(f"3  Die Kaverne selbst bleibt einphasig: tiefster Wert {de(T_kav)} °C, über "
+                 + ("der Cricondentherm 28,1 °C." if stoff == "gem" else "dem kritischen Punkt 31,0 °C."))
+    L.append(f"4  Am Kopf ist das CO₂ beim Ausspeichern meist zweiphasig ({zw[RATE_A]} von {n[RATE_A]} Rechenpunkten bei "
+             f"100.000 Nm³/h, {zw[RATE_B]} von {n[RATE_B]} bei 50.000 Nm³/h). Die Anlage muss alle Phasen verarbeiten (Q-028 S. 8).")
+    L.append("5  Je höher die Rate, desto kälter am Kopf und desto eher zweiphasig (DBI: bei 1.000 t/d nur überkritisch → "
+             "gasförmig, Q-030 S. 13; bei 60.000 Nm³/h knapp an der Flüssiggrenze, S. 15 und 18).")
+    if grenz and dicht:
+        L.append(f"6  Dicht bliebe der Strang im Stillstand erst ab {de(grenz, 0)} bar an der LCCS. Mit diesem Mindestdruck blieben "
+                 f"nur {de(100 * dicht['anteil_iso'], 0)} % vom Inhalt als Arbeitsgas, mit 70 bar sind es {de(100 * a70, 0)} % "
+                 "(isotherm). Deshalb: bis 70 bar fahren und mehrphasig am Kopf.")
+    if p91:
+        L.append(f"7  Unter rund {de(p91, 0)} bar in der Kaverne kommen oben weniger als 91 bar an: für die dichte Rückgabe "
+                 "braucht es dann eine Rückverdichtung (Q-030 S. 36).")
+    return L
+
+
 def erzeuge(stoff):
     D = lade(stoff, "kaverne_stillstand.json")
     A = lade(stoff, "arbeitsgas.json")
@@ -1118,6 +1230,8 @@ def erzeuge(stoff):
     BK = lade(stoff, "bohrlochkopf.json")
     AG = lade(stoff, "zusammensetzung_nach_kaverne.json")
     V = lade("gem", "vergleich_rein_gemisch.json") if stoff == "gem" else None
+    global LEIT
+    LEIT = leitsaetze(stoff, D, A, Z, BK)
     wb = Workbook()
     K = [("Kopfdruck im Stillstand, Kaverne voll", "=Kopf_voll", "bar", "0.0", "Blatt 01 – ruhende Säule"),
          ("Zieldruck der Pumpe im Betrieb S1 (100.000 Nm³/h)", "=Kopf_betr_S1", "bar", "0.0", "Blatt 01 – strömende Säule"),
@@ -1129,7 +1243,8 @@ def erzeuge(stoff):
          ("Grenzrate: Kaverne bleibt beim Ausspeichern einphasig bis", "=Grenzrate", "kg/s", "0", "Blatt 03"),
          ("Kopfdruck beim Ausspeichern mindestens (100.000 Nm³/h)", "=Kopf_aus_min", "bar", "0.0",
           "Blatt 04 → Rückverdichtung auf 91 bar nötig"),
-         ("Temperatur nach Drossel auf 30 bar mindestens", "=T_drossel_min", "°C", "0.0", "Blatt 04 → Vorwärmung"),
+         ("Kopftemperatur beim Ausspeichern mindestens (100.000 Nm³/h)", "=T_kopf_aus_min", "°C", "0.0",
+          "Blatt 04 – am Kopf meist zweiphasig (Siedelinie)"),
          ("Kavernen für den Bedarf nach Q-002 (unten / oben)", "=Kavernen_min", "–", "0",
           "=\"bis \"&TEXT(Kavernen_max,\"0\")&\" Kavernen bei 1,21 Mt (Blatt 05)\"")]
     uebersicht(wb, stoff, K)
@@ -1155,7 +1270,7 @@ def erzeuge(stoff):
     link(DD, "B3", "← zur Übersicht", "Übersicht")
     # Namen, die fehlen könnten (Blatt nicht gerechnet), als #N/A anlegen, damit die Übersicht nicht #NAME? zeigt
     for n in ("Kopf_voll", "Kopf_leer", "Kopf_betr_S1", "Kopf_betr_S2", "TGV", "AG_zyklus", "Zyklusdauer", "Zyklen_a",
-              "Grenzrate", "Kopf_aus_min", "T_drossel_min", "Kavernen_min", "Kavernen_max"):
+              "Grenzrate", "Kopf_aus_min", "T_kopf_aus_min", "Kavernen_min", "Kavernen_max"):
         if n not in wb.defined_names:
             wb.defined_names[n] = DefinedName(n, attr_text="NA()")
     wb.calculation.fullCalcOnLoad = True

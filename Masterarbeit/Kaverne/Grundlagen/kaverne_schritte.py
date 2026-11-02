@@ -158,6 +158,11 @@ def schritt_01(med, ordner):
 
     # ---- Abbildung 2: Betriebsfenster im p-T-Diagramm
     fig, ax = plt.subplots(figsize=(10.5, 6.8))
+    if not med.ist_gemisch:                     # Phasengebiete einfärben (wie Stand bis 14.10.)
+        T_s = np.linspace(PropsSI("Ttriple", "CO2"), PropsSI("Tcrit", "CO2"), 200)
+        p_s = np.array([PropsSI("P", "T", T, "Q", 0, "CO2") for T in T_s]) / 1e5
+        ax.fill_between([kb.T_KRIT, 70], kb.P_KRIT, 240, color="#FCE5CD", zorder=0)
+        ax.fill_between(T_s - 273.15, p_s, 240, color="#D9EAD3", zorder=0)
     phasengrenze_zeichnen(ax, med)
     for name, s in saeulen.items():
         pr = s["profil"]
@@ -166,10 +171,21 @@ def schritt_01(med, ordner):
         pr = rr[RATE_A]["profil"]
         ax.plot([float(r[2]) for r in pr], [float(r[1]) for r in pr], color=FARBE_S[szen], lw=2.2,
                 label=f"Einspeisen {szen} ({RATE_A})")
-    ax.plot([KAV.T_lccs] * 2, [KAV.p_min, KAV.p_max], color=BLAU_D, lw=6, alpha=0.6, solid_capstyle="butt",
+    ax.plot([KAV.T_lccs] * 2, [KAV.p_min, KAV.p_max], color=BLAU_D, lw=6, alpha=0.8, solid_capstyle="butt",
             label=f"Kaverne an der LCCS: {kb.de(KAV.p_min, 0)}–{kb.de(KAV.p_max, 0)} bar")
+    # Bohrlochkopf im Stillstand: Kopfdruck leer bis voll bei Oberflächentemperatur (Balken links)
+    ks = [s["p_kopf"] for s in saeulen.values()]
+    ax.plot([kb.T_OBERFLAECHE] * 2, [min(ks), max(ks)], color=BLAU_D, lw=6, alpha=0.35, solid_capstyle="butt",
+            label=f"Bohrlochkopf im Stillstand: {kb.de(min(ks), 0)}–{kb.de(max(ks), 0)} bar")
+    ax.text(KAV.T_lccs + 1.2, KAV.p_max, "voll", fontsize=8, color=BLAU_D, va="center")
+    ax.text(KAV.T_lccs + 1.2, KAV.p_min, "leer", fontsize=8, color=BLAU_D, va="center")
+    ax.text(kb.T_OBERFLAECHE - 1, 5, f"Bohrlochkopf\n({kb.de(kb.T_OBERFLAECHE, 0)} °C)", fontsize=8, ha="right", color="#555")
+    gross = dict(fontsize=11, weight="bold", color="#7F7F7F", ha="center")
+    ax.text(0, 110, "flüssig" if not med.ist_gemisch else "flüssig / dicht", **gross)
+    ax.text(60, 200, "überkritisch", **gross)
+    ax.text(55, 30, "gasförmig", **gross)
     ax.set(xlim=(-10, 70), ylim=(0, 240), xlabel="Temperatur [°C]", ylabel="Druck [bar]",
-           title=f"Betriebsfenster Bohrloch und Kaverne, {_titel(med)}")
+           title=f"Betriebsfenster {_titel(med)}: von der LCCS (Balken rechts) bis zum Kopf (Balken links)")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=7.5, loc="upper left")
     fig.tight_layout()
