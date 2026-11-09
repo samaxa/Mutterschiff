@@ -10,6 +10,10 @@ K. Vosbeck 15.10.2026): Min- und Max-Fall nach den Bandbreiten in Q-089, jeweils
 reines CO₂ und das Worst-Case-Gemisch der Anlieferung. Werte und Fundstellen:
 ausspeichergas.py (Kopf der Datei).
 
+Stand 09.11.2026: Der Min-Fall nimmt zusätzlich keine Bildung durch Mikroben an (kein H₂S,
+kein mikrobielles CH₄, damit auch kein H₂-Verbrauch) und kein Verdichteröl (S1, nur Pumpe,
+kein Verdichter). Der Max-Fall (Auslegung) bleibt unverändert.
+
 Zustände aus den vorigen Schritten (Auslegungsrate 100.000 Nm³/h, Einspeisung S2,
 Stillstand 21,67 d; die erste Ausspeicherung ist für S1 und S2 gleich):
   Kaverne voll / leer   ../Reines_CO2/kavernenzyklus.json bzw. ../Begleitstoffe_CO2/...
@@ -38,15 +42,17 @@ import kaverne_bausteine as kb   # noqa: E402
 KAV = kb.TIEF
 RATE, ST = "100.000 Nm³/h", "Stillstand 21,67 d (Q-028)"
 V_REF_Q089 = 500000.0            # m³, Musterkaverne Q-089 (Tab. 16)
+H2S_PPM, CH4_MIKRO_PPM = 10.0, 50.0     # Max-Fall: Q-089 Abschn. 6.4.2 / 6.4.3, Tab. 20 (S. 40)
 FAELLE = {
-    "min": dict(name="Min-Fall (untere Werte Q-089)", a_w_voll=ag.A_W_SOLE, a_w_leer=1.0,
-                finger_m3=1000.0, blanket_m3=0.084, oel_kg=0.135),
+    # Min-Fall: untere Werte Q-089; keine Bildung durch Mikroben (kaum H₂ als Nahrung, saure und salzige Sole
+    # hemmt sie) -> 0 ppm H₂S und 0 ppm mikrobielles CH₄; S1 (nur Pumpe, kein Verdichter) -> kein Verdichteröl
+    "min": dict(name="Min-Fall (untere Werte Q-089, ohne Mikroben, S1 ohne Verdichter)", a_w_voll=ag.A_W_SOLE,
+                a_w_leer=1.0, finger_m3=1000.0, blanket_m3=0.084, oel_kg=0.0, h2s_ppm=0.0, ch4_mikro_ppm=0.0),
     "max": dict(name="Max-Fall (obere Werte Q-089, gesättigt)", a_w_voll=ag.A_W_AUSLEGUNG, a_w_leer=ag.A_W_AUSLEGUNG,
-                finger_m3=2000.0, blanket_m3=1.76, oel_kg=0.260),
+                finger_m3=2000.0, blanket_m3=1.76, oel_kg=0.260, h2s_ppm=H2S_PPM, ch4_mikro_ppm=CH4_MIKRO_PPM),
 }
 RHO_DIESEL, M_DIESEL = 827.7, 230.0     # kg/m³ (Q-089 Tab. 12, 50 °C / 210 bar), g/mol (Tab. 11: 121-315, Mitte)
 M_OEL = 300.0                           # g/mol (Q-089 Tab. 5: 270-320)
-H2S_PPM, CH4_MIKRO_PPM = 10.0, 50.0     # Q-089 Abschn. 6.4.2 / 6.4.3, Tab. 20 (S. 40)
 RESTSOLE_ANTEIL = 0.01                  # eigene Annahme: 1 % von V Restsole (nur Größenordnung; Q-003 Kap. 9.3.2.4: ≤ 1 %)
 OGE = dict(H2O_ppm=30.0, H2S_ppm=0.5, p_min=91.0)   # Rückgabe ins Netz (OGE-Austausch 16.09.2026)
 
@@ -84,10 +90,10 @@ for stoff in ("rein", "gem"):
 
         zus = {k: v * n_tot for k, v in BASIS[stoff].items()}
         zus["Methane"] = zus.get("Methane", 0.0) + n_ch4_rest
-        zus["HydrogenSulfide"] = H2S_PPM * 1e-6 * n_tot
+        zus["HydrogenSulfide"] = F["h2s_ppm"] * 1e-6 * n_tot
         if stoff == "gem":
-            zus["Methane"] += CH4_MIKRO_PPM * 1e-6 * n_tot
-            zus["Hydrogen"] -= 4 * CH4_MIKRO_PPM * 1e-6 * n_tot      # 4 H₂ + CO₂ -> CH₄ + 2 H₂O
+            zus["Methane"] += F["ch4_mikro_ppm"] * 1e-6 * n_tot
+            zus["Hydrogen"] -= 4 * F["ch4_mikro_ppm"] * 1e-6 * n_tot      # 4 H₂ + CO₂ -> CH₄ + 2 H₂O
         zus["Diesel (C10-C20)"] = n_diesel
         zus["Verdichteroel"] = y_oel * n_tot
         n_trocken = sum(zus.values())
@@ -112,13 +118,13 @@ for stoff in ("rein", "gem"):
         details[fall] = dict(stoff=med.name, fall=F["name"], voll=voll, leer=leer, TGV=TGV, n_tot=n_tot,
                              y_voll=y_voll, y_leer=y_leer, y_h2o=y_h2o, g_Nm3=ag.g_pro_Nm3(y_h2o),
                              ppm=dict(Wasser=1e6 * y_h2o, Resterdgas_CH4=1e6 * n_ch4_rest / n_tot,
-                                      H2S=H2S_PPM, CH4_mikrobiell=CH4_MIKRO_PPM if stoff == "gem" else 0.0,
+                                      H2S=F["h2s_ppm"], CH4_mikrobiell=F["ch4_mikro_ppm"] if stoff == "gem" else 0.0,
                                       Diesel=1e6 * n_diesel / n_tot, Verdichteroel=1e6 * y_oel),
                              annahmen=F, co2_sole_t=n_co2_sole * 44.01e-6, kopf=kopf_pruef,
                              rueckgabe=dict(H2O_entfernen_ppm=1e6 * y_h2o - OGE["H2O_ppm"],
                                             H2O_entfernen_kg_h=(y_h2o - OGE["H2O_ppm"] * 1e-6) / (1 - y_h2o)
                                             * kb.V_NORM_MAX * ag.N_NORM * ag.M_H2O / 1000,
-                                            H2S_entfernen_ppm=H2S_PPM - OGE["H2S_ppm"]))
+                                            H2S_entfernen_ppm=max(F["h2s_ppm"] - OGE["H2S_ppm"], 0.0)))
 
 # ---- Konsole -------------------------------------------------------------------------------------
 for fall, d in details.items():

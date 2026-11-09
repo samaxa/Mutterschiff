@@ -10,12 +10,14 @@
  "annahmen": {
   "faelle": {
    "min": {
-    "name": "Min-Fall (untere Werte Q-089)",
+    "name": "Min-Fall (untere Werte Q-089, ohne Mikroben, S1 ohne Verdichter)",
     "a_w_voll": 0.75,
     "a_w_leer": 1.0,
     "finger_m3": 1000.0,
     "blanket_m3": 0.084,
-    "oel_kg": 0.135
+    "oel_kg": 0.0,
+    "h2s_ppm": 0.0,
+    "ch4_mikro_ppm": 0.0
    },
    "max": {
     "name": "Max-Fall (obere Werte Q-089, gesättigt)",
@@ -23,7 +25,9 @@
     "a_w_leer": 1.0,
     "finger_m3": 2000.0,
     "blanket_m3": 1.76,
-    "oel_kg": 0.26
+    "oel_kg": 0.26,
+    "h2s_ppm": 10.0,
+    "ch4_mikro_ppm": 50.0
    }
   },
   "H2S_ppm": 10.0,
@@ -37,25 +41,25 @@
  "faelle": {
   "rein_min": {
    "feucht": {
-    "CO2": 0.9933581779972825,
-    "Methane": 0.0010197912332658141,
-    "HydrogenSulfide": 9.933581779972826e-06,
-    "Diesel (C10-C20)": 2.5366565215251373e-08,
-    "Verdichteroel": 1.0019294232112843e-07,
+    "CO2": 0.9933682014815419,
+    "Methane": 0.0010198015234729127,
+    "HydrogenSulfide": 0.0,
+    "Diesel (C10-C20)": 2.5366821176668693e-08,
+    "Verdichteroel": 0.0,
     "Water": 0.005611971628164053
    },
    "trocken_coolprop": {
-    "CO2": 0.998964463654341,
-    "Methane": 0.0010255467010224482,
-    "HydrogenSulfide": 9.98964463654341e-06
+    "CO2": 0.998974443054028,
+    "Methane": 0.001025556945971893,
+    "HydrogenSulfide": 0.0
    }
   },
   "rein_min_ab_2_zyklus": {
    "feucht": null,
    "trocken_coolprop": {
-    "CO2": 0.999990000099999,
+    "CO2": 1.0,
     "Methane": 0.0,
-    "HydrogenSulfide": 9.99990000099999e-06
+    "HydrogenSulfide": 0.0
    }
   },
   "rein_max": {
@@ -83,37 +87,37 @@
   },
   "gem_min": {
    "feucht": {
-    "CO2": 0.94378604450875,
-    "Nitrogen": 0.02384301586127369,
-    "Argon": 0.009934589942197371,
-    "Methane": 0.01105963366570432,
-    "Hydrogen": 0.004768603172254738,
-    "CarbonMonoxide": 0.0009934589942197372,
-    "HydrogenSulfide": 9.93458994219737e-06,
-    "Diesel (C10-C20)": 2.687785836368011e-08,
-    "Verdichteroel": 1.0020311093320125e-07,
+    "CO2": 0.9436541524257718,
+    "Nitrogen": 0.02383968385075634,
+    "Argon": 0.009933201604481811,
+    "Methane": 0.011008422097510056,
+    "Hydrogen": 0.0049666008022409055,
+    "CarbonMonoxide": 0.000993320160448181,
+    "HydrogenSulfide": 0.0,
+    "Diesel (C10-C20)": 2.6874102240408096e-08,
+    "Verdichteroel": 0.0,
     "Water": 0.005604592184688726
    },
    "trocken_coolprop": {
-    "CO2": 0.949105514470847,
-    "Nitrogen": 0.023977402470842454,
-    "Argon": 0.009990584362851022,
-    "Methane": 0.011121969180643126,
-    "Hydrogen": 0.004795480494168491,
-    "CarbonMonoxide": 0.0009990584362851024,
-    "HydrogenSulfide": 9.990584362851022e-06
+    "CO2": 0.9489727833737422,
+    "Nitrogen": 0.023974049264178753,
+    "Argon": 0.009989187193407814,
+    "Methane": 0.01107046785262662,
+    "Hydrogen": 0.004994593596703907,
+    "CarbonMonoxide": 0.0009989187193407815,
+    "HydrogenSulfide": 0.0
    }
   },
   "gem_min_ab_2_zyklus": {
    "feucht": null,
    "trocken_coolprop": {
-    "CO2": 0.9501330186226071,
-    "Nitrogen": 0.024003360470465866,
-    "Argon": 0.010001400196027445,
-    "Methane": 0.01005140719700758,
-    "Hydrogen": 0.004800672094093173,
-    "CarbonMonoxide": 0.0010001400196027444,
-    "HydrogenSulfide": 1.0001400196027443e-05
+    "CO2": 0.9500000000000001,
+    "Nitrogen": 0.024000000000000004,
+    "Argon": 0.010000000000000002,
+    "Methane": 0.01,
+    "Hydrogen": 0.005000000000000001,
+    "CarbonMonoxide": 0.0010000000000000002,
+    "HydrogenSulfide": 0.0
    }
   },
   "gem_max": {
@@ -155,7 +159,7 @@
  "details": {
   "rein_min": {
    "stoff": "reines CO₂",
-   "fall": "Min-Fall (untere Werte Q-089)",
+   "fall": "Min-Fall (untere Werte Q-089, ohne Mikroben, S1 ohne Verdichter)",
    "voll": [
     225.94860339016464,
     52.149999999996794
@@ -173,18 +177,20 @@
    "ppm": {
     "Wasser": 5611.971628164053,
     "Resterdgas_CH4": 1026.6097927756769,
-    "H2S": 10.0,
+    "H2S": 0.0,
     "CH4_mikrobiell": 0.0,
     "Diesel": 0.025536171923800043,
-    "Verdichteroel": 0.10086285545373798
+    "Verdichteroel": 0.0
    },
    "annahmen": {
-    "name": "Min-Fall (untere Werte Q-089)",
+    "name": "Min-Fall (untere Werte Q-089, ohne Mikroben, S1 ohne Verdichter)",
     "a_w_voll": 0.75,
     "a_w_leer": 1.0,
     "finger_m3": 1000.0,
     "blanket_m3": 0.084,
-    "oel_kg": 0.135
+    "oel_kg": 0.0,
+    "h2s_ppm": 0.0,
+    "ch4_mikro_ppm": 0.0
    },
    "co2_sole_t": 376.33631013314596,
    "kopf": [
@@ -304,7 +310,7 @@
    "rueckgabe": {
     "H2O_entfernen_ppm": 5581.971628164053,
     "H2O_entfernen_kg_h": 451.1773186287925,
-    "H2S_entfernen_ppm": 9.5
+    "H2S_entfernen_ppm": 0.0
    }
   },
   "rein_max": {
@@ -338,7 +344,9 @@
     "a_w_leer": 1.0,
     "finger_m3": 2000.0,
     "blanket_m3": 1.76,
-    "oel_kg": 0.26
+    "oel_kg": 0.26,
+    "h2s_ppm": 10.0,
+    "ch4_mikro_ppm": 50.0
    },
    "co2_sole_t": 376.33631013314596,
    "kopf": [
@@ -463,7 +471,7 @@
   },
   "gem_min": {
    "stoff": "Worst-Case-Gemisch",
-   "fall": "Min-Fall (untere Werte Q-089)",
+   "fall": "Min-Fall (untere Werte Q-089, ohne Mikroben, S1 ohne Verdichter)",
    "voll": [
     224.70208507374608,
     52.15
@@ -481,18 +489,20 @@
    "ppm": {
     "Wasser": 5604.592184688727,
     "Resterdgas_CH4": 1082.4510926498394,
-    "H2S": 10.0,
-    "CH4_mikrobiell": 50.0,
+    "H2S": 0.0,
+    "CH4_mikrobiell": 0.0,
     "Diesel": 0.027054824124663528,
-    "Verdichteroel": 0.10086285545373798
+    "Verdichteroel": 0.0
    },
    "annahmen": {
-    "name": "Min-Fall (untere Werte Q-089)",
+    "name": "Min-Fall (untere Werte Q-089, ohne Mikroben, S1 ohne Verdichter)",
     "a_w_voll": 0.75,
     "a_w_leer": 1.0,
     "finger_m3": 1000.0,
     "blanket_m3": 0.084,
-    "oel_kg": 0.135
+    "oel_kg": 0.0,
+    "h2s_ppm": 0.0,
+    "ch4_mikro_ppm": 0.0
    },
    "co2_sole_t": 375.9224182207374,
    "kopf": [
@@ -564,7 +574,7 @@
    "rueckgabe": {
     "H2O_entfernen_ppm": 5574.592184688727,
     "H2O_entfernen_kg_h": 450.577512214762,
-    "H2S_entfernen_ppm": 9.5
+    "H2S_entfernen_ppm": 0.0
    }
   },
   "gem_max": {
@@ -598,7 +608,9 @@
     "a_w_leer": 1.0,
     "finger_m3": 2000.0,
     "blanket_m3": 1.76,
-    "oel_kg": 0.26
+    "oel_kg": 0.26,
+    "h2s_ppm": 10.0,
+    "ch4_mikro_ppm": 50.0
    },
    "co2_sole_t": 375.9224182207374,
    "kopf": [

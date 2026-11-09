@@ -25,6 +25,18 @@ Stand 15.10.2026 - nach der Besprechung mit Katrin Vosbeck (Kavernenannahmen):
     über den ganzen Zyklus ausgewiesen (max. = Pumpe, min. = Rückverdichtung).
   * Betriebsweise: Stillstand 21,67 d (Q-028) gegen kontinuierlich (0 d).
 
+Stand 09.11.2026 - Betriebsstrategie beim Einspeichern (einspeisen_strategie, Schritt 07):
+  * Solange der Lieferdruck reicht, strömt das CO₂ ohne Pumpe über (Überströmbetrieb). Das
+    Regelventil am Kopf baut dabei den Überdruck ab (isenthalp, Joule-Thomson). Kalt gedrosselt
+    landet S1 bei leerer Kaverne bei rund 20 bar / -20 °C im Zweiphasengebiet.
+  * S1: Ist der Kopf nach dem kalten Drosseln nicht einphasig (3 bar Abstand zur Siedelinie,
+    U_PG wie in der Einspeicherung), wird bei 91 bar vorgewärmt, gerade so weit, dass der Kopf
+    einphasig bleibt. Die leichtere Säule hebt dabei den Kopfdruck an.
+  * S2: Es wird nur so weit verdichtet, wie der Kopf braucht, und gasförmig eingespeist
+    (Nachkühler 40 °C wie Zwischenkühler). Erst wenn das nicht mehr reicht (über 91 bar oder
+    über 95 °C je Stufe), läuft Pfad B (91 bar, Kühler 26 °C, Pumpe bzw. Drossel).
+  * kavernenzyklus akzeptiert dafür h_ein auch als Funktion des LCCS-Drucks.
+
 Annahmen                Wert                    Quelle (Fundstelle)
   LCCS-Teufe            1200 m                  Q-030 Tab. 1, Option 2 (Uniper-Bestand)
   Bezugsteufe Inhalt    LCCS + 205 m = 1405 m   Q-028 Tab. 1: LCCS 1150 m, Kavernen-
@@ -538,6 +550,151 @@ def einspeisen_geregelt(med, kav, p_lccs, szen, m_dot, h_auslegung, n=200):
     return dict(p_lccs=p_lccs, pumpe=pumpe, kopf=k)
 
 
+
+# ---- 4b) Betriebsstrategie beim Einspeichern (Stand 09.11.2026) -----------------
+T_NACHKUEHLER = eb.T_ZK      # 40 °C: Gasaustritt bei gasförmiger Einspeisung S2 (wie Zwischenkühler, Q-017 S. 37)
+T_VORW_MAX = 120.0           # °C: Obergrenze der Suche nach der Vorwärmtemperatur S1
+
+
+def abstand_phasengrenze(p, T, q=None):
+    """Abstand eines Zustands von reinem CO₂ zur Siedelinie in bar (0 = zweiphasig).
+
+    Unterhalb von T_krit |p - p_s(T)|; oberhalb von T_krit gibt es keinen Phasenwechsel,
+    gezählt wird dann der Abstand zum kritischen Punkt: |p - p_krit| in bar oder T - T_krit
+    in K, der größere Wert. Bei T = T_krit gehen beide Äste stetig ineinander über; Gas bei
+    20 bar / 32 °C zählt damit als weit weg (vorher fälschlich als nah, weil nur p - p_krit).
+    Gleiches Kriterium wie die Einspeicherung: mindestens U_PG = 3 bar.
+    """
+    if q is not None:
+        return 0.0
+    if T >= T_KRIT:
+        return max(abs(p - P_KRIT), T - T_KRIT)
+    return abs(p - PropsSI("P", "T", T + 273.15, "Q", 0, "CO2") / 1e5)
+
+
+def kopf_einphasig(k):
+    return k is not None and abstand_phasengrenze(k["p"], k["T"], k["q"]) >= eb.U_PG
+
+
+def _kleinste_temperatur(f_ok, lo, hi, it=12, schritt=2.0):
+    """Kleinste Temperatur in [lo, hi], bei der f_ok(T) wahr ist, sonst None.
+
+    Erst ein Raster (schritt K) bis zum ersten zulässigen Punkt, dann Bisektion zwischen
+    dem letzten unzulässigen und diesem Punkt. Das Raster ist nötig, weil das zulässige
+    Fenster nach oben begrenzt sein kann (S1: Kopfdruck über dem Lieferdruck).
+    """
+    T_alt, T = lo, lo
+    while T <= hi + 1e-9:
+        if f_ok(T):
+            break
+        T_alt, T = T, T + schritt
+    else:
+        return None
+    if T == lo:
+        return lo
+    lo, hi = T_alt, T
+    for _ in range(it):
+        mid = 0.5 * (lo + hi)
+        if f_ok(mid):
+            hi = mid
+        else:
+            lo = mid
+    return hi
+
+
+def einspeisen_strategie(med, kav, p_lccs, szen, m_dot, h_auslegung, n=150):
+    """Einspeisen mit Betriebsstrategie (nur reines CO₂): Kopfzustand, Energie, h an der LCCS.
+
+    S1 (91 bar / 15 °C dicht): Pumpe, wenn der Lieferdruck nicht reicht. Sonst Überströmen
+       über das Regelventil; ist der Kopf danach nicht einphasig, wird bei 91 bar
+       vorgewärmt (kleinste Temperatur, bei der der Kopf 3 bar Abstand zur Siedelinie hat
+       und nicht mehr als den Lieferdruck braucht).
+    S2 (30 bar / 15 °C gasförmig): erst gasförmig, nur so weit verdichtet wie nötig
+       (Nachkühler 40 °C, keine Pumpe, keine Drossel). Geht das nicht (Kopf über 91 bar,
+       Stufe über 95 °C), Pfad B: 91 bar, Kühler 26 °C, dann Pumpe oder Drossel; ist der Kopf
+       nach der Drossel nicht einphasig, wird weniger tief gekühlt.
+    Rückgabe: art, kopf (p, T, q, ...), h_kopf, h_lccs, w [kJ/kg Antrieb], q_kuehl [kJ/kg],
+    q_heiz [kJ/kg], T_vorw bzw. T_kuehler, p_verdichter.
+    """
+    if med.ist_gemisch:
+        raise NotImplementedError("Betriebsstrategie nur für reines CO₂ (Kaverne rein)")
+    st = med.stoff
+    erg = dict(p_lccs=p_lccs, szenario=szen, w=0.0, q_kuehl=0.0, q_heiz=0.0,
+               T_vorw=None, T_kuehler=None, p_verdichter=None)
+    kopf = lambda h: kopf_einspeisen(med, kav, p_lccs, h, m_dot, n=n)[1]
+
+    if szen == "S1":
+        h0 = med.h(eb.p_S1, eb.T_S1)
+        k = kopf(h0)
+        if k["p"] > eb.p_S1:                                       # Lieferdruck reicht nicht
+            k = kopf(h_auslegung)
+            P = eb.stufe(st, eb.p_S1, eb.T_S1, k["p"], eb.eta_P)
+            erg.update(art="Pumpe", w=P["w"], h_kopf=h_auslegung)
+        elif kopf_einphasig(k):
+            erg.update(art="Drossel", h_kopf=h0)
+        else:
+            def ok(Tv):                  # einphasig UND der Kopf braucht nicht mehr als den Lieferdruck
+                k_ = kopf(med.h(eb.p_S1, Tv))
+                return kopf_einphasig(k_) and k_["p"] <= eb.p_S1
+            Tv = _kleinste_temperatur(ok, eb.T_S1, T_VORW_MAX)
+            if Tv is None:
+                raise RuntimeError(f"S1: bis {T_VORW_MAX} °C Vorwärmung kein einphasiger Kopf unter 91 bar")
+            h = med.h(eb.p_S1, Tv)
+            k = kopf(h)
+            erg.update(art="Vorwärmen + Drossel", T_vorw=Tv, q_heiz=h - h0, h_kopf=h)
+    else:
+        # a) gasförmig: Kopfdruck p und Gasaustritt 40 °C müssen zur Säule passen (Fixpunkt)
+        p, k, konv = 55.0, None, False
+        for _ in range(40):
+            k = kopf(med.h(p, T_NACHKUEHLER))
+            if k is None:
+                break
+            if abs(k["p"] - p) < 0.01:
+                p, konv = k["p"], True
+                break
+            p = 0.5 * (p + k["p"])
+        gas_ok = konv and kopf_einphasig(k) and eb.p_S2 < p <= eb.P_UEK
+        if gas_ok:
+            if p <= eb.P_ZW:
+                V1 = eb.stufe(st, eb.p_S2, eb.T_S2, p, eb.eta_V1)
+                stufen, q = [V1], 0.0
+            else:
+                _, V1, ZK, V2 = eb.zweistufig(st, p, p_zw=eb.P_ZW, T_zk=eb.T_ZK)
+                stufen, q = [V1, V2], ZK["q"]
+            gas_ok = max(s_["T2"] for s_ in stufen) <= eb.T_MAX_STUFE
+        if gas_ok:
+            h = med.h(p, T_NACHKUEHLER)
+            erg.update(art="gasförmig (nur verdichten)", p_verdichter=p, h_kopf=h,
+                       w=sum(s_["w"] for s_ in stufen), q_kuehl=q + stufen[-1]["h2"] - h,
+                       T_kuehler=T_NACHKUEHLER)
+        else:
+            # b) Pfad B wie bisher
+            _, V1, ZK, V2 = eb.zweistufig(st, eb.P_UEK, p_zw=eb.P_ZW, T_zk=eb.T_ZK)
+            w_v, h_v2 = V1["w"] + V2["w"], V2["h2"]
+            h26 = med.h(eb.P_UEK, eb.T_K)
+            k = kopf(h26)
+            if k["p"] > eb.P_UEK:
+                k = kopf(h_auslegung)
+                P = eb.stufe(st, eb.P_UEK, eb.T_K, k["p"], eb.eta_P)
+                erg.update(art="Pfad B + Pumpe", w=w_v + P["w"], q_kuehl=ZK["q"] + h_v2 - h26,
+                           h_kopf=h_auslegung, T_kuehler=eb.T_K, p_verdichter=eb.P_UEK)
+            elif kopf_einphasig(k):
+                erg.update(art="Pfad B + Drossel", w=w_v, q_kuehl=ZK["q"] + h_v2 - h26,
+                           h_kopf=h26, T_kuehler=eb.T_K, p_verdichter=eb.P_UEK)
+            else:
+                def ok(Tc):
+                    k_ = kopf(med.h(eb.P_UEK, Tc))
+                    return kopf_einphasig(k_) and k_["p"] <= eb.P_UEK
+                Tc = _kleinste_temperatur(ok, eb.T_K, V2["T2"])
+                if Tc is None:
+                    raise RuntimeError("S2: kein einphasiger Kopf unter 91 bar, auch ohne Kühlung")
+                h = med.h(eb.P_UEK, Tc)
+                k = kopf(h)
+                erg.update(art="Pfad B, weniger gekühlt + Drossel", w=w_v,
+                           q_kuehl=ZK["q"] + h_v2 - h, h_kopf=h, T_kuehler=Tc, p_verdichter=eb.P_UEK)
+    erg.update(kopf=k, h_lccs=k["h_lccs"], T_lccs=k["T_lccs"])
+    return erg
+
 # ---- 5) Kavernenbilanz über einen Speicherzyklus --------------------------------
 def kavernenzyklus(med, kav, m_dot, phasen=None, dpdt_max=DPDT_MAX, dt=0.02, h_ein=None,
                    T_ein=T_EIN_Q028, stopp_bei_zweiphasig=False, T_geb=None, p_start=None,
@@ -548,6 +705,7 @@ def kavernenzyklus(med, kav, m_dot, phasen=None, dpdt_max=DPDT_MAX, dt=0.02, h_e
         dU/dt = ṁ·h_strom + UA·(T_Gebirge - T)
         h_strom: aus = h(Kaverne); ein = h_ein an der LCCS (= h_Kopf + g·z, gekoppelt an
                  die Einspeicherung S1/S2); ohne h_ein: h(p, T_ein) - nur für Q-028.
+                 h_ein darf auch eine Funktion h_ein(p_lccs) sein (Betriebsstrategie, Schritt 07).
 
     Start: voll (p_max an der LCCS, oder p_start) und Gebirgstemperatur, also nach
     langem Stillstand (Q-028 Tab. 1). Die Rate wird gekürzt, sobald der Druck an der
@@ -587,7 +745,10 @@ def kavernenzyklus(med, kav, m_dot, phasen=None, dpdt_max=DPDT_MAX, dt=0.02, h_e
             if md <= 0:
                 h_strom = zs["h"]
             else:
-                h_strom = h_ein if h_ein is not None else med.h(zs["p"], T_ein)
+                if callable(h_ein):           # Betriebsstrategie: h an der LCCS hängt am Kavernendruck
+                    h_strom = h_ein(pl)
+                else:
+                    h_strom = h_ein if h_ein is not None else med.h(zs["p"], T_ein)
             begrenzt = False
             if md != 0.0:                     # Probeschritt: dp/dt an der LCCS einhalten
                 for _ in range(4):

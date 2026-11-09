@@ -1,0 +1,229 @@
+{
+ "erzeugt_von": "09_mindestdruck_szenarien.py",
+ "stand": "09.11.2026",
+ "TGV_t": 520976.3474491802,
+ "szenarien": {
+  "160 bar (DBI, Q-030 S. 16)": {
+   "50.000 Nm³/h": {
+    "p_min": 160.0,
+    "WGV_t": 19072.28932971065,
+    "anteil": 0.03660874322431902,
+    "dauer_aus_d": 8.039999999999917,
+    "T_kav_ende": 46.70918550897687,
+    "kopf_aus_ende": {
+     "p": 75.30863452700756,
+     "T": 29.757273776130432,
+     "q": null
+    },
+    "strang_zweiphasig_aus": false,
+    "zweiphasig_von_bis": null,
+    "kopf_ein": {
+     "S1": {
+      "p_min": 57.234800915912444,
+      "p_max": 104.1726638652491,
+      "gasfoermig": false,
+      "dicht_ab": 160
+     },
+     "S2": {
+      "p_min": 66.95599575208315,
+      "p_max": 113.25199741707759,
+      "gasfoermig": false,
+      "dicht_ab": 160
+     }
+    },
+    "vorwaermer_S1_MW": 0.0,
+    "stillstand": {
+     "p": 63.87452437594121,
+     "T": 10.0,
+     "abstand_bar": 18.852695234863468
+    }
+   },
+   "100.000 Nm³/h": {
+    "p_min": 160.0,
+    "WGV_t": 17511.140101904748,
+    "anteil": 0.03361215953016545,
+    "dauer_aus_d": 5.159999999999978,
+    "T_kav_ende": 46.33994919712717,
+    "kopf_aus_ende": {
+     "p": 73.45285622599982,
+     "T": 29.13724948610013,
+     "q": null
+    },
+    "strang_zweiphasig_aus": false,
+    "zweiphasig_von_bis": null,
+    "kopf_ein": {
+     "S1": {
+      "p_min": 58.47479742007537,
+      "p_max": 105.43483492905942,
+      "gasfoermig": false,
+      "dicht_ab": 160
+     },
+     "S2": {
+      "p_min": 68.29914309835449,
+      "p_max": 114.62622610540083,
+      "gasfoermig": false,
+      "dicht_ab": 160
+     }
+    },
+    "vorwaermer_S1_MW": 0.0,
+    "stillstand": {
+     "p": 63.87452437594121,
+     "T": 10.0,
+     "abstand_bar": 18.852695234863468
+    }
+   }
+  },
+  "100 bar (DBI multizyklisch, Q-030)": {
+   "50.000 Nm³/h": {
+    "p_min": 100.0,
+    "WGV_t": 113911.85741451534,
+    "anteil": 0.21865072756614373,
+    "dauer_aus_d": 48.02000000000191,
+    "T_kav_ende": 44.63222869826484,
+    "kopf_aus_ende": {
+     "p": 51.69092384888006,
+     "T": 15.664760607518815,
+     "q": 0.5270606894096816
+    },
+    "strang_zweiphasig_aus": true,
+    "zweiphasig_von_bis": [
+     152.1519156669935,
+     100.0
+    ],
+    "kopf_ein": {
+     "S1": {
+      "p_min": 57.234800915912444,
+      "p_max": 104.1726638652491,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     },
+     "S2": {
+      "p_min": 66.95599575208315,
+      "p_max": 113.25199741707759,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     }
+    },
+    "vorwaermer_S1_MW": 5.319384379270916,
+    "stillstand": {
+     "p": 45.04963750654883,
+     "T": 10.0,
+     "abstand_bar": 0.02780836547108123
+    }
+   },
+   "100.000 Nm³/h": {
+    "p_min": 100.0,
+    "WGV_t": 61115.63205128483,
+    "anteil": 0.11730980177990996,
+    "dauer_aus_d": 14.399999999999782,
+    "T_kav_ende": 39.33331064988954,
+    "kopf_aus_ende": {
+     "p": 40.84314276233054,
+     "T": 6.118584099257021,
+     "q": 0.3895067392073067
+    },
+    "strang_zweiphasig_aus": true,
+    "zweiphasig_von_bis": [
+     153.97665520806555,
+     100.0
+    ],
+    "kopf_ein": {
+     "S1": {
+      "p_min": 58.47479742007537,
+      "p_max": 105.43483492905942,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     },
+     "S2": {
+      "p_min": 68.29914309835449,
+      "p_max": 114.62622610540083,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     }
+    },
+    "vorwaermer_S1_MW": 10.257471365426104,
+    "stillstand": {
+     "p": 45.04963750654883,
+     "T": 10.0,
+     "abstand_bar": 0.02780836547108123
+    }
+   }
+  },
+  "70 bar (Q-028)": {
+   "50.000 Nm³/h": {
+    "p_min": 70.0,
+    "WGV_t": 393543.88057210005,
+    "anteil": 0.7553968284721202,
+    "dauer_aus_d": 165.90000000001106,
+    "T_kav_ende": 47.3584851807276,
+    "kopf_aus_ende": {
+     "p": 49.232043044530506,
+     "T": 21.327403609060582,
+     "q": null
+    },
+    "strang_zweiphasig_aus": true,
+    "zweiphasig_von_bis": [
+     152.1519156669935,
+     81.99661913349726
+    ],
+    "kopf_ein": {
+     "S1": {
+      "p_min": 55.66101414240238,
+      "p_max": 104.1726638652491,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     },
+     "S2": {
+      "p_min": 55.66101414240238,
+      "p_max": 113.25199741707759,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     }
+    },
+    "vorwaermer_S1_MW": 6.175302071755384,
+    "stillstand": {
+     "p": 44.99299418696985,
+     "T": 10.0,
+     "abstand_bar": -0.02883495410789294
+    }
+   },
+   "100.000 Nm³/h": {
+    "p_min": 70.0,
+    "WGV_t": 380315.5390422236,
+    "anteil": 0.7300053848976749,
+    "dauer_aus_d": 81.68000000000089,
+    "T_kav_ende": 42.15398770447729,
+    "kopf_aus_ende": {
+     "p": 41.70786556120216,
+     "T": 6.9454099207478635,
+     "q": 0.9991870438255331
+    },
+    "strang_zweiphasig_aus": true,
+    "zweiphasig_von_bis": [
+     153.97665520806555,
+     70.0
+    ],
+    "kopf_ein": {
+     "S1": {
+      "p_min": 58.47479742007537,
+      "p_max": 105.43483492905942,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     },
+     "S2": {
+      "p_min": 60.914327127252946,
+      "p_max": 114.62622610540083,
+      "gasfoermig": true,
+      "dicht_ab": 160
+     }
+    },
+    "vorwaermer_S1_MW": 11.887390290444305,
+    "stillstand": {
+     "p": 44.99299418696985,
+     "T": 10.0,
+     "abstand_bar": -0.02883495410789294
+    }
+   }
+  }
+ }
+}

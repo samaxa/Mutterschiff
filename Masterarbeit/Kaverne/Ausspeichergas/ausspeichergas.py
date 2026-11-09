@@ -23,11 +23,14 @@ Max-Fall aus den Bandbreiten der H₂-Studie Q-089 (UGS für DGMK 2024, Uniper-M
   Resterdgas (CH₄)   Finger 1000 m³ in 500.000 m³  Finger 2000 m³ in 500.000 m³  Q-089 Abschn. 6.3, Tab. 16/17
                      = 0,2 % von V                 = 0,4 % von V; nur 1. Zyklus  (S. 32-33)
   Diesel-Blanket     Fall 4a: 0,084 m³             Fall 4c: 1,76 m³              Q-089 Tab. 10 (S. 23)
-  Verdichteröl       0,135 kg je 100.000 Nm³       0,260 kg je 100.000 Nm³       Q-089 Tab. 20 (S. 39); nur S2
-  H₂S (mikrobiell)   10 ppm                        10 ppm                        Q-089 Abschn. 6.4.2, Tab. 20
-                                                                                 (S. 40, "angenommener Wert");
+  Verdichteröl       0 (S1: nur Pumpe,             0,260 kg je 100.000 Nm³       Q-089 Tab. 20 (S. 39); nur S2
+                     kein Verdichter)
+  H₂S (mikrobiell)   0 (keine Bildung durch        10 ppm                        Q-089 Abschn. 6.4.2, Tab. 20
+                     Mikroben)                                                   (S. 40, "angenommener Wert");
                                                                                  Q-030 Kap. 1.4: zulässig 10 ppm
-  CH₄ (mikrobiell)   50 ppm (nur Gemisch)          50 ppm (nur Gemisch)          Q-089 Abschn. 6.4.3, Tab. 20
+  CH₄ (mikrobiell)   0 (keine Bildung durch        50 ppm (nur Gemisch)          Q-089 Abschn. 6.4.3, Tab. 20
+                     Mikroben)
+  (Min-Fall ohne Mikroben und ohne Verdichteröl seit 09.11.2026)
 
 Übertrag auf CO₂ (warum sich die Mengen gegenüber H₂ ändern):
   Wasser        CO₂ löst deutlich mehr Wasser als H₂, und im dichten Zustand
@@ -41,10 +44,13 @@ Max-Fall aus den Bandbreiten der H₂-Studie Q-089 (UGS für DGMK 2024, Uniper-M
                 etwa 2,5-mal so viele Mole wie H₂ bei 210 bar -> kleinerer CH₄-Anteil.
   Mikrobiologie Sulfatreduzierer und Methanbildner brauchen einen Elektronen-
                 donator - in H₂-Kavernen ist das der Wasserstoff selbst. Im
-                Gemisch stehen nur 0,5 % H₂ zur Verfügung, in reinem CO₂ keiner;
-                saure Sole (CO₂ gelöst, pH ~3-4) und hoher Salzgehalt hemmen
-                zusätzlich (Q-089 Abschn. 6.4, Q-019 AP 3). Übernommen als
-                Worst Case in beiden Fällen.
+                Gemisch stehen nur 0,5 % H₂ zur Verfügung, in reinem CO₂ keiner.
+                Saure Sole (CO₂ gelöst, pH etwa 3, Q-127) und gesättigte Sole
+                bremsen die Mikroben, schließen sie aber nicht aus: Sulfat-
+                reduzierer wachsen noch in gesättigter Sole (Q-126 S. 12), Sulfat
+                ist in Kavernensole vorhanden (Q-128). Max-Fall: Werte aus
+                Q-089 als Worst Case übernommen. Min-Fall: günstiger Grenzfall
+                ohne Bildung durch Mikroben (0 ppm H₂S, 0 ppm CH₄, kein H₂-Verbrauch).
 
 Randbedingung Rückgabe ins Netz (OGE-Austausch 16.09.2026, Notizen S. Maxara):
   H₂O ≤ 30 ppm, H₂S < 0,5 ppm, mindestens 91 bar; Glykoltrocknung und Aminwäsche
