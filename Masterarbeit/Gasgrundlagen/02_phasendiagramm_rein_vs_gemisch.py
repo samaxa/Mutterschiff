@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-G02 - Phasendiagramm reines CO2 (links) und Worst-Case-Gemisch (rechts)
+G02 - Phasendiagramm des Worst-Case-Gemischs (reines CO2 als gestrichelte Siedelinie)
 ============================================================================
-Für das Grundlagenkapitel: gleiche Achsen, gleiche Farben, links reines CO2,
-rechts das Gemisch. Von links nach rechts sieht man, was 5 mol-%
-Begleitstoffe ändern: aus der Siedelinie wird ein Zweiphasengebiet zwischen
+Für das Grundlagenkapitel: nur das Gemisch, reines CO2 nur noch als
+gestrichelte Siedelinie (das reine Phasendiagramm zeigt G01). Man sieht, was
+5 mol-% Begleitstoffe ändern: aus der Siedelinie wird ein Zweiphasengebiet zwischen
 Tau- und Blasenlinie, der kritische Punkt verschiebt sich, und der
 höchste Druck des Zweiphasengebiets (Cricondenbar) liegt über dem
 kritischen Druck von reinem CO2.
+Die Anhebung des Blasendrucks bei 15 °C (+21 bar gegenüber reinem CO2)
+steht nur im Text, nicht in der Grafik.
 
 Keine Betriebspunkte: die stehen in
 Einspeicherung/Begleitstoffe_CO2/Stoffmodell/01_phasendiagramm_rein_vs_gemisch.py
@@ -43,6 +45,7 @@ p_s15 = PropsSI("P", "T", gb.K(15.0), "Q", 0, "CO2") / 1e5
 print(f"kritischer Punkt rein:    {T_krit:5.1f} °C / {p_krit:5.1f} bar")
 print(f"kritischer Punkt Gemisch: {T_krit_G:5.1f} °C / {p_krit_G:5.1f} bar")
 print(f"Cricondenbar Gemisch:     {T_cb:5.1f} °C / {p_cb:5.1f} bar")
+print(f"Cricondentherm Gemisch:   {pg['cricondentherm'][0]:5.1f} °C / {pg['cricondentherm'][1]:5.1f} bar")
 print(f"bei 15 °C: Siededruck rein {p_s15:.1f} bar | Gemisch Tau {p_tau15:.1f} bar, "
       f"Blase {p_bl15:.1f} bar -> Zweiphasengebiet {p_bl15 - p_tau15:.1f} bar breit, "
       f"Blasenlinie {p_bl15 - p_s15:+.1f} bar gegenüber rein")
@@ -54,32 +57,31 @@ box = dict(boxstyle="round,pad=0.25", fc="white", ec="none", alpha=0.8)
 
 
 def hintergrund(ax):
-    gas = [(Tmin, Pmin), (Tmax, Pmin), (Tmax, p_krit), (T_krit, p_krit)]
-    gas += list(zip(T_s[::-1], p_s[::-1])) + [(T_s[0], Pmin)]
-    gas = [(max(t, Tmin), p) for t, p in gas]
+    """Phasengebiete des Gemischs: flüssig oberhalb der Blasenlinie, gasförmig unterhalb
+    der Taulinie, überkritisch oberhalb von kritischer Temperatur und kritischem Druck
+    des Gemischs. Das Zweiphasengebiet dazwischen wird separat schraffiert."""
+    i = np.argsort(pg["p_tau"])                      # Taulinie: Druck steigt bis zum krit. Punkt
+    T_tau, p_tau = pg["T_tau"][i], pg["p_tau"][i]
+    j = np.argsort(pg["T_blase"])                    # Blasenlinie: Temperatur steigt bis zum krit. Punkt
+    T_bl, p_bl = pg["T_blase"][j], pg["p_blase"][j]
+    T0 = min(Tmin, T_tau[0], T_bl[0]) - 1.0
+    gas = [(T0, Pmin), (Tmax, Pmin), (Tmax, p_krit_G), (T_krit_G, p_krit_G)]
+    gas += list(zip(T_tau[::-1], p_tau[::-1])) + [(T0, p_tau[0])]
     ax.add_patch(plt.Polygon(gas, closed=True, fc=C_GAS, ec="none", zorder=0))
-    flue = [(Tmin, p_s[0]), (Tmin, Pmax), (T_krit, Pmax)] + list(zip(T_s[::-1], p_s[::-1]))
+    flue = [(T0, p_bl[0])] + list(zip(T_bl, p_bl)) + [(T_krit_G, p_krit_G), (T_krit_G, Pmax), (T0, Pmax)]
     ax.add_patch(plt.Polygon(flue, closed=True, fc=C_FLUE, ec="none", zorder=0))
-    ax.add_patch(plt.Rectangle((T_krit, p_krit), Tmax - T_krit, Pmax - p_krit,
+    ax.add_patch(plt.Rectangle((T_krit_G, p_krit_G), Tmax - T_krit_G, Pmax - p_krit_G,
                                fc=C_SUP, ec="none", zorder=0))
     ax.text(-30, 95, "flüssig", fontsize=12, color=COL_FLUE, weight="bold", ha="center", bbox=box)
     ax.text(45, 45, "gasförmig", fontsize=12, color=COL_GAS, weight="bold", ha="center", bbox=box)
-    ax.text(46, 108, "überkritisch", fontsize=11, color=COL_SUP, weight="bold", ha="center", bbox=box)
+    ax.text(45, 108, "überkritisch", fontsize=11, color=COL_SUP, weight="bold", ha="center", bbox=box)
 
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6.0), sharey=True)
-
-# -- links: reines CO2 --
-hintergrund(ax1)
-ax1.plot(T_s, p_s, color=COL_REIN, lw=2.0, zorder=3, label="Siedelinie reines CO₂")
-ax1.plot(T_krit, p_krit, "o", color=COL_REIN, ms=8, zorder=5, mec="white", mew=1.5)
-ax1.annotate(f"kritischer Punkt\n{T_krit:.1f} °C / {p_krit:.1f} bar", (T_krit, p_krit),
-             textcoords="offset points", xytext=(-130, 18), fontsize=8.5, color=COL_REIN, bbox=box,
-             arrowprops=dict(arrowstyle="-", color=COL_REIN, lw=0.7))
-ax1.set_title("Reines CO₂")
-ax1.set_ylabel("Druck [bar]")
-
-# -- rechts: Gemisch --
+# Nur das Gemisch: reines CO2 steht schon in abb_G01_phasendiagramm_co2.png und ist hier
+# nur noch als gestrichelte Siedelinie angedeutet. Die Flächen gehören zum Gemisch. Markiert wird nur der kritische Punkt
+# des Gemischs; Cricondenbar und Cricondentherm liegen knapp daneben und werden im Text
+# beschrieben.
+fig, ax2 = plt.subplots(figsize=(7.4, 5.6))
 hintergrund(ax2)
 huelle = list(zip(pg["T_tau"], pg["p_tau"])) + list(zip(pg["T_blase"], pg["p_blase"]))
 ax2.add_patch(plt.Polygon(huelle, closed=True, fc=COL_GEM, alpha=0.12, ec="none", zorder=1))
@@ -88,23 +90,18 @@ ax2.add_patch(plt.Polygon(huelle, closed=True, fc="none", ec=COL_GEM, hatch="///
 ax2.plot(T_s, p_s, color=COL_REIN, lw=1.2, ls="--", zorder=3, label="Siedelinie reines CO₂")
 ax2.plot(pg["T_blase"], pg["p_blase"], color=COL_GEM, lw=2.0, zorder=4, label="Blasenlinie Gemisch")
 ax2.plot(pg["T_tau"], pg["p_tau"], color=COL_GEM, lw=2.0, ls="-.", zorder=4, label="Taulinie Gemisch")
-ax2.axhline(p_cb, color=COL_GEM, lw=0.9, ls=":", zorder=2, label=f"Cricondenbar ({p_cb:.1f} bar)")
 ax2.plot(T_krit_G, p_krit_G, "o", color=COL_GEM, ms=8, zorder=5, mec="white", mew=1.5)
-ax2.annotate(f"krit. Punkt Gemisch\n{T_krit_G:.1f} °C / {p_krit_G:.1f} bar", (T_krit_G, p_krit_G),
-             textcoords="offset points", xytext=(-140, 24), fontsize=8.5, color=COL_GEM, bbox=box,
-             arrowprops=dict(arrowstyle="-", color=COL_GEM, lw=0.7))
-ax2.text(-20, 30, "zweiphasig", fontsize=10, color=COL_GEM, weight="bold", ha="center", bbox=box)
-ax2.annotate("", xy=(15, p_bl15), xytext=(15, p_s15),
-             arrowprops=dict(arrowstyle="->", color="#333333", lw=1.4))
-ax2.text(16.5, 0.5 * (p_s15 + p_bl15), f"+{p_bl15 - p_s15:.0f} bar", fontsize=9, va="center", bbox=box)
-ax2.set_title("Worst-Case-Gemisch (95 mol-% CO₂)")
-
-for ax in (ax1, ax2):
-    ax.set_xlim(Tmin, Tmax)
-    ax.set_ylim(Pmin, Pmax)
-    ax.set_xlabel("Temperatur [°C]")
-    ax.grid(alpha=0.25, zorder=1)
-    ax.legend(loc="lower right", fontsize=8, framealpha=0.92)
+ax2.annotate("kritischer Punkt Gemisch\n" + f"{T_krit_G:.1f} °C / {p_krit_G:.1f} bar".replace(".", ","),
+             (T_krit_G, p_krit_G), textcoords="data", xytext=(-8, 106), ha="left", va="center",
+             fontsize=9, color=COL_GEM, bbox=box, arrowprops=dict(arrowstyle="-", color=COL_GEM, lw=0.7))
+ax2.text(-20, 30, "zweiphasig", fontsize=11, color=COL_GEM, weight="bold", ha="center", bbox=box)
+ax2.set_xlim(Tmin, Tmax)
+ax2.set_ylim(Pmin, Pmax)
+ax2.set_xlabel("Temperatur [°C]", fontsize=11)
+ax2.set_ylabel("Druck [bar]", fontsize=11)
+ax2.tick_params(labelsize=10)
+ax2.grid(alpha=0.25, zorder=1)
+ax2.legend(loc="lower right", fontsize=9, framealpha=0.95)
 
 fig.tight_layout()
 fig.savefig(gb.ABB / "abb_G02_phasendiagramm_rein_vs_gemisch.png", dpi=175)
@@ -115,6 +112,7 @@ json.dump({
     "krit_rein": {"T": T_krit, "p": p_krit},
     "krit_gemisch": {"T": float(T_krit_G), "p": float(p_krit_G)},
     "cricondenbar": {"T": float(T_cb), "p": float(p_cb)},
+    "cricondentherm": {"T": float(pg["cricondentherm"][0]), "p": float(pg["cricondentherm"][1])},
     "15C": {"siededruck_rein": p_s15, "taudruck_gemisch": float(p_tau15),
             "blasendruck_gemisch": float(p_bl15)},
 }, open(gb.ABB / "G02_rein_vs_gemisch.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)

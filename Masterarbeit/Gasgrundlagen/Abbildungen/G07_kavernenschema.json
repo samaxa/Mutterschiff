@@ -1,0 +1,16 @@
+{
+ "z_LCCS_m": 1200.0,
+ "z_Kavernendach_m": 1240.0,
+ "z_Sumpf_m": 1490.0,
+ "z_Bezug_m": 1405.0,
+ "T_Oberflaeche_C": 10.0,
+ "T_LCCS_C": 46.0,
+ "T_Bezug_C": 52.15,
+ "rho_Gebirge_kg_m3": 2200.0,
+ "p_Gebirge_LCCS_bar": 258.984,
+ "p_85prozent_LCCS_bar": 220.13639999999998,
+ "p_max_Referenz_bar": 210.0,
+ "p_max_Anteil_Gebirgsdruck": 0.8108609026040219,
+ "p_min_Referenz_bar": 70.0,
+ "Quellen": "Q-028 Tab. 1, Q-030 Abb. 8, Q-003 S. 46, Q-038"
+}

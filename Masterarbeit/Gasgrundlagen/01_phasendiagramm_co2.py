@@ -18,6 +18,12 @@ Abbildung 2 (abb_G01_dichte_isothermen.png)
   aber in der Nähe der pseudokritischen Linie sehr steil. Kein
   Phasenwechsel, trotzdem ändert sich das Verhalten stark.
 
+Abbildung 3 (abb_G01_pseudokritisch.png)
+  Enthalpie und isobare Wärmekapazität über der Temperatur für Isobaren unter
+  und über dem kritischen Druck. Zeigt, dass der Übergang flüssigkeitsähnlich ->
+  gasähnlich oberhalb von p_krit stetig, nahe der pseudokritischen Linie aber mit
+  sehr großem Wärmebedarf je Kelvin abläuft (pseudokritisches Sieden).
+
 Ergebnisse: Abbildungen/G01_phasendiagramm.json
 """
 import json
@@ -80,12 +86,14 @@ def flaechen(ax):
                                fc=C_SUP, ec="none", zorder=0))
 
 
-fig, ax = plt.subplots(figsize=(9, 6.4))
+fig, ax = plt.subplots(figsize=(7.4, 5.6))
+# Schriftgrößen für den Druck bei 0,8 Textbreite (mindestens rund 7 pt im PDF)
 flaechen(ax)
 ax.plot(T_sub, p_sub, color="#333333", lw=1.4, zorder=3, label="Sublimationslinie")
 ax.plot(T_mel, p_mel, color=COL_FEST, lw=1.4, zorder=3, label="Schmelzlinie")
 ax.plot(T_s, p_s, color=COL_REIN, lw=2.0, zorder=3, label="Siedelinie")
-ax.plot(T_pk, p_pk, color=COL_SUP, lw=1.4, ls=":", zorder=3, label="pseudokritische Linie")
+ax.plot(T_pk, p_pk, color=COL_SUP, lw=1.4, ls=":", zorder=3,
+        label="pseudokritische Linie ($c_p$-Maximum)")
 ax.plot(T_krit, p_krit, "o", color=COL_REIN, ms=8, zorder=5, mec="white", mew=1.5)
 ax.plot(T_tr, p_tr, "o", color="#333333", ms=6, zorder=5, mec="white", mew=1.2)
 
@@ -94,25 +102,33 @@ ax.plot(T_tr, p_tr, "o", color="#333333", ms=6, zorder=5, mec="white", mew=1.2)
 ax.add_patch(plt.Rectangle((t0, q0), t1 - t0, q1 - q0, fc="none", ec=COL_BB, lw=1.6,
                            ls="--", zorder=6, label="Betriebsbereich Referenzanlage"))
 
+# Beschriftungen: jeweils mitten in die Fläche, mit Abstand zu allen Linien
 box = dict(boxstyle="round,pad=0.25", fc="white", ec="none", alpha=0.8)
-ax.text(-68, 150, "fest", fontsize=11, color=COL_FEST, weight="bold", ha="center", bbox=box)
-ax.text(-25, 150, "flüssig", fontsize=12, color=COL_FLUE, weight="bold", ha="center", bbox=box)
-ax.text(-25, 18, "gasförmig", fontsize=12, color=COL_GAS, weight="bold", ha="center", bbox=box)
-ax.text(85, 150, "überkritisch", fontsize=12, color=COL_SUP, weight="bold", ha="center", bbox=box)
-ax.annotate(f"kritischer Punkt\n{T_krit:.1f} °C / {p_krit:.1f} bar", (T_krit, p_krit),
-            textcoords="data", xytext=(70, 40), fontsize=8.5, color=COL_REIN, bbox=box,
+ax.text(-68, 110, "fest", fontsize=12, color=COL_FEST, weight="bold", ha="center", va="center", bbox=box)
+ax.text(-22, 150, "flüssig", fontsize=13, color=COL_FLUE, weight="bold", ha="center", va="center", bbox=box)
+ax.text(40, 14, "gasförmig", fontsize=13, color=COL_GAS, weight="bold", ha="center", va="center", bbox=box)
+ax.text(84, 140, "überkritisch", fontsize=12, color=COL_SUP, weight="bold", ha="center", va="center", bbox=box)
+# beide Seiten der pseudokritischen Linie (kein Phasenwechsel, nur Übergang)
+ax.text(48, 178, "flüssigkeits-\nähnlich", fontsize=10, color=COL_SUP, style="italic",
+        ha="center", va="center", zorder=7)
+ax.text(87, 100, "gasähnlich", fontsize=10, color=COL_SUP, style="italic",
+        ha="center", va="center", zorder=7)
+ax.annotate("kritischer Punkt\n" + f"{T_krit:.1f} °C / {p_krit:.1f} bar".replace(".", ","), (T_krit, p_krit),
+            textcoords="data", xytext=(68, 36), fontsize=9, color=COL_REIN, bbox=box,
             arrowprops=dict(arrowstyle="-", color=COL_REIN, lw=0.7))
-ax.annotate(f"Tripelpunkt\n{T_tr:.1f} °C / {p_tr:.1f} bar", (T_tr, p_tr),
-            textcoords="offset points", xytext=(-10, 40), fontsize=8.5, color="#333333", bbox=box,
-            arrowprops=dict(arrowstyle="-", color="#333333", lw=0.7))
+ax.annotate("Tripelpunkt\n" + f"{T_tr:.1f} °C / {p_tr:.1f} bar".replace(".", ",").replace("-", "−"), (T_tr, p_tr),
+            textcoords="data", xytext=(-50, 42), ha="left", va="center", fontsize=9,
+            color="#333333", bbox=box, arrowprops=dict(arrowstyle="-", color="#333333", lw=0.7))
 
 ax.set_xlim(Tmin, Tmax)
 ax.set_ylim(Pmin, Pmax)
-ax.set_xlabel("Temperatur [°C]")
-ax.set_ylabel("Druck [bar]")
-ax.set_title("Reines CO₂")
-ax.legend(loc="upper left", bbox_to_anchor=(0.0, 0.88), fontsize=8, framealpha=0.92)
+ax.set_xlabel("Temperatur [°C]", fontsize=11)
+ax.set_ylabel("Druck [bar]", fontsize=11)
+# Legende in der Ecke oben links, Beschriftungen liegen darunter
+ax.legend(loc="upper left", fontsize=8.5, framealpha=0.95, borderaxespad=0.4,
+          handlelength=2.2, labelspacing=0.35)
 ax.grid(alpha=0.25, zorder=1)
+ax.tick_params(labelsize=10)
 fig.tight_layout()
 fig.savefig(gb.ABB / "abb_G01_phasendiagramm_co2.png", dpi=175)
 plt.close(fig)
@@ -165,6 +181,86 @@ r45 = PropsSI("D", "P", 91e5, "T", gb.K(45.0), "CO2")
 print(f"\n91 bar: 35 °C -> {r35:.0f} kg/m³, 45 °C -> {r45:.0f} kg/m³ "
       f"(Faktor {r35 / r45:.1f} auf 10 K, ohne Phasenwechsel)")
 
+# ---- 4) Abbildung 3: Übergang über die pseudokritische Linie ----------------------
+# Enthalpie und isobare Wärmekapazität über der Temperatur für Isobaren unter und über
+# dem kritischen Druck. Unterhalb von p_krit springt die Enthalpie an der Siedelinie um die
+# Verdampfungsenthalpie, oberhalb steigt sie stetig, um die pseudokritische Temperatur
+# aber sehr steil (pseudokritisches Sieden, Banuti 2015/2019).
+ISOBAREN = [(60.0, "#164a73"), (80.0, "#00304F"), (91.0, "#C55A11"),
+            (120.0, "#a3480b"), (150.0, "#7F3F00"), (210.0, "#595959")]
+T_lin = np.linspace(0.0, 100.0, 1001)
+fig, (axh, axc) = plt.subplots(1, 2, figsize=(10.5, 4.6))
+pk_kennwerte = {}
+for p, farbe in ISOBAREN:
+    name = f"{p:.0f} bar"
+    if p < p_krit:
+        Ts = PropsSI("T", "P", p * 1e5, "Q", 0, "CO2") - 273.15
+        h_f = PropsSI("H", "P", p * 1e5, "Q", 0, "CO2") / 1e3
+        h_g = PropsSI("H", "P", p * 1e5, "Q", 1, "CO2") / 1e3
+        for zweig in (T_lin[T_lin < Ts - 0.05], T_lin[T_lin > Ts + 0.05]):
+            h = [PropsSI("H", "P", p * 1e5, "T", gb.K(t), "CO2") / 1e3 for t in zweig]
+            c = [PropsSI("C", "P", p * 1e5, "T", gb.K(t), "CO2") / 1e3 for t in zweig]
+            axh.plot(zweig, h, color=farbe, lw=1.6, label=name if zweig[0] < Ts else None)
+            axc.plot(zweig, c, color=farbe, lw=1.6, label=name if zweig[0] < Ts else None)
+        axh.plot([Ts, Ts], [h_f, h_g], color=farbe, lw=1.6)
+        axc.axvline(Ts, color=farbe, lw=1.0, ls=":")
+        axh.annotate((f"Verdampfung bei {Ts:.1f} °C".replace(".", ",") + "\n"
+                      + r"$\Delta h_v$" + f" = {h_g - h_f:.0f} kJ/kg"),
+                     (Ts, (h_f + h_g) / 2), xytext=(2, 515), textcoords="data",
+                     ha="left", va="center", fontsize=8.5, color=farbe,
+                     arrowprops=dict(arrowstyle="-", color=farbe, lw=0.7))
+        axc.text(Ts + 1.0, 40, f"Verdampfung {p:.0f} bar", rotation=90, ha="left", va="top",
+                 fontsize=8, color=farbe)
+        pk_kennwerte[name] = {"T_siede": Ts, "dh_v": h_g - h_f}
+        continue
+    h = np.array([PropsSI("H", "P", p * 1e5, "T", gb.K(t), "CO2") for t in T_lin]) / 1e3
+    c = np.array([PropsSI("C", "P", p * 1e5, "T", gb.K(t), "CO2") for t in T_lin]) / 1e3
+    axh.plot(T_lin, h, color=farbe, lw=1.6, label=name)
+    axc.plot(T_lin, c, color=farbe, lw=1.6, label=name)
+    i = int(np.argmax(c))
+    axh.plot(T_lin[i], h[i], "o", color=farbe, ms=5, mec="white", mew=0.8, zorder=5)
+    axc.plot(T_lin[i], c[i], "o", color=farbe, ms=5, mec="white", mew=0.8, zorder=5)
+    Tpk = float(T_lin[i])
+    dh10 = (PropsSI("H", "P", p * 1e5, "T", gb.K(Tpk + 5), "CO2")
+            - PropsSI("H", "P", p * 1e5, "T", gb.K(Tpk - 5), "CO2")) / 1e3
+    pk_kennwerte[name] = {
+        "T_pk": Tpk, "cp_max": float(c[i]),
+        "dh_Tpk_pm5K": dh10,
+        "rho_Tpk_minus5K": PropsSI("D", "P", p * 1e5, "T", gb.K(Tpk - 5), "CO2"),
+        "rho_Tpk_plus5K": PropsSI("D", "P", p * 1e5, "T", gb.K(Tpk + 5), "CO2"),
+        "kappa_T_max_1_per_bar": max(PropsSI("isothermal_compressibility", "P", p * 1e5,
+                                             "T", gb.K(t), "CO2") for t in T_lin[T_lin > 31.5]) * 1e5,
+    }
+    print(f"{name}: T_pk = {Tpk:5.1f} °C, cp_max = {c[i]:5.1f} kJ/(kg K), "
+          f"Δh über ±5 K = {dh10:5.1f} kJ/kg")
+axh.set_xlabel("Temperatur [°C]")
+axh.set_ylabel("spez. Enthalpie [kJ/kg]")
+axh.set_title("Enthalpie über der Temperatur")
+axh.set_xlim(0, 100)
+axc.set_xlabel("Temperatur [°C]")
+axc.set_ylabel("isobare Wärmekapazität $c_p$ [kJ/(kg K)]")
+axc.set_title("Isobare Wärmekapazität über der Temperatur")
+axc.set_yscale("log")
+axc.set_ylim(0.8, 60)
+axc.set_yticks([1, 2, 5, 10, 20, 50])
+axc.set_xlim(0, 100)
+axc.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:g}".replace(".", ",")))
+axh.legend(loc="lower right", fontsize=8.5, framealpha=0.95, title="Druck", title_fontsize=8.5)
+axc.text(0.98, 0.97, "Punkte: pseudokritische Temperatur ($c_p$-Maximum)", transform=axc.transAxes,
+         ha="right", va="top", fontsize=8.5, color="#333333")
+for a in (axh, axc):
+    a.grid(alpha=0.25, zorder=1)
+fig.tight_layout()
+fig.savefig(gb.ABB / "abb_G01_pseudokritisch.png", dpi=175)
+plt.close(fig)
+print("gespeichert: abb_G01_pseudokritisch.png")
+
+# Kühlung bei 91 bar von 60 °C auf 15 °C: Anteil der Wärme zwischen 35 und 45 °C
+q_ges = (PropsSI("H", "P", 91e5, "T", gb.K(60.0), "CO2") - PropsSI("H", "P", 91e5, "T", gb.K(15.0), "CO2")) / 1e3
+q_pk = (PropsSI("H", "P", 91e5, "T", gb.K(45.0), "CO2") - PropsSI("H", "P", 91e5, "T", gb.K(35.0), "CO2")) / 1e3
+print(f"Kühlung 91 bar 60 -> 15 °C: {q_ges:.1f} kJ/kg, davon 35-45 °C {q_pk:.1f} kJ/kg ({q_pk / q_ges:.0%})")
+pk_kennwerte["kuehlung_91bar_60_15C"] = {"q_gesamt": q_ges, "q_35_45C": q_pk}
+
 json.dump({
     "krit": {"T": T_krit, "p": p_krit, "rho": PropsSI("rhomass_critical", "CO2")},
     "tripel": {"T": T_tr, "p": p_tr},
@@ -173,4 +269,5 @@ json.dump({
     "pseudokritisch": {"p": p_pk.tolist(), "T": T_pk.round(3).tolist()},
     "rho_91bar": {"35C": r35, "45C": r45},
     "isothermen": isothermen,
+    "pseudokritischer_uebergang": pk_kennwerte,
 }, open(gb.ABB / "G01_phasendiagramm.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
