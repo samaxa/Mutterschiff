@@ -1,6 +1,6 @@
 # Gasgrundlagen – CO₂ im Vergleich zu Erdgas und Wasserstoff
 
-Grundlagenrechnungen für Kap. 3 der Masterarbeit (Stoffliche Grundlagen): Was heißt überkritisch, gibt es dort einen Phasenübergang, wie verhält sich CO₂ beim Drosseln und beim Verdichten, und braucht es mehr oder weniger Energie als Erdgas und Wasserstoff? Dazu das Phasendiagramm mit dem Betriebsbereich der Referenzanlage. Außerdem das Kavernenschema für Kap. 2.3 (`07`) und der Säulenvergleich der drei Gase für Kap. 6.1 (`06`).
+Grundlagenrechnungen für Kap. 3 der Masterarbeit (Stoffliche Grundlagen): Was heißt überkritisch, gibt es dort einen Phasenübergang, wie verhält sich CO₂ beim Drosseln und beim Verdichten, und braucht es mehr oder weniger Energie als Erdgas und Wasserstoff? Dazu das Phasendiagramm mit dem Betriebsbereich der Referenzanlage. Außerdem das Kavernenschema für Kap. 2.3 (`07`), das Blockfließbild der Obertageanlage für Kap. 2.6 (`08`) und der Säulenvergleich der drei Gase für Kap. 6.1 (`06`).
 
 **Herkunft:** erste Untersuchung in der alten Quellenmatrix (`1_Quellen-_und_Wissensmatrix_alt.xlsx`, Blätter „Isenthalpe_Entspannung_Gase“ und „JT-Koeffi_Gase“). Dort wurden die Zustände einzeln mit CoolProp Online und dem NIST WebBook abgefragt. Hier rechnet Python dieselben Fälle mit CoolProp direkt.
 
@@ -12,7 +12,7 @@ Grundlagenrechnungen für Kap. 3 der Masterarbeit (Stoffliche Grundlagen): Was h
 Gasgrundlagen/
 ├── README.md
 ├── gasgrundlagen_bausteine.py   Annahmen mit Begründung (Kopf der Datei), Stoffe, Rechenbausteine
-├── 01 … 07                      Skripte
+├── 01 … 08                      Skripte
 ├── CO2_Gasgrundlagen_Rechenuebersicht.xlsx
 ├── Daten/                       nist_webbook_jt.csv (NIST-Werte aus der alten Mappe)
 └── Abbildungen/                 alle Abbildungen und Ergebnisdateien (G01 … G07 .json)
@@ -29,6 +29,7 @@ Gasgrundlagen/
 | `05_jt_koeffizient.py` | µ_JT von CO₂ auf vier Isothermen, Vergleich der drei Gase bei 50 °C, Validierung gegen NIST (200 Punkte) | `abb_G05_jt_koeffizient.png` |
 | `06_gassaeule_medienvergleich.py` | Ruhende Säule im Förderstrang für CO₂, CH₄, H₂ (Gebirge 10 °C + 0,03 K/m, 600 Schritte wie `kaverne_bausteine.gassaeule`): Druckverlauf in der Referenzkaverne (210 bar an der LCCS) und Kopfdruck über der LCCS-Teufe 600–1600 m; Kopfdruck auch bei leerer Kaverne (70 bar) in der JSON. Gleiche Werte wie Blatt „Medienvergleich“ in `Einspeicherung/Clean_CO2/CO2_Einspeicherpfad_Rechenuebersicht.xlsx` | `abb_G06_gassaeule_medienvergleich.png` |
 | `07_kavernenschema.py` | Schema von Kaverne und Bohrung (Rohrtouren, Förderstrang, Packer, Sicherheitsventil, LCCS, Sumpf, Gebirgstemperatur) und Druckgrenzen über der Teufe (Gebirgsdruck mit 2.200 kg/m³ nach Q-003, 85-%-Grenze nach Q-038, Referenzkaverne). Fundstellen im Kopf des Skripts | `abb_G07_kavernenschema.png` |
+| `08_obertageanlage_blockfliessbild.py` | Vereinfachtes Blockfließbild (Grundfließschema nach DIN EN ISO 10628-1, Q-076) der Obertageanlage eines Erdgas-Kavernenspeichers: Ein- und Ausspeicherpfad, Ausspeichern mit Verdichtung, Nieder- und Hochdruckbereich. Eigene Darstellung nach Q-036 (Blockfließbilder Epe) und Q-035 Folie 6/7, ohne Anlagenkennzeichen. Keine Rechnung, braucht nur matplotlib | `abb_G08_obertageanlage_blockfliessbild.png` |
 
 `02` braucht `Einspeicherung/Begleitstoffe_CO2/Grundlagen/gemisch_worstcase.py`, `06` und `07` brauchen `Kaverne/Grundlagen/kaverne_bausteine.py` (Referenzkaverne, Gebirgstemperatur, Gassäule). Die Ordner `Gasgrundlagen/`, `Einspeicherung/` und `Kaverne/` müssen deshalb nebeneinander liegen. Alle anderen Skripte brauchen nur `gasgrundlagen_bausteine.py`.
 

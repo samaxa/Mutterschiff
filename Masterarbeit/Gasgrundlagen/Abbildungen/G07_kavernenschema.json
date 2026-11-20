@@ -12,5 +12,6 @@
  "p_max_Referenz_bar": 210.0,
  "p_max_Anteil_Gebirgsdruck": 0.8108609026040219,
  "p_min_Referenz_bar": 70.0,
+ "p_min_Gradient_bar_m": 0.058333333333333334,
  "Quellen": "Q-028 Tab. 1, Q-030 Abb. 8, Q-003 S. 46, Q-038"
 }

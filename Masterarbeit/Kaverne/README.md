@@ -24,7 +24,7 @@ Kaverne/
 | 03 | `03_kavernenzyklus.py` | Rate aus 10 bar/d, Kavernenbilanz über einen Zyklus für S1/S2 × 2 Raten × (Stillstand 21,67 d / kontinuierlich), Grenzrate, Nachrechnung Q-028 | `kavernenzyklus.json`, `abb_K03_*.png` |
 | 04 | `04_bohrlochkopf.py` | Kopfdruckfenster beim Ein- und Ausspeichern, Pumpe oder Drossel, Phase im Strang, Reibung | `bohrlochkopf.json`, `abb_K04_*.png` |
 | 05 | `Begleitstoffe_CO2/05_vergleich_rein_gemisch.py` | Welcher Stoff ist je Auslegungsgröße ungünstiger? | `vergleich_rein_gemisch.json`, `abb_K05_rein_vs_gemisch.png` |
-| 06 | `Ausspeichergas/06_zusammensetzung_nach_kaverne.py` | Zusammensetzung des Ausspeichergases, Min- und Max-Fall (Q-089), Rückgabegrenzen OGE | `zusammensetzung_nach_kaverne.json`, `abb_K06_*.png` |
+| 06 | `Ausspeichergas/06_zusammensetzung_nach_kaverne.py` | Zusammensetzung des Ausspeichergases (Stand 18.11.2026, 50.000 Nm³/h): sechs Fälle wie die Mappe `CO2_Ausspeichergas_Zusammensetzung.xlsx` (rein/Gemisch × Min/Max, Gemisch Max ohne Stillstand, ab 2. Zyklus); Resterdgas als Erdgas H (Q-140), Begleitstoffe der Anlieferung (Q-096), Rückgabegrenzen OGE | `zusammensetzung_nach_kaverne.json`, `abb_K06_*.png` |
 
 Reihenfolge: `Reines_CO2/01–04` → `Begleitstoffe_CO2/01–04` → `Begleitstoffe_CO2/05` → `Ausspeichergas/06` → `Grundlagen/excel_kaverne_erzeugen.py`.
 

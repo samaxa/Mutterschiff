@@ -10,8 +10,11 @@ Links  Schema (Breiten nicht maßstäblich, Teufen maßstäblich)
        Förderstrang, Packer, LCCS, Kavernendach, Kaverne, Sumpf mit Restsole,
        Gebirgstemperatur als Farbskala.
 Rechts Druckgrenzen über der Teufe: Gebirgsdruck aus der mittleren
-       Gebirgsdichte, 85-%-Grenze für den Höchstdruck und das Druckfenster der
-       Referenzkaverne an der LCCS.
+       Gebirgsdichte, 85-%-Grenze für den Höchstdruck, Mindestdruck der
+       Referenzkaverne (70 bar an der LCCS, linear über die Teufe übertragen) und
+       das Druckfenster der Referenzkaverne an der LCCS mit Kissen- und Arbeitsgas.
+       Stand 19.11.2026: Titel links ohne "Breiten nicht maßstäblich" (steht in der
+       Bildunterschrift), Mindestdruck und Kissen-/Arbeitsgas ergänzt.
 
 Herkunft der Zahlen (keine eigene Rechnung außer Grundrechenarten)
   LCCS 1200 m, 70 bis 210 bar, 650.000 m³     Referenzkaverne (kaverne_bausteine.TIEF,
@@ -196,7 +199,7 @@ a1.set_ylim(Y_UNTEN, Y_OBEN)
 a1.set_xticks([])
 a1.set_ylabel("Teufe in m")
 a1.set_yticks(np.arange(0, 1600, 200))
-a1.set_title("Kaverne und Bohrung (Breiten nicht maßstäblich)", fontsize=10)
+a1.set_title("Kaverne und Bohrung", fontsize=10)
 for sp in ("top", "right"):
     a1.spines[sp].set_visible(False)
 
@@ -205,25 +208,31 @@ z = np.linspace(0, 1550, 100)
 a2.plot(p_geb(z), z, color="#6B5B45", lw=1.8,
         label=f"Gebirgsdruck ({tsd(RHO_GEBIRGE)} kg/m³)")
 a2.plot(F_MAX * p_geb(z), z, color="#C0392B", lw=1.8, ls="--",
-        label="Grenze 85 % des Gebirgsdrucks")
+        label="Höchstdruck (85 %)")
+a2.plot(KAV.p_min / Z_LCCS * z, z, color="#2E6DA4", lw=1.6, ls="-.",
+        label="Mindestdruck")
 a2.axvline(P_KRIT, color="0.45", ls=":", lw=1.0)
-a2.text(P_KRIT - 4, 120, r"$p_\mathrm{krit}$ CO$_2$", rotation=90, fontsize=8,
+a2.text(P_KRIT - 4, 560, r"$p_\mathrm{krit}$ CO$_2$", rotation=90, fontsize=8,
         va="top", ha="right", color="0.3")
 a2.plot([KAV.p_min, KAV.p_max], [Z_LCCS, Z_LCCS], color=COL_CO2, lw=5, solid_capstyle="butt",
-        alpha=0.85, label="Referenzkaverne an der LCCS")
-for p, col in ((p_geb_lccs, "#6B5B45"), (F_MAX * p_geb_lccs, "#C0392B")):
+        alpha=0.85, label="Druckfenster an der LCCS")
+for p, col in ((p_geb_lccs, "#6B5B45"), (F_MAX * p_geb_lccs, "#C0392B"), (KAV.p_min, "#2E6DA4")):
     a2.plot(p, Z_LCCS, "o", color=col, ms=4, zorder=5)
-a2.text(330, 120, f"an der LCCS ({tsd(Z_LCCS)} m):\n"
-        f"Gebirgsdruck {de(p_geb_lccs, 0)} bar\n"
-        f"85 % davon {de(F_MAX * p_geb_lccs, 0)} bar\n"
-        f"Referenzkaverne {de(KAV.p_min, 0)} bis {de(KAV.p_max, 0)} bar",
-        fontsize=7.5, ha="right", va="top", color=C_TEXT, linespacing=1.4,
-        bbox=dict(fc="white", ec="0.75", lw=0.6, pad=3.0))
+# Kissengas bis zum Mindestdruck, Arbeitsgas bis zum Höchstdruck (Druckbereiche an der LCCS)
+Z_PFEIL = Z_LCCS + 70
+for p0, p1, txt in ((0.0, KAV.p_min, "Kissengas"), (KAV.p_min, KAV.p_max, "Arbeitsgas")):
+    a2.annotate("", xy=(p1, Z_PFEIL), xytext=(p0, Z_PFEIL),
+                arrowprops=dict(arrowstyle="<|-|>", color=C_TEXT, lw=0.9, mutation_scale=7), zorder=6)
+    a2.text(p0 + 1 if p0 == 0.0 else 0.5 * (p0 + p1), Z_PFEIL + 22, txt, fontsize=7,
+            ha="left" if p0 == 0.0 else "center", va="top", color=C_TEXT, zorder=6)
+# Werte an der LCCS direkt an den Punkten
+for p, txt, col in ((p_geb_lccs, de(p_geb_lccs, 0), "#6B5B45"), (F_MAX * p_geb_lccs, de(F_MAX * p_geb_lccs, 0), "#C0392B")):
+    a2.text(p + 8, Z_LCCS - 14, txt, fontsize=7.5, ha="left", va="bottom", color=col, zorder=6)
 a2.set_xlim(0, 340)
 a2.set_xlabel("Druck in bar")
 a2.set_title("Druckgrenzen über der Teufe", fontsize=10)
 a2.grid(alpha=0.3)
-a2.legend(loc="lower left", fontsize=7.5, framealpha=0.95)
+a2.legend(loc="upper right", fontsize=7, framealpha=0.95, handlelength=2.2, borderpad=0.5)
 a2.tick_params(axis="y", labelleft=False)
 for sp in ("top", "right"):
     a2.spines[sp].set_visible(False)
@@ -238,5 +247,6 @@ json.dump({
     "rho_Gebirge_kg_m3": RHO_GEBIRGE, "p_Gebirge_LCCS_bar": p_geb_lccs,
     "p_85prozent_LCCS_bar": F_MAX * p_geb_lccs, "p_max_Referenz_bar": KAV.p_max,
     "p_max_Anteil_Gebirgsdruck": KAV.p_max / p_geb_lccs, "p_min_Referenz_bar": KAV.p_min,
+    "p_min_Gradient_bar_m": KAV.p_min / Z_LCCS,
     "Quellen": "Q-028 Tab. 1, Q-030 Abb. 8, Q-003 S. 46, Q-038",
 }, open(gb.ABB / "G07_kavernenschema.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)

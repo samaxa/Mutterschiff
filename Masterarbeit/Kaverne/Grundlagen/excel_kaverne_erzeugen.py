@@ -1040,8 +1040,11 @@ def blatt_06(wb, stoff, AG):
            "BANDBREITE STATT EINES WORST CASE (Besprechung K. Vosbeck 15.10.2026):  Min-Fall mit den unteren, Max-Fall mit "
            "den oberen Werten aus Q-089 – Wasser (Abschn. 6.5, Tab. 19), Resterdgas im Finger (Abschn. 6.3, Tab. 16/17), "
            "Diesel-Blanket (Tab. 10), Verdichteröl (Tab. 20), Mikrobiologie (Abschn. 6.4).\n"
+           "STAND 18.11.2026:  Rate 50.000 Nm³/h; Resterdgas als Erdgas H (Q-140, Min Russland, Max Nordsee); aus der "
+           "Anlieferung (nur Gemisch, Max, Q-096) H₂S 5, COS 15, O₂ 40, NOx 5 ppm. Herleitung je Begleitstoff: "
+           "Ausspeichergas/CO2_Ausspeichergas_Zusammensetzung.xlsx.\n"
            "RÜCKGABE (OGE 16.09.2026):  H₂O ≤ 30 ppm, H₂S < 0,5 ppm, mindestens 91 bar – die Spalte „entfernen“ zeigt, was die "
-           "Aufbereitung leisten muss.", 64)
+           "Aufbereitung leisten muss.", 92)
     kl = "gem" if stoff == "gem" else "rein"
     r = 6
     z(ws, f"B{r}", "Einträge in ppm (mol) – erster Zyklus", "h2")
